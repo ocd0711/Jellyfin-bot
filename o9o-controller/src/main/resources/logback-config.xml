@@ -1,0 +1,153 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+
+<configuration scan="true" scanPeriod="60 seconds" debug="false">
+
+    <property name="log.home_dir" value="./log/"/>
+<!--    <property name="log.operator.dir" value="./log/operate/"/>-->
+    <property name="log.maxHistory" value="30"/>
+	<property name="log.minHistory" value="1"/>
+    <property name="log.level" value="debug"/>
+
+    <appender name="ERROR" class="ch.qos.logback.core.rolling.RollingFileAppender">
+        <filter class="ch.qos.logback.classic.filter.LevelFilter">
+            <level>ERROR</level>
+            <onMatch>ACCEPT</onMatch>
+            <onMismatch>DENY</onMismatch>
+        </filter>
+        <rollingPolicy class="ch.qos.logback.core.rolling.TimeBasedRollingPolicy">
+            <fileNamePattern>
+                ${log.home_dir}/error/%d{yyyy-MM-dd}/my-demo-%i.log
+            </fileNamePattern>
+            <maxHistory>${log.maxHistory}</maxHistory>
+            <TimeBasedFileNamingAndTriggeringPolicy class="ch.qos.logback.core.rolling.SizeAndTimeBasedFNATP">
+                <MaxFileSize>20MB</MaxFileSize>
+            </TimeBasedFileNamingAndTriggeringPolicy>
+        </rollingPolicy>
+        <encoder>
+            <pattern>
+                %d{yyyy-MM-dd HH:mm:ss.SSS} [%-5level] %logger - %msg%n
+            </pattern>
+        </encoder>
+    </appender>
+
+    <appender name="WARN" class="ch.qos.logback.core.rolling.RollingFileAppender">
+        <filter class="ch.qos.logback.classic.filter.LevelFilter">
+            <level>WARN</level>
+            <onMatch>ACCEPT</onMatch>
+            <onMismatch>DENY</onMismatch>
+        </filter>
+        <rollingPolicy class="ch.qos.logback.core.rolling.TimeBasedRollingPolicy">
+            <fileNamePattern>${log.home_dir}/warn/%d{yyyy-MM-dd}/my-demo-%i.log</fileNamePattern>
+            <maxHistory>${log.maxHistory}</maxHistory>
+            <TimeBasedFileNamingAndTriggeringPolicy class="ch.qos.logback.core.rolling.SizeAndTimeBasedFNATP">
+                <MaxFileSize>20MB</MaxFileSize>
+            </TimeBasedFileNamingAndTriggeringPolicy>
+        </rollingPolicy>
+        <encoder>
+            <pattern>%d{yyyy-MM-dd HH:mm:ss.SSS} [%-5level] %logger - %msg%n</pattern>
+        </encoder>
+    </appender>
+
+    <appender name="INFO" class="ch.qos.logback.core.rolling.RollingFileAppender">
+        <filter class="ch.qos.logback.classic.filter.LevelFilter">
+            <level>INFO</level>
+            <onMatch>ACCEPT</onMatch>
+            <onMismatch>DENY</onMismatch>
+        </filter>
+        <rollingPolicy class="ch.qos.logback.core.rolling.TimeBasedRollingPolicy">
+            <fileNamePattern>${log.home_dir}/info/%d{yyyy-MM-dd}/my-demo-%i.log</fileNamePattern>
+            <maxHistory>${log.maxHistory}</maxHistory>
+            <TimeBasedFileNamingAndTriggeringPolicy class="ch.qos.logback.core.rolling.SizeAndTimeBasedFNATP">
+                <MaxFileSize>20MB</MaxFileSize>
+            </TimeBasedFileNamingAndTriggeringPolicy>
+        </rollingPolicy>
+        <encoder class="ch.qos.logback.core.encoder.LayoutWrappingEncoder">
+            <layout class="ch.qos.logback.classic.html.HTMLLayout">
+                <pattern>%thread%level%logger%msg</pattern>
+            </layout>
+        </encoder>
+        <encoder>
+            <pattern>%d{yyyy-MM-dd HH:mm:ss.SSS} [%-5level] %logger - %msg%n</pattern>
+        </encoder>
+    </appender>
+
+    <appender name="DEBUG" class="ch.qos.logback.core.rolling.RollingFileAppender">
+        <filter class="ch.qos.logback.classic.filter.LevelFilter">
+            <level>DEBUG</level>
+            <onMatch>ACCEPT</onMatch>
+            <onMismatch>DENY</onMismatch>
+        </filter>
+        <rollingPolicy class="ch.qos.logback.core.rolling.TimeBasedRollingPolicy">
+            <fileNamePattern>${log.home_dir}/debug/%d{yyyy-MM-dd}/my-demo-%i.log</fileNamePattern>
+            <maxHistory>${log.minHistory}</maxHistory>
+            <TimeBasedFileNamingAndTriggeringPolicy class="ch.qos.logback.core.rolling.SizeAndTimeBasedFNATP">
+                <MaxFileSize>20MB</MaxFileSize>
+            </TimeBasedFileNamingAndTriggeringPolicy>
+        </rollingPolicy>
+        <encoder>
+            <pattern>%d{yyyy-MM-dd HH:mm:ss.SSS} [%-5level] %logger - %msg%n</pattern>
+        </encoder>
+    </appender>
+    
+    <appender name="TRACE" class="ch.qos.logback.core.rolling.RollingFileAppender">
+        <filter class="ch.qos.logback.classic.filter.LevelFilter">
+            <level>TRACE</level>
+            <onMatch>ACCEPT</onMatch>
+            <onMismatch>DENY</onMismatch>
+        </filter>
+        <rollingPolicy class="ch.qos.logback.core.rolling.TimeBasedRollingPolicy">
+            <fileNamePattern>${log.home_dir}/trace/%d{yyyy-MM-dd}/my-demo-%i.log</fileNamePattern>
+            <maxHistory>${log.maxHistory}</maxHistory>
+            <TimeBasedFileNamingAndTriggeringPolicy class="ch.qos.logback.core.rolling.SizeAndTimeBasedFNATP">
+                <MaxFileSize>20MB</MaxFileSize>
+            </TimeBasedFileNamingAndTriggeringPolicy>
+        </rollingPolicy>
+        <encoder>
+            <pattern>%d{yyyy-MM-dd HH:mm:ss.SSS} [%-5level] %logger - %msg%n</pattern>
+        </encoder>
+    </appender>
+    
+    <!--<appender name="operateAppender" class="ch.qos.logback.core.rolling.RollingFileAppender">
+        <rollingPolicy class="ch.qos.logback.core.rolling.TimeBasedRollingPolicy">
+            <fileNamePattern>${log.operator.dir}/%d{yyyy-MM-dd}/operator-%i.html</fileNamePattern>
+            <maxHistory>${log.maxHistory}</maxHistory>
+            <TimeBasedFileNamingAndTriggeringPolicy class="ch.qos.logback.core.rolling.SizeAndTimeBasedFNATP">
+                <MaxFileSize>20MB</MaxFileSize>
+            </TimeBasedFileNamingAndTriggeringPolicy>
+        </rollingPolicy>
+        &lt;!&ndash; encoder class="ch.qos.logback.core.encoder.LayoutWrappingEncoder">
+            <layout class="ch.qos.logback.classic.html.HTMLLayout">
+                 <pattern>%d{yyyy-MM-dd HH:mm:ss.SSS} [%-5level] %logger - %msg%n</pattern>
+            </layout>
+        </encoder &ndash;&gt;
+        <encoder>
+           <pattern>%msg%n</pattern>
+        </encoder>
+        
+    </appender>-->
+    <!--<logger name="ai.qiwu.gameditor.common.util.ERROR" level="ERROR" additivity="true">
+            <appender-ref ref="operateAppender"/>
+    </logger> -->
+    
+    <appender name="CONSOLE" class="ch.qos.logback.core.ConsoleAppender">
+        <!--  <filter class="ch.qos.logback.classic.filter.LevelFilter">
+            <level>ERROR</level>
+            <onMatch>ACCEPT</onMatch>
+            <onMismatch>DENY</onMismatch>
+        </filter> -->
+        <encoder>
+            <pattern>
+                %d{yyyy-MM-dd HH:mm:ss.SSS} [%-5level] %logger - %msg%n
+            </pattern>
+        </encoder>
+    </appender>
+    
+    <root>
+        <level value="${log.level}"/>
+        <appender-ref ref="CONSOLE"/>
+        <!--<appender-ref ref="operateAppender"/>-->
+        <appender-ref ref="ERROR"/>
+        <appender-ref ref="WARN"/>
+        <appender-ref ref="INFO"/>
+    </root>
+</configuration>

@@ -1,0 +1,257 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+    <parent>
+        <groupId>org.springframework.boot</groupId>
+        <artifactId>spring-boot-starter-parent</artifactId>
+        <version>2.7.2</version>
+        <!-- 设置一个空值, 始终从仓库中获取, 不从本地路径获取 -->
+        <relativePath/>
+    </parent>
+    <groupId>com.ocd</groupId>
+    <artifactId>o9o-server</artifactId>
+    <version>1.0.0</version>
+    <name>o9o-server</name>
+    <description>o9o emby 后端</description>
+    <packaging>pom</packaging>
+
+    <!--自定义环境变量-->
+    <properties>
+        <main-version>1.0.0</main-version>
+        <java.version>17</java.version>
+        <!-- 设置maven版本，否则pom文件报错，原因就是maven版本和springboot版本不一致 -->
+        <maven-jar-plugin.version>3.2.2</maven-jar-plugin.version>
+        <!-- 打包时跳过test测试 -->
+        <skipTests>true</skipTests>
+        <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+        <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
+        <fastjson.version>2.0.16</fastjson.version>
+        <mybatis-plus.version>3.5.1</mybatis-plus.version>
+        <commons-lang3.version>3.12.0</commons-lang3.version>
+        <dysmsapi.version>2.2.1</dysmsapi.version>
+        <druid.version>1.2.9</druid.version>
+        <slf4j-simple.version>1.7.36</slf4j-simple.version>
+        <hutool-all.version>5.8.0.M2</hutool-all.version>
+        <rxjava.version>3.1.4</rxjava.version>
+        <apache-commons-io.version>2.11.0</apache-commons-io.version>
+        <dynamic-version>3.5.1</dynamic-version>
+        <dadiyang-version>1.0.5</dadiyang-version>
+        <kotlinx-coroutines-core.version>1.4.2</kotlinx-coroutines-core.version>
+        <easypoi.version>4.4.0</easypoi.version>
+        <telegrambot.version>7.11.0</telegrambot.version>
+        <api-asn1-ber.version>2.1.2</api-asn1-ber.version>
+        <oshi-core.version>6.6.5</oshi-core.version>
+        <eec.version>0.5.20</eec.version>
+        <eec-e3-support.version>0.5.4</eec-e3-support.version>
+        <xchart.version>3.8.8</xchart.version>
+        <jfreechart.version>1.0.13</jfreechart.version>
+        <kotlin.version>1.9.0</kotlin.version>
+        <kotlin.compiler.incremental>true</kotlin.compiler.incremental>
+    </properties>
+
+    <modules>
+        <module>o9o-bean</module>
+        <module>o9o-util</module>
+        <module>o9o-service</module>
+        <module>o9o-controller</module>
+    </modules>
+
+    <dependencies>
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-web</artifactId>
+            <!--            <exclusions>-->
+            <!--                <exclusion>-->
+            <!--                    <groupId>org.springframework.boot</groupId>-->
+            <!--                    <artifactId>spring-boot-starter-json</artifactId>-->
+            <!--                </exclusion>-->
+            <!--            </exclusions>-->
+            <!--            <exclusions>-->
+            <!--                <exclusion>-->
+            <!--                    <groupId>org.springframework.boot</groupId>-->
+            <!--                    <artifactId>spring-boot-starter-logging</artifactId>-->
+            <!--                </exclusion>-->
+            <!--            </exclusions>-->
+        </dependency>
+
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-configuration-processor</artifactId>
+            <optional>true</optional>
+        </dependency>
+
+        <!--        <dependency>-->
+        <!--            <groupId>org.springframework.boot</groupId>-->
+        <!--            <artifactId>spring-boot-devtools</artifactId>-->
+        <!--            <scope>runtime</scope>-->
+        <!--            <optional>true</optional>-->
+        <!--        </dependency>-->
+
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-test</artifactId>
+            <scope>test</scope>
+        </dependency>
+
+        <dependency>
+            <groupId>org.projectlombok</groupId>
+            <artifactId>lombok</artifactId>
+        </dependency>
+
+        <dependency>
+            <groupId>com.alibaba</groupId>
+            <artifactId>fastjson</artifactId>
+            <version>${fastjson.version}</version>
+        </dependency>
+    </dependencies>
+
+    <dependencyManagement>
+        <dependencies>
+            <dependency>
+                <groupId>commons-io</groupId>
+                <artifactId>commons-io</artifactId>
+                <version>${apache-commons-io.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.telegram</groupId>
+                <artifactId>telegrambots-longpolling</artifactId>
+                <version>${telegrambot.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.telegram</groupId>
+                <artifactId>telegrambots-webhook</artifactId>
+                <version>${telegrambot.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.telegram</groupId>
+                <artifactId>telegrambots-client</artifactId>
+                <version>${telegrambot.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.telegram</groupId>
+                <artifactId>telegrambots-extensions</artifactId>
+                <version>${telegrambot.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>io.reactivex.rxjava3</groupId>
+                <artifactId>rxjava</artifactId>
+                <version>${rxjava.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>cn.hutool</groupId>
+                <artifactId>hutool-all</artifactId>
+                <version>${hutool-all.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.apache.directory.api</groupId>
+                <artifactId>api-asn1-ber</artifactId>
+                <version>${api-asn1-ber.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>cn.afterturn</groupId>
+                <artifactId>easypoi-spring-boot-starter</artifactId>
+                <version>${easypoi.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.slf4j</groupId>
+                <artifactId>slf4j-simple</artifactId>
+                <version>${slf4j-simple.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>com.github.dadiyang</groupId>
+                <artifactId>jave</artifactId>
+                <version>${dadiyang-version}</version>
+            </dependency>
+            <dependency>
+                <groupId>com.baomidou</groupId>
+                <artifactId>mybatis-plus-boot-starter-test</artifactId>
+                <version>${mybatis-plus.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>com.baomidou</groupId>
+                <artifactId>mybatis-plus-boot-starter</artifactId>
+                <version>${mybatis-plus.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>com.baomidou</groupId>
+                <artifactId>mybatis-plus-extension</artifactId>
+                <version>${mybatis-plus.version}</version>
+                <scope>compile</scope>
+            </dependency>
+            <dependency>
+                <groupId>com.baomidou</groupId>
+                <artifactId>dynamic-datasource-spring-boot-starter</artifactId>
+                <version>${dynamic-version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.apache.commons</groupId>
+                <artifactId>commons-lang3</artifactId>
+                <version>${commons-lang3.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>com.github.oshi</groupId>
+                <artifactId>oshi-core</artifactId>
+                <version>${oshi-core.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.knowm.xchart</groupId>
+                <artifactId>xchart</artifactId>
+                <version>${xchart.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>jfree</groupId>
+                <artifactId>jfreechart</artifactId>
+                <version>${jfreechart.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.ttzero</groupId>
+                <artifactId>eec</artifactId>
+                <version>${eec.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.ttzero</groupId>
+                <artifactId>eec-e3-support</artifactId>
+                <version>${eec-e3-support.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>com.aliyun</groupId>
+                <artifactId>aliyun-java-sdk-dysmsapi</artifactId>
+                <version>${dysmsapi.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>com.alibaba</groupId>
+                <artifactId>druid-spring-boot-starter</artifactId>
+                <version>${druid.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.jetbrains.kotlinx</groupId>
+                <artifactId>kotlinx-coroutines-core</artifactId>
+                <version>${kotlinx-coroutines-core.version}</version>
+            </dependency>
+        </dependencies>
+    </dependencyManagement>
+
+    <profiles>
+        <!--测试环境-->
+        <profile>
+            <id>test</id>
+            <activation>
+                <!--默认激活开发环境-->
+                <activeByDefault>true</activeByDefault>
+            </activation>
+            <properties>
+                <profile.active>test</profile.active>
+            </properties>
+        </profile>
+
+        <!--生产环境-->
+        <profile>
+            <id>prod</id>
+            <properties>
+                <profile.active>prod</profile.active>
+            </properties>
+        </profile>
+    </profiles>
+
+</project>

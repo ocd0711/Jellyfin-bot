@@ -1,0 +1,24 @@
+spring:
+  application:
+    name: o9o-controller
+  profiles:
+    active: @profile.active@
+  jackson:
+    time-zone: GMT+8
+    date-format: yyyy-MM-dd HH:mm:ss
+
+server:
+  port: 8081
+
+logging:
+  level:
+    root: debug
+  config: classpath:logback-config.xml
+#logging:
+#  config: classpath:logback-admin.xml
+#  level:
+#    root: info
+log:
+  name: log
+  #这里采用的是相对路径，所以在linux启动该jar包时，会根据启动jar的当前路径产生日志文件，需要注意
+  path: ./logs

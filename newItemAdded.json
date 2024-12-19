@@ -1,0 +1,38 @@
+{
+  "Event": "scripterx.mediaitem.added.complete",
+  "item.id": "%item.id%",
+  "item.name": "%item.name%",
+  "item.originaltitle": "%item.originaltitle%",
+  "item.tagline": "%item.tagline%",
+  "item.overview": "%item.overview%",
+  "item.type": "%item.type%",
+  "item.productionyear": "%item.productionyear%",
+  "item.isvirtual": "%item.isvirtual%",
+  "item.library.type": "%item.library.type%",
+  "item.library.name": "%item.library.name%",
+  "season.id": "%season.id%",
+  "season.name": "%season.name%",
+  "season.number": "%season.number%",
+  "series.id": "%series.id%",
+  "series.name": "%series.name%",
+  "episode.number": "%episode.number%",
+  "embyServer": {
+    "id": "%server.id%",
+    "name": "%server.name%",
+    "version": "%server.version%",
+    "platform": {
+      "os": "%server.platform.os%",
+      "osVersion": "%server.platform.osver%",
+      "upTime": "%server.platform.uptime%"
+    }
+  },
+  "scripterx": {
+    "version": {
+      "full": "%scripterx.version%",
+      "major": "%scripterx.version.major%",
+      "minor": "%scripterx.version.minor%",
+      "build": "%scripterx.version.build%",
+      "revision": "%scripterx.version.revision%"
+    }
+  }
+}

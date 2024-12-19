@@ -1,0 +1,88 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<configuration scan="true" scanPeriod="600 seconds">
+	<springProperty name="log.path" source="log.path" />
+	<springProperty name="log.name" source="log.name" />
+	<!--控制台输出 -->
+	<appender name="STDOUT" class="ch.qos.logback.core.ConsoleAppender">
+		<encoder charset="UTF-8">
+			<!--格式化输出：%d表示日期，%thread表示线程名，%-5level：级别从左显示5个字符宽度%msg：日志消息，%n是换行符 -->
+			<pattern>%d{yyyy-MM-dd HH:mm:ss} - %msg%n</pattern>
+		</encoder>
+	</appender>
+
+	<!--按照每天生成日志文件 -->
+	<appender name="infos" class="ch.qos.logback.core.rolling.RollingFileAppender">
+		<rollingPolicy class="ch.qos.logback.core.rolling.TimeBasedRollingPolicy">
+			<FileNamePattern>${log.path}/${log.name}.info.%i.%d{yyyy-MM-dd}</FileNamePattern>
+			<timeBasedFileNamingAndTriggeringPolicy class="ch.qos.logback.core.rolling.SizeAndTimeBasedFNATP">
+				<maxFileSize>100MB</maxFileSize>
+			</timeBasedFileNamingAndTriggeringPolicy>
+			<MaxHistory>20</MaxHistory>
+		</rollingPolicy>
+		<encoder>
+			<pattern>%d{yyyy-MM-dd HH:mm:ss} [%-5level] - %msg%n</pattern>
+		</encoder>
+
+		<!-- 此日志文件只记录info级别，不记录大于info级别的日志 -->
+		<filter class="ch.qos.logback.classic.filter.LevelFilter">
+			<level>INFO</level>
+			<onMatch>ACCEPT</onMatch>
+			<onMismatch>DENY</onMismatch>
+		</filter>
+	</appender>
+	<!--按照每天生成日志文件 -->
+	<appender name="errors" class="ch.qos.logback.core.rolling.RollingFileAppender">
+		<rollingPolicy class="ch.qos.logback.core.rolling.TimeBasedRollingPolicy">
+			<FileNamePattern>${log.path}/${log.name}.error.%i.%d{yyyy-MM-dd}</FileNamePattern>
+			<timeBasedFileNamingAndTriggeringPolicy class="ch.qos.logback.core.rolling.SizeAndTimeBasedFNATP">
+				<maxFileSize>100MB</maxFileSize>
+			</timeBasedFileNamingAndTriggeringPolicy>
+			<MaxHistory>20</MaxHistory>
+		</rollingPolicy>
+		<encoder>
+			<pattern>%d{yyyy-MM-dd HH:mm:ss} [%-5level] {%c-%L} - %msg%n</pattern>
+		</encoder>
+		<!-- 此日志文件只记录error级别的 -->
+		<filter class="ch.qos.logback.classic.filter.LevelFilter">
+			<level>error</level>
+			<onMatch>ACCEPT</onMatch>
+			<onMismatch>DENY</onMismatch>
+		</filter>
+	</appender>
+
+	<!-- 按照文件名称，&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&生成多个文件 -->
+	<appender name="FILE-THREAD" class="ch.qos.logback.classic.sift.SiftingAppender">
+		<discriminator>
+			<key>logFileName</key>
+			<defaultValue>matols</defaultValue>
+		</discriminator>
+		<sift>
+			<appender name="files" class="ch.qos.logback.core.rolling.RollingFileAppender">
+				<rollingPolicy class="ch.qos.logback.core.rolling.TimeBasedRollingPolicy">
+					<FileNamePattern>${log.path}/${log.name}.warn.%i.%d{yyyy-MM-dd}</FileNamePattern>
+					<timeBasedFileNamingAndTriggeringPolicy class="ch.qos.logback.core.rolling.SizeAndTimeBasedFNATP">
+						<maxFileSize>100MB</maxFileSize>
+					</timeBasedFileNamingAndTriggeringPolicy>
+					<MaxHistory>20</MaxHistory>
+				</rollingPolicy>
+				<encoder>
+					<pattern>%msg%n</pattern>
+				</encoder>
+				<!-- 此日志文件只记录warn级别的 -->
+				<filter class="ch.qos.logback.classic.filter.LevelFilter">
+					<level>warn</level>
+					<onMatch>ACCEPT</onMatch>
+					<onMismatch>DENY</onMismatch>
+				</filter>
+			</appender>
+		</sift>
+	</appender>
+
+	<root level="INFO">
+		<appender-ref ref="STDOUT" />
+		<appender-ref ref="infos" />
+		<appender-ref ref="errors" />
+		<appender-ref ref="FILE-THREAD" />
+	</root>
+
+</configuration>

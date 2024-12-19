@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.ocd.mapper.mysql.UserMapper">
+
+    <select id="selectByCondition" parameterType="java.lang.String"
+            resultType="com.ocd.bean.mysql.User">
+        SELECT *
+        FROM user
+        WHERE
+        1 = 1
+        <if test="fuzzyQuery != null and fuzzyQuery != ''">
+            AND (email LIKE concat('%', #{fuzzyQuery}, '%') OR emby_id LIKE concat('%', #{fuzzyQuery}, '%'))
+        </if>
+        ORDER BY create_time DESC
+    </select>
+
+</mapper>

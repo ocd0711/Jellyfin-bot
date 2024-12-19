@@ -1,0 +1,24 @@
+{
+  "serverUrl": "",
+  "outPath": "o9o-server-doc",
+  "coverOld": true,
+  "isStrict": false,
+  "allInOne": true,
+  "style": "xt256",
+  "allInOneDocFileName": "o9o-server.html",
+  "projectName": "o9o-server",
+  "sortByTitle": false,
+  "requestExample": true,
+  "responseExample": true,
+  "createDebugPage": true,
+  "packageFilters": "com.ocd.controller.manager.*",
+  "revisionLogs": [
+    {
+      "version": "0.1",
+      "author": "OCD",
+      "remarks": "none",
+      "revisionTime": "♾️",
+      "status": "update"
+    }
+  ]
+}
