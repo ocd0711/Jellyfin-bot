@@ -138,6 +138,7 @@ class EmbyUtil {
             )
             if (user.userType == 0)
                 user.userType = 1
+            user.deactivate = false
             user.embyName = embyUserDto.name
             user.embyId = embyUserDto.id
             AuthorityUtil.userService.userMapper.updateById(user)
