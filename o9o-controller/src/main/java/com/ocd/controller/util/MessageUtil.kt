@@ -398,7 +398,7 @@ Jellyfin 当前用户量: 活跃-%s ${if (BotConfig.getInstance().ISDELETE) "待
         return nextMidnight.toEpochSecond(ZoneOffset.UTC) - now.toEpochSecond(ZoneOffset.UTC)
     }
 
-    fun getAccountMessage(user: com.ocd.bean.mysql.User): String {
+    fun getAccountMessage(user: com.ocd.bean.mysql.User, embyUser: EmbyUserResult?): String {
         val action = if (BotConfig.getInstance().ISDELETE && !user.haveEmby()) {
             "删除账户"
         } else {
@@ -406,9 +406,9 @@ Jellyfin 当前用户量: 活跃-%s ${if (BotConfig.getInstance().ISDELETE) "待
         }
         val returnStr = escapeMarkdownV2("#ACCOUNT ${BotConfig.getInstance().EXPDAY} 天未观看 $action")
 
-        val embyName = escapeMarkdownV2(user.embyName ?: "Unknown User")
-        val embyId = escapeMarkdownV2(user.embyId ?: "N/A")
-        val tgId = escapeMarkdownV2(user.tgId ?: "0") // 确保 tgId 也被转义
+        val embyName = escapeMarkdownV2(embyUser?.name ?: "Unknown User")
+        val embyId = escapeMarkdownV2(embyUser?.id ?: "N/A")
+        val tgId = escapeMarkdownV2(user.tgId ?: "0")
 
         val endRes = """
 [$embyName](tg://user?id=$tgId), $embyId

@@ -187,7 +187,7 @@ public class AuthorityUtil {
                         } finally {
                             sendMessage.setChatId(BotConfig.getInstance().NOTIFY_CHANNEL);
                             sendMessage.enableMarkdownV2(true);
-                            sendMessage.setText(MessageUtil.INSTANCE.getAccountMessage(user));
+                            sendMessage.setText(MessageUtil.INSTANCE.getAccountMessage(user, embyUserDto));
                             try {
                                 telegramClient.execute(sendMessage);
                             } catch (TelegramApiException e) {
