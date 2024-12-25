@@ -56,6 +56,8 @@ public class AuthorityUtil {
 
     public static boolean openRegister = false;
 
+    public static Integer accountCount = null;
+
     public static String checkTgUser(User user) {
         String sendMessage = EmbyUtil.getInstance().checkServerHealth();
         if (sendMessage != null) return sendMessage;

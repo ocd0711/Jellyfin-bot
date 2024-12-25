@@ -654,6 +654,10 @@ class EmbyUtil {
         }
     }
 
+    fun getCanRegisterSize(): Int {
+        return if (AuthorityUtil.accountCount == null) 0 else AuthorityUtil.accountCount - getAllEmbyUser().size
+    }
+
     /**
      * curl 'https://tanhuatv.site/user_usage_stats/user_activity?days=42&end_date=2024-12-06&stamp=1733546602946' \
      * -X 'GET' \

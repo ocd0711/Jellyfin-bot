@@ -240,26 +240,33 @@ object MessageUtil {
 
     @JvmOverloads
     fun getStartMessage(firstName: String, isFlush: Boolean = false): String {
+        val embyCount = EmbyUtil.getInstance().getAllEmbyUser().size
         return String.format(
             """
 ✨ 只有你想见我的时候我们的相遇才有意义
 
-Jellyfin 当前用户量: 活跃-%s ${if (BotConfig.getInstance().ISDELETE) "待杀(七天内)" else "停用"}-%s
-
-开放注册状态: %s
+🚪 开放注册状态: %s
+👤 用户总数: %s
+🏖️ 活跃: %s
+👻 ${if (BotConfig.getInstance().ISDELETE) "待杀(七天内)" else "停用"}: %s
+💨 允许注册数: %s
 
 🍉你好鸭 %s 请选择功能${if (isFlush) "(用户状态已刷新)" else ""}👇
 """,
+            if (AuthorityUtil.openRegister) "开" else "关",
+            embyCount,
             AuthorityUtil.userService.userMapper.selectCount(
                 QueryWrapper<com.ocd.bean.mysql.User>().lambda().isNotNull(com.ocd.bean.mysql.User::getEmbyId)
-                    .`in`(com.ocd.bean.mysql.User::getDeactivate, 0)
+                    .`in`(com.ocd.bean.mysql.User::getUserType, listOf<Int>(1, 2))
+                    .eq(com.ocd.bean.mysql.User::getDeactivate, 0)
             ),
             AuthorityUtil.userService.userMapper.selectCount(
                 QueryWrapper<com.ocd.bean.mysql.User>().lambda().isNotNull(com.ocd.bean.mysql.User::getEmbyId)
-                    .`in`(com.ocd.bean.mysql.User::getDeactivate, 1)
+                    .`in`(com.ocd.bean.mysql.User::getUserType, listOf<Int>(1, 2))
+                    .eq(com.ocd.bean.mysql.User::getDeactivate, 1)
             ),
-//            EmbyUtil.getInstance().getAllEmbyUser().size,
-            if (AuthorityUtil.openRegister) "开" else "关", firstName
+            EmbyUtil.getInstance().getCanRegisterSize(),
+            firstName
         )
     }
 

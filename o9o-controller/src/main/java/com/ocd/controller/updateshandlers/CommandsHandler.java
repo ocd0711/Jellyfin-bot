@@ -9,6 +9,7 @@ import com.ocd.bean.dto.result.EmbyUserResult;
 import com.ocd.bean.mysql.Invitecode;
 import com.ocd.bean.mysql.Line;
 import com.ocd.bean.mysql.Shop;
+import com.ocd.controller.commands.OpenCommand;
 import com.ocd.controller.commands.StartCommand;
 import com.ocd.controller.commands.StatisticsCommand;
 import com.ocd.controller.commands.UserNotifyCommand;
@@ -81,6 +82,7 @@ public class CommandsHandler extends CommandLongPollingTelegramBot {
         register(startCommand);
         register(statisticsCommand);
         register(new UserNotifyCommand());
+        register(new OpenCommand());
 
         registerDefaultAction((absSender, message) -> {
             SendMessage commandUnknownMessage = new SendMessage(message.getChatId().toString(), "");
@@ -947,13 +949,13 @@ public class CommandsHandler extends CommandLongPollingTelegramBot {
                                         com.ocd.bean.mysql.User sqlUser = AuthorityUtil.userService.userMapper.selectOne(new QueryWrapper<com.ocd.bean.mysql.User>().lambda().eq(com.ocd.bean.mysql.User::getTgId, update.getMessage().getFrom().getId()));
                                         if (sqlUser.haveEmby())
                                             outDoing = "tg 已绑定过 emby 账号, /start 查看信息";
-                                        else if (sqlUser.getExchange() == null && !AuthorityUtil.openRegister) {
+                                        else if (sqlUser.getExchange() == null && !AuthorityUtil.openRegister || ((AuthorityUtil.openRegister && EmbyUtil.getInstance().getCanRegisterSize() <= 0))) {
                                             outDoing = "无注册权限";
                                         } else {
                                             if (!EmbyUtil.getInstance().register(sqlUser, embyName)) {
                                                 outDoing = "名称已占用, 请重新开始注册";
                                             } else {
-                                                if (!AuthorityUtil.openRegister) {
+                                                if (sqlUser.getExchange() != null) {
                                                     Invitecode invitecode = AuthorityUtil.invitecodeService.invitecodeMapper.selectOne(new QueryWrapper<Invitecode>().lambda().eq(Invitecode::getInvitecode, sqlUser.getExchange()));
                                                     if (invitecode == null) {
                                                         outDoing = "账单异常, 联系政工办处理";
