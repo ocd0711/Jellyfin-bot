@@ -323,6 +323,19 @@ public class CommandsHandler extends CommandLongPollingTelegramBot {
                                         }
                                     }
                                     break;
+                                case "changeBind":
+                                    outString = new StringBuilder(datas[2] + " 账户已换绑");
+                                    com.ocd.bean.mysql.User removeEmbyUser = AuthorityUtil.userService.userMapper.selectOne(new QueryWrapper<com.ocd.bean.mysql.User>().lambda().eq(com.ocd.bean.mysql.User::getEmbyName, datas[2]));
+                                    if (removeEmbyUser != null) {
+                                        cacheUser.updateByUser(removeEmbyUser);
+                                        removeEmbyUser.cleanEmby();
+                                        AuthorityUtil.userService.userMapper.updateById(removeEmbyUser);
+                                    }
+                                    AuthorityUtil.userService.userMapper.updateById(cacheUser);
+                                    break;
+                                case "noChangeBind":
+                                    outString = new StringBuilder(datas[2] + " 账户拒绝换绑");
+                                    break;
                             }
                         } else {
                             if (!chatMember.getUser().getIsBot()) {
@@ -544,8 +557,15 @@ public class CommandsHandler extends CommandLongPollingTelegramBot {
                                             break;
                                     }
                                 } else editMessageCaption.setCaption(check);
-//                            if (StringUtils.isBlank(outString.toString())) {
-//                                answerCallbackQuery.setText("不是管理别瞎鸡儿点!");
+                                if (!operatorsUser.getAdmin() && !userButtons.contains(command)) {
+                                    answerCallbackQuery.setText("不是管理别瞎鸡儿点!");
+                                    try {
+                                        telegramClient.execute(answerCallbackQuery);
+                                        return null;
+                                    } catch (TelegramApiException e) {
+                                        // nothing
+                                    }
+                                }
                                 try {
                                     if (!command.equals("main") && !command.equals("flush") && !command.equals("openRegister")) {
                                         InlineKeyboardRow rowLineHome = new InlineKeyboardRow();
@@ -560,12 +580,6 @@ public class CommandsHandler extends CommandLongPollingTelegramBot {
                                         editMessageCaption.setReplyMarkup(MessageUtil.INSTANCE.getMainButton(cacheUser));
                                     }
                                     telegramClient.execute(editMessageCaption);
-//                                    telegramClient.execute(answerCallbackQuery);
-//                                    return;
-//                                } catch (TelegramApiException e) {
-//                                    outString = new StringBuilder("异常情况: " + e);
-//                                }
-//                            }
 //                            sendMessageRequest.setText(outString.toString());
 //                            try {
 //                                telegramClient.execute(sendMessageRequest);
@@ -936,7 +950,8 @@ public class CommandsHandler extends CommandLongPollingTelegramBot {
                                             else if (operatorsUser.haveEmby())
                                                 outDoing = "已有" + BotConfig.getInstance().GROUP_NICK + "账号, 无需重复绑定";
                                             else if (AuthorityUtil.userService.userMapper.exists(new QueryWrapper<com.ocd.bean.mysql.User>().lambda().eq(com.ocd.bean.mysql.User::getEmbyName, embyUsername).ne(com.ocd.bean.mysql.User::getTgId, operatorsUser.getTgId()))) {
-                                                outDoing = "此账号已被他人绑定, 如有异议联系政工办";
+                                                outDoing = "此账号已被他人绑定, 换绑申请已发群内, 联系管理处理";
+                                                MessageUtil.INSTANCE.sendChangeBindMessage(telegramClient, operatorsUser, embyUsername);
                                             } else {
                                                 operatorsUser.updateEmbyByEmbyUser(embyUserResult);
                                                 AuthorityUtil.userService.userMapper.updateById(operatorsUser);

@@ -140,4 +140,11 @@ public class User {
         BeanUtils.copyProperties(this, devicesExcel);
         return devicesExcel;
     }
+
+    public void updateByUser(User user) {
+        this.embyName = user.getEmbyName();
+        this.embyId = user.getEmbyId();
+        this.userType = user.getUserType();
+        this.deactivate = user.getDeactivate();
+    }
 }

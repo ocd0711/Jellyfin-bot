@@ -8,6 +8,7 @@ import com.ocd.util.FormatUtil
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
 import org.apache.commons.lang3.StringUtils
+import org.slf4j.LoggerFactory
 import org.springframework.core.io.ClassPathResource
 import org.telegram.telegrambots.meta.api.methods.send.SendMessage
 import org.telegram.telegrambots.meta.api.objects.InputFile
@@ -17,6 +18,7 @@ import org.telegram.telegrambots.meta.api.objects.message.Message
 import org.telegram.telegrambots.meta.api.objects.replykeyboard.InlineKeyboardMarkup
 import org.telegram.telegrambots.meta.api.objects.replykeyboard.buttons.InlineKeyboardButton
 import org.telegram.telegrambots.meta.api.objects.replykeyboard.buttons.InlineKeyboardRow
+import org.telegram.telegrambots.meta.generics.TelegramClient
 import oshi.SystemInfo
 import java.io.ByteArrayInputStream
 import java.time.LocalDateTime
@@ -30,6 +32,7 @@ import kotlin.random.Random
  * Description:
  */
 object MessageUtil {
+    private val logger = LoggerFactory.getLogger(this::class.java);
 
     fun sendUserMessage(
         user: User,
@@ -450,5 +453,35 @@ $returnStr
         val inputStream = resource.inputStream
         val imageBytes = inputStream.readBytes()
         return InputFile(ByteArrayInputStream(imageBytes), "head.jpeg")
+    }
+
+    fun sendChangeBindMessage(
+        telegramClient: TelegramClient,
+        user: com.ocd.bean.mysql.User,
+        embyName: String
+    ) {
+        val sendMessage = SendMessage(
+            BotConfig.getInstance().GROUP_ID, "用户: [${user.tgId}](tg://user?id=${user.tgId})\n" +
+                    "处理结果: 更换绑定账户 $embyName\n" +
+                    "管理信息: \\#changeBind"
+        )
+        sendMessage.enableMarkdownV2(true)
+        val rows = ArrayList<InlineKeyboardRow>()
+        val inlineKeyboardMarkup = InlineKeyboardMarkup(rows)
+        val rowLine1 = InlineKeyboardRow()
+        val newBind = InlineKeyboardButton("✅ 允许")
+        newBind.callbackData = "changeBind ${user.tgId} $embyName"
+        rowLine1.add(newBind)
+        val noChangeBind = InlineKeyboardButton("⛔️ 拒绝")
+        noChangeBind.callbackData = "noChangeBind ${user.tgId} $embyName"
+        rowLine1.add(noChangeBind)
+        rows.add(rowLine1)
+        inlineKeyboardMarkup.keyboard = rows
+        sendMessage.replyMarkup = inlineKeyboardMarkup
+        try {
+            telegramClient.execute(sendMessage)
+        } catch (e: Exception) {
+            logger.error("sendChangeBindMessage error", e)
+        }
     }
 }
