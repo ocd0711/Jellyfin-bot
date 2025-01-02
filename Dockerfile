@@ -28,4 +28,4 @@ COPY --from=build /app/bot-controller/target/*-exec.jar app.jar
 
 EXPOSE 8080
 
-ENTRYPOINT ["java", "-jar", "app.jar" , "--spring.config.location=/app/application-prod.yml"]
+ENTRYPOINT ["java", "-jar", "app.jar" , "--spring.config.additional-location=/app/application-prod.yml"]

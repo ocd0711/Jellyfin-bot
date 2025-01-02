@@ -1,26 +1,9 @@
-server:
-  port: 8081
-
 logging:
   level:
     root: info
-  config: classpath:logback-config.xml
-#logging:
-#  config: classpath:logback-admin.xml
-#  level:
-#    root: info
-log:
-  name: log
-  #这里采用的是相对路径，所以在linux启动该jar包时，会根据启动jar的当前路径产生日志文件，需要注意
-  path: ./logs
 
 # spring配置
 spring:
-  application:
-    name: jellyfin-bot
-  jackson:
-    time-zone: GMT+8
-    date-format: yyyy-MM-dd HH:mm:ss
   mail:
     # 邮件 smtp 配置, 异常上报
     host: smtp.mail.me.com

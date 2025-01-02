@@ -10,7 +10,7 @@
         <relativePath/>
     </parent>
     <groupId>com.ocd</groupId>
-    <artifactId>bot-server</artifactId>
+    <artifactId>Jellyfin-bot</artifactId>
     <version>1.0.0</version>
     <name>bot-server</name>
     <description>jellyfin bot 后端</description>
