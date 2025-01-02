@@ -10,10 +10,10 @@
         <relativePath/>
     </parent>
     <groupId>com.ocd</groupId>
-    <artifactId>o9o-server</artifactId>
+    <artifactId>bot-server</artifactId>
     <version>1.0.0</version>
-    <name>o9o-server</name>
-    <description>o9o emby 后端</description>
+    <name>bot-server</name>
+    <description>jellyfin bot 后端</description>
     <packaging>pom</packaging>
 
     <!--自定义环境变量-->
@@ -51,10 +51,10 @@
     </properties>
 
     <modules>
-        <module>o9o-bean</module>
-        <module>o9o-util</module>
-        <module>o9o-service</module>
-        <module>o9o-controller</module>
+        <module>bot-bean</module>
+        <module>bot-util</module>
+        <module>bot-service</module>
+        <module>bot-controller</module>
     </modules>
 
     <dependencies>

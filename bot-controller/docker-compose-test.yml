@@ -1,0 +1,30 @@
+version: '3.8'
+networks:
+  jellyfin-bot:
+services:
+
+  isen_controller:
+    image: openjdk:17
+    container_name: bot-server-test
+    hostname: bot-server-test
+    privileged: true
+    networks:
+      - jellyfin-bot
+    ports:
+      - "8081:8081"
+    #      - "5004:5004"
+    volumes:
+      - ../bot-controller:/tmp/bot-controller:rw
+      - ../hello.txt:/tmp/hello.txt:rw
+      - /etc/timezone:/etc/timezone
+      - /etc/localtime:/etc/localtime
+    restart: always
+    user: 0:0
+    working_dir: /tmp/bot-controller/target/
+    command: /bin/bash -c "java -jar bot-controller-1.0.0-exec.jar"
+    #    command: /bin/bash -c "java -agentlib:jdwp=transport=dt_socket,server=y,suspend=y,address=*:5004 -jar bot-controller-1.0.0-exec.jar"
+    healthcheck:
+      test: "curl --silent --fail localhost:8081/getstate || exit 1"
+      interval: 30s
+      timeout: 3s
+      retries: 1

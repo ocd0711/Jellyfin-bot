@@ -3,10 +3,10 @@ FROM maven:3.8.5-openjdk-17-slim AS build
 WORKDIR /app
 
 COPY pom.xml .
-COPY o9o-bean/pom.xml o9o-bean/pom.xml
-COPY o9o-service/pom.xml o9o-service/pom.xml
-COPY o9o-util/pom.xml o9o-util/pom.xml
-COPY o9o-controller/pom.xml o9o-controller/pom.xml
+COPY bot-bean/pom.xml bot-bean/pom.xml
+COPY bot-service/pom.xml bot-service/pom.xml
+COPY bot-util/pom.xml bot-util/pom.xml
+COPY bot-controller/pom.xml bot-controller/pom.xml
 RUN mvn dependency:go-offline
 
 COPY . .
@@ -24,7 +24,7 @@ RUN apt-get update && apt-get install -y \
 
 WORKDIR /app
 
-COPY --from=build /app/o9o-controller/target/*-exec.jar app.jar
+COPY --from=build /app/bot-controller/target/*-exec.jar app.jar
 
 EXPOSE 8080
 

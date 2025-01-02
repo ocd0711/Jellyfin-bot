@@ -15,7 +15,7 @@ mvn_package_install() {
   #  done
 }
 workdir_controller() {
-  cd $Project/o9o-controller
+  cd $Project/bot-controller
 }
 stop_docker-compose() {
   docker compose -f $dockerProfile down
