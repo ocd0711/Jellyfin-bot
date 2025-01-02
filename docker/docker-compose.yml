@@ -2,7 +2,7 @@ version: '3.8'
 services:
 
   jellyfin-bot-prod:
-    image: ocd0711/jellyfin-bot:amd64
+    image: ocd0711/jellyfin-bot:latest
     container_name: jellyfin-bot-prod
     hostname: tanhua-bot-prod
     privileged: true
