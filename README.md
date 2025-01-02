@@ -13,6 +13,15 @@
 
 ## 项目使用
 
+### Docker 部署方式
+
+- 环境: `docker`, `docker-compose`
+- 新建文件夹, 并且将后面 [点击跳转](https://github.com/ocd0711/Jellyfin-bot/tree/master/o9o-controller) 地址下的文件全部放在这个文件夹下
+- 修改 `application.yml` 配置文件
+- `docker compose up -d` 即可运行
+
+### 自行编译部署方式
+
 - 环境: `java 17`, `maven 3.x`, `docker`, `redis`
 - 修改 `o9o-controller/src/main/resources/application-prod.yml` 配置文件
 - 编译参考 `mvn package install -P prod`
