@@ -1,0 +1,45 @@
+version: '3.8'
+services:
+
+  jellyfin-bot-prod:
+    image: ocd0711/jellyfin-bot:amd64
+    container_name: jellyfin-bot-prod
+    hostname: tanhua-bot-prod
+    privileged: true
+    network_mode: host
+    volumes:
+      - ./application.yml:/app/application-prod.yml
+      - ./hello.txt:/tmp/hello.txt:rw
+    #      - /etc/timezone:/etc/timezone
+    #      - /etc/localtime:/etc/localtime
+    restart: always
+    user: 0:0
+    healthcheck:
+      test: "curl --silent --fail localhost:8081/getstate || exit 1"
+      interval: 30s
+      timeout: 3s
+      retries: 1
+    environment:
+      TZ: Asia/Shanghai
+    #      - SET_CONTAINER_TIMEZONE=true
+    #      - CONTAINER_TIMEZONE=Asia/Shanghai
+    depends_on:
+      - "redis"
+
+  redis:
+    image: redis:latest
+    hostname: jellyfin-bot-redis
+    container_name: jellyfin-bot-redis
+    restart: always
+    privileged: true
+    volumes:
+      - ./redis/data:/data
+      - ./redis/conf/redis.conf:/usr/local/etc/redis/redis.conf
+      - ./redis/logs:/logs
+#    command: [ "redis-server", "/usr/local/etc/redis/redis.conf" ]
+    command:
+      --requirepass "xxxxx"
+    ports:
+      - 6379:6379
+    environment:
+      - TZ="Asia/Shanghai"
