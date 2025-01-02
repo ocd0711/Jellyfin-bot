@@ -18,6 +18,8 @@ FROM openjdk:17-jdk-slim
 RUN apt-get update && apt-get install -y \
     libfreetype6 \
     fonts-dejavu-core \
+    fonts-liberation \
+    fontconfig \
     && rm -rf /var/lib/apt/lists/*
 
 WORKDIR /app
