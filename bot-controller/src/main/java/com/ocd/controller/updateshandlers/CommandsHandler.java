@@ -290,7 +290,7 @@ public class CommandsHandler extends CommandLongPollingTelegramBot {
                                             Invitecode invitecode = new Invitecode(AuthorityUtil.invitecode(), 1);
                                             AuthorityUtil.invitecodeService.invitecodeMapper.insert(invitecode);
                                             SendMessage giftMessage = new SendMessage(userId.toString(), "");
-                                            giftMessage.setText("注册码: https://t.me/TanhuaTvBot?start=" + invitecode.getInvitecode());
+                                            giftMessage.setText("注册码: https://t.me/" + BotConfig.getInstance().COMMANDS_USER + "?start=" + invitecode.getInvitecode());
                                             try {
                                                 telegramClient.execute(giftMessage);
                                             } catch (TelegramApiException e) {
@@ -313,7 +313,7 @@ public class CommandsHandler extends CommandLongPollingTelegramBot {
                                             Invitecode invitecode = new Invitecode(AuthorityUtil.invitecode(), 0);
                                             AuthorityUtil.invitecodeService.invitecodeMapper.insert(invitecode);
                                             SendMessage giftMessage = new SendMessage(userId.toString(), "");
-                                            giftMessage.setText("♾️: https://t.me/TanhuaTvBot?start=" + invitecode.getInvitecode());
+                                            giftMessage.setText("♾️: https://t.me/" + BotConfig.getInstance().COMMANDS_USER + "?start=" + invitecode.getInvitecode());
                                             try {
                                                 telegramClient.execute(giftMessage);
                                             } catch (TelegramApiException e) {
@@ -686,7 +686,7 @@ public class CommandsHandler extends CommandLongPollingTelegramBot {
                                     AuthorityUtil.userService.createUser(groupUserCache);
                                     SendMessage sendMessageRequestJoin = new SendMessage(userChat.getId().toString(), "");
                                     sendMessageRequestJoin.enableMarkdownV2(true);
-                                    sendMessageRequestJoin.setText("欢迎来到" + BotConfig.getInstance().GROUP_NICK + " " + "[" + myChatMemberUser.getFirstName() + "]" + "(tg://user?id=" + myChatMemberUser.getId() + ")" + " 记得去 @TanhuaTvBot 启用 bot");
+                                    sendMessageRequestJoin.setText("欢迎来到" + BotConfig.getInstance().GROUP_NICK + " " + "[" + myChatMemberUser.getFirstName() + "]" + "(tg://user?id=" + myChatMemberUser.getId() + ")" + " 记得去 @" + BotConfig.getInstance().COMMANDS_USER + " 启用 bot");
                                     try {
                                         telegramClient.execute(sendMessageRequestJoin);
                                     } catch (TelegramApiException e) {
@@ -1001,7 +1001,7 @@ public class CommandsHandler extends CommandLongPollingTelegramBot {
                                                         for (int i = 0; i < count; i++) {
                                                             Invitecode invitecode = new Invitecode(AuthorityUtil.invitecode(), shop.getMonth());
                                                             AuthorityUtil.invitecodeService.invitecodeMapper.insert(invitecode);
-                                                            cacheString.append("生成邀请链接(" + (shop.getMonth() == 0 ? "♾️" : "注册码") + ")  " + " https://t.me/TanhuaTvBot?start=" + invitecode.getInvitecode() + "\n");
+                                                            cacheString.append("生成邀请链接(" + (shop.getMonth() == 0 ? "♾️" : "注册码") + ")  " + " https://t.me/" + BotConfig.getInstance().COMMANDS_USER + "?start=" + invitecode.getInvitecode() + "\n");
                                                         }
                                                         outDoing = cacheString.toString();
                                                     }
