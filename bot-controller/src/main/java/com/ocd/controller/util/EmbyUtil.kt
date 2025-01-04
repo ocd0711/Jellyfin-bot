@@ -167,8 +167,9 @@ class EmbyUtil {
                 map["ResetPassword"] = true
             }
             val entity = HttpEntity(map, headers)
-            val uri = UriComponentsBuilder.fromHttpUrl("${url}Users/Password")
-                .queryParam("userId", user.embyId)
+            val uri =
+                UriComponentsBuilder.fromHttpUrl(if (BotConfig.getInstance().IS_JELLYGIN) "${url}Users/Password" else "${url}Users/${user.embyId}/Password")
+                    .queryParam("userId", user.embyId)
             val response = HttpUtil.getInstance()
                 .restTemplate()
                 .exchange(
@@ -260,8 +261,6 @@ class EmbyUtil {
             }
             val map: HashMap<String, Any> = HashMap()
             map["IsDisabled"] = deactivate
-            map["AuthenticationProviderId"] = "Jellyfin.Server.Implementations.Users.DefaultAuthenticationProvider"
-            map["PasswordResetProviderId"] = "Jellyfin.Server.Implementations.Users.DefaultPasswordResetProvider"
             map["EnableAudioPlaybackTranscoding"] = false
             map["EnableVideoPlaybackTranscoding"] = false
             map["EnablePlaybackRemuxing"] = false
@@ -269,6 +268,18 @@ class EmbyUtil {
             map["MaxActiveSessions"] = 3
             map["RemoteClientBitrateLimit"] = 80000000
             map["SyncPlayAccess"] = "None"
+            if (!BotConfig.getInstance().IS_JELLYGIN) {
+                map["IsHidden"] = true
+                map["IsHiddenFromUnusedDevices"] = true
+                map["EnableSyncTranscoding"] = false
+                map["EnableMediaConversion"] = false
+                map["EnablePublicSharing"] = false
+                map["SimultaneousStreamLimit"] = 3
+                map["AllowCameraUpload"] = false
+            } else {
+                map["AuthenticationProviderId"] = "Jellyfin.Server.Implementations.Users.DefaultAuthenticationProvider"
+                map["PasswordResetProviderId"] = "Jellyfin.Server.Implementations.Users.DefaultPasswordResetProvider"
+            }
             val entity = HttpEntity(map, headers)
             val uri =
                 UriComponentsBuilder.fromHttpUrl("${url}Users/${user.embyId}/Policy")
@@ -294,8 +305,6 @@ class EmbyUtil {
                 contentType = MediaType.APPLICATION_JSON
             }
             val map: HashMap<String, Any> = HashMap()
-            map["AuthenticationProviderId"] = "Jellyfin.Server.Implementations.Users.DefaultAuthenticationProvider"
-            map["PasswordResetProviderId"] = "Jellyfin.Server.Implementations.Users.DefaultPasswordResetProvider"
             map["EnableAudioPlaybackTranscoding"] = false
             map["EnableVideoPlaybackTranscoding"] = false
             map["EnablePlaybackRemuxing"] = false
@@ -304,6 +313,18 @@ class EmbyUtil {
             map["RemoteClientBitrateLimit"] = 80000000
             map["SyncPlayAccess"] = "None"
             map["IsAdministrator"] = user.superAdmin
+            if (!BotConfig.getInstance().IS_JELLYGIN) {
+                map["IsHidden"] = true
+                map["IsHiddenFromUnusedDevices"] = true
+                map["EnableSyncTranscoding"] = false
+                map["EnableMediaConversion"] = false
+                map["EnablePublicSharing"] = false
+                map["SimultaneousStreamLimit"] = 3
+                map["AllowCameraUpload"] = false
+            } else {
+                map["AuthenticationProviderId"] = "Jellyfin.Server.Implementations.Users.DefaultAuthenticationProvider"
+                map["PasswordResetProviderId"] = "Jellyfin.Server.Implementations.Users.DefaultPasswordResetProvider"
+            }
             val entity = HttpEntity(map, headers)
             val uri =
                 UriComponentsBuilder.fromHttpUrl("${url}Users/${user.embyId}/Policy")
@@ -329,8 +350,6 @@ class EmbyUtil {
                 contentType = MediaType.APPLICATION_JSON
             }
             val map: HashMap<String, Any> = HashMap()
-            map["AuthenticationProviderId"] = "Jellyfin.Server.Implementations.Users.DefaultAuthenticationProvider"
-            map["PasswordResetProviderId"] = "Jellyfin.Server.Implementations.Users.DefaultPasswordResetProvider"
             map["EnableAudioPlaybackTranscoding"] = false
             map["EnableVideoPlaybackTranscoding"] = false
             map["EnablePlaybackRemuxing"] = false
@@ -338,6 +357,18 @@ class EmbyUtil {
             map["MaxActiveSessions"] = 3
             map["RemoteClientBitrateLimit"] = 80000000
             map["SyncPlayAccess"] = "None"
+            if (!BotConfig.getInstance().IS_JELLYGIN) {
+                map["IsHidden"] = true
+                map["IsHiddenFromUnusedDevices"] = true
+                map["EnableSyncTranscoding"] = false
+                map["EnableMediaConversion"] = false
+                map["EnablePublicSharing"] = false
+                map["SimultaneousStreamLimit"] = 3
+                map["AllowCameraUpload"] = false
+            } else {
+                map["AuthenticationProviderId"] = "Jellyfin.Server.Implementations.Users.DefaultAuthenticationProvider"
+                map["PasswordResetProviderId"] = "Jellyfin.Server.Implementations.Users.DefaultPasswordResetProvider"
+            }
             val entity = HttpEntity(map, headers)
             val uri =
                 UriComponentsBuilder.fromHttpUrl("${url}Users/${embyId}/Policy")
@@ -367,7 +398,8 @@ class EmbyUtil {
                 user,
                 user.hideMedia,
                 embyMediaFoldersDtos.filter { embyMediaFoldersDto -> !hideMediaList.contains(embyMediaFoldersDto.name) }
-                    .stream().map { it.id }.collect(Collectors.toList())
+                    .stream().map { (if (BotConfig.getInstance().IS_JELLYGIN) it.id else it.guid) }
+                    .collect(Collectors.toList())
             )
 
             val headers = HttpHeaders().apply {
@@ -489,7 +521,8 @@ class EmbyUtil {
                 set("X-Emby-Token", apikey)
             }
             val entity = HttpEntity<String>(headers)
-            val uri = UriComponentsBuilder.fromHttpUrl("${url}Devices?userId=$embyId")
+            val uri =
+                UriComponentsBuilder.fromHttpUrl(if (BotConfig.getInstance().IS_JELLYGIN) "${url}Devices?userId=$embyId" else "${url}Devices")
             val response = HttpUtil.getInstance()
                 .restTemplate()
                 .exchange(
@@ -498,10 +531,11 @@ class EmbyUtil {
                     entity,
                     String::class.java
                 )
-            return JSONArray.parseArray<EmbyDeviceResult>(
+            val devices = JSONArray.parseArray<EmbyDeviceResult>(
                 JSON.parseObject(response.body).get("Items").toString() ?: "",
                 EmbyDeviceResult::class.java
             )
+            return if (embyId != null) devices.filter { it.lastUserId == embyId } else devices
         } catch (e: Exception) {
             emptyList()
         }
@@ -661,7 +695,7 @@ class EmbyUtil {
     }
 
     @JvmOverloads
-    fun getUserPlayback(user: User, limitCount: Int = 1): List<PlaybackRecord>? {
+    fun getUserPlayback(embyId: String, limitCount: Int? = 1): List<PlaybackRecord> {
         try {
             val headers = HttpHeaders().apply {
                 set("X-Emby-Token", apikey)
@@ -669,7 +703,7 @@ class EmbyUtil {
             }
             val map: HashMap<String, Any> = HashMap()
             map["CustomQueryString"] =
-                "SELECT * FROM PlaybackActivity WHERE UserId = '${user.embyId}' ORDER BY DateCreated DESC  LIMIT $limitCount"
+                "SELECT * FROM PlaybackActivity WHERE UserId = '$embyId' ORDER BY DateCreated DESC ${if (limitCount != null) "LIMIT $limitCount" else ""}"
             map["ReplaceUserId"] = false
             val entity = HttpEntity(map, headers)
             val uri = UriComponentsBuilder.fromHttpUrl("${url}user_usage_stats/submit_custom_query")
@@ -684,7 +718,7 @@ class EmbyUtil {
             val playbackData = JSON.parseObject(response.body, PlaybackData::class.java)
             return playbackData.mapResultsToPlaybackRecords()
         } catch (e: Exception) {
-            return null
+            return emptyList()
         }
     }
 }

@@ -86,6 +86,11 @@ public class EmbyMediaFoldersResult {
     @JsonProperty("LockData")
     private Boolean lockData;
 
+    // ------- Emby ⬇️ -------
+    @JsonProperty("Guid")
+    private String guid;
+    // ------- Emby ⬆️ -------
+
     @NoArgsConstructor
     @Data
     public static class ProviderIdsDTO {

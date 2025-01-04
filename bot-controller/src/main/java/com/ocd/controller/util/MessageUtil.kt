@@ -361,7 +361,7 @@ object MessageUtil {
         isManage: Boolean = false
     ): String {
         val activityLog =
-            if (embyUserDto == null) null else EmbyUtil.getInstance().getUserPlayback(cacheUser)?.get(0)?.dateCreated
+            if (embyUserDto == null) null else EmbyUtil.getInstance().getUserPlayback(cacheUser.embyId)?.get(0)?.dateCreated
         var out =
             "用户名称: ${if (embyUserDto == null || cacheUser.getEmbyName() == null) "无号" else cacheUser.getEmbyName()}\n" +
                     "绑定 tg id: ${cacheUser.tgId}\n" +
@@ -383,7 +383,7 @@ object MessageUtil {
                     "最后观看时间: ${FormatUtil.dateToString(activityLog)}\n" +
                     "积分: ${cacheUser.points}\n"
         if (isManage)
-            out = out + "登录设备数量: ${AuthorityUtil.devicesService.getDeviceCount(cacheUser.embyId)}\n"
+            out = out + "登录设备数量: ${EmbyUtil.getInstance().viewingEquipment(cacheUser.embyId).size}\n"
         out = out + (if (BotConfig.getInstance().ISDELETE)
             "保号规则: ${if (cacheUser.userType == 2) "白名单 ♾️" else "${BotConfig.getInstance().EXPDAY} 天内有观看记录(无记录删号)"}"
         else "保号规则: ${if (cacheUser.userType == 2) "白名单 ♾️" else "${BotConfig.getInstance().EXPDAY} 天内有观看记录(每周五自助解封/${BotConfig.getInstance().UNBLOCKPOINTS} 积分解封)"}")

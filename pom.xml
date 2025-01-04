@@ -236,6 +236,10 @@
         <!--测试环境-->
         <profile>
             <id>test</id>
+            <activation>
+                <!--默认激活开发环境-->
+                <activeByDefault>true</activeByDefault>
+            </activation>
             <properties>
                 <profile.active>test</profile.active>
             </properties>
@@ -244,10 +248,6 @@
         <!--生产环境-->
         <profile>
             <id>prod</id>
-            <activation>
-                <!--默认激活开发环境-->
-                <activeByDefault>true</activeByDefault>
-            </activation>
             <properties>
                 <profile.active>prod</profile.active>
             </properties>

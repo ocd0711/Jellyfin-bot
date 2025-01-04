@@ -101,6 +101,33 @@ public class EmbyUserPolicyResult {
     @JsonProperty("SyncPlayAccess")
     private String syncPlayAccess;
 
+    // ------ emby ⬇️ -------
+    @JsonProperty("IsHiddenRemotely")
+    private Boolean isHiddenRemotely;
+    @JsonProperty("IsHiddenFromUnusedDevices")
+    private Boolean isHiddenFromUnusedDevices;
+    @JsonProperty("LockedOutDate")
+    private Integer lockedOutDate;
+    @JsonProperty("AllowTagOrRating")
+    private Boolean allowTagOrRating;
+    @JsonProperty("IsTagBlockingModeInclusive")
+    private Boolean isTagBlockingModeInclusive;
+    @JsonProperty("IncludeTags")
+    private List<String> includeTags;
+    @JsonProperty("RestrictedFeatures")
+    private List<?> restrictedFeatures;
+    @JsonProperty("EnableSubtitleDownloading")
+    private Boolean enableSubtitleDownloading;
+    @JsonProperty("ExcludedSubFolders")
+    private List<?> excludedSubFolders;
+    @JsonProperty("SimultaneousStreamLimit")
+    private Integer simultaneousStreamLimit;
+    @JsonProperty("AllowCameraUpload")
+    private Boolean allowCameraUpload;
+    @JsonProperty("AllowSharingPersonalItems")
+    private Boolean allowSharingPersonalItems;
+    // ------ emby ⬆️ -------
+
     public void sByUser(User user) {
         this.isAdministrator = user.getSuperAdmin();
     }

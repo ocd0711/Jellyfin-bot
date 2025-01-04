@@ -2,8 +2,9 @@ package com.ocd.controller.commands;
 
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.ocd.bean.dto.excel.DevicesExcel;
-import com.ocd.bean.mysql.Devices;
+import com.ocd.bean.dto.result.EmbyDeviceResult;
 import com.ocd.controller.util.AuthorityUtil;
+import com.ocd.controller.util.EmbyUtil;
 import com.ocd.controller.util.MessageUtil;
 import lombok.extern.slf4j.Slf4j;
 import org.telegram.telegrambots.extensions.bots.commandbot.commands.BotCommand;
@@ -61,8 +62,9 @@ public class StatisticsCommand extends BotCommand {
                 List<com.ocd.bean.mysql.User> userList = AuthorityUtil.userService.userMapper.selectList(new QueryWrapper<com.ocd.bean.mysql.User>().lambda().in(com.ocd.bean.mysql.User::getUserType, List.of(1, 2)));
                 ArrayList<DevicesExcel> devicesExcelList = new java.util.ArrayList<>(userList.stream().map(com.ocd.bean.mysql.User::getDeviceExcel).toList());
                 devicesExcelList.forEach(devicesExcel -> {
-                    devicesExcel.setDeviceCount(AuthorityUtil.devicesService.getDeviceCount(devicesExcel.getEmbyId()));
-                    devicesExcel.setDeviceInfo(String.join("\n", AuthorityUtil.devicesService.getDeviceList(devicesExcel.getEmbyId()).stream().map(Devices::toString).toList()));
+                    List<EmbyDeviceResult> playbackRecords = EmbyUtil.getInstance().viewingEquipment(devicesExcel.getEmbyId());
+                    devicesExcel.setDeviceCount(playbackRecords.stream().count());
+                    devicesExcel.setDeviceInfo(String.join("\n", playbackRecords.stream().map(EmbyDeviceResult::toString).toList()));
                 });
                 devicesExcelList.sort(Comparator.comparingLong(DevicesExcel::getDeviceCount).reversed());
                 ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();

@@ -62,4 +62,7 @@ class BotConfig {
 
     @Value("\${bot.head_photo}")
     lateinit var HEAD_PHOTO: String
+
+    @Value("\${bot.is_jellyfin}")
+    val IS_JELLYGIN: Boolean = true
 }

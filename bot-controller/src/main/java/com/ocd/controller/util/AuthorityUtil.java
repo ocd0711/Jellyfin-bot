@@ -27,14 +27,13 @@ import java.util.*;
 public class AuthorityUtil {
 
     @Autowired
-    public AuthorityUtil(UserService userService, LineService lineService, InvitecodeService invitecodeService, InfoService infoService, HideMediaService hideMediaService, ShopService shopService, DevicesService devicesService) {
+    public AuthorityUtil(UserService userService, LineService lineService, InvitecodeService invitecodeService, InfoService infoService, HideMediaService hideMediaService, ShopService shopService) {
         AuthorityUtil.userService = userService;
         AuthorityUtil.lineService = lineService;
         AuthorityUtil.invitecodeService = invitecodeService;
         AuthorityUtil.infoService = infoService;
         AuthorityUtil.hideMediaService = hideMediaService;
         AuthorityUtil.shopService = shopService;
-        AuthorityUtil.devicesService = devicesService;
     }
 
     public static UserService userService;
@@ -48,8 +47,6 @@ public class AuthorityUtil {
     public static HideMediaService hideMediaService;
 
     public static ShopService shopService;
-
-    public static DevicesService devicesService;
 
     public static boolean openRegister = false;
 
@@ -158,7 +155,7 @@ public class AuthorityUtil {
 //                    } else {
                     boolean needSend = false;
                     try {
-                        List<PlaybackRecord> activityLogs = EmbyUtil.getInstance().getUserPlayback(user);
+                        List<PlaybackRecord> activityLogs = EmbyUtil.getInstance().getUserPlayback(user.getEmbyId());
                         Long betweenDay = activityLogs == null ? null : DateUtil.betweenDay(activityLogs.get(0).getDateCreated(), new Date(), true);
                         if (betweenDay == null || betweenDay >= BotConfig.getInstance().getEXPDAY()) {
                             if (betweenDay == null || betweenDay >= BotConfig.getInstance().getEXPDAY() + 7) {
