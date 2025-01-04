@@ -22,6 +22,8 @@ import org.telegram.telegrambots.meta.api.objects.replykeyboard.buttons.InlineKe
 import org.telegram.telegrambots.meta.generics.TelegramClient
 import oshi.SystemInfo
 import java.io.ByteArrayInputStream
+import java.io.File
+import java.io.InputStream
 import java.time.LocalDateTime
 import java.time.ZoneOffset
 import java.util.*
@@ -449,10 +451,16 @@ $returnStr
         return code.toString()
     }
 
-    fun getHeadImageAsInputFile(): InputFile {
-        val resource = ClassPathResource("head.jpeg")
-        val inputStream = resource.inputStream
-        val imageBytes = inputStream.readBytes()
+    @JvmOverloads
+    fun getHeadImageAsInputFile(imagePath: String? = BotConfig.getInstance().HEAD_PHOTO): InputFile {
+        val imageInputStream: InputStream
+        if (imagePath != null && File(imagePath).exists()) {
+            imageInputStream = File(imagePath).inputStream()
+        } else {
+            val resource = ClassPathResource("head.jpeg")
+            imageInputStream = resource.inputStream
+        }
+        val imageBytes = imageInputStream.readBytes()
         return InputFile(ByteArrayInputStream(imageBytes), "head.jpeg")
     }
 

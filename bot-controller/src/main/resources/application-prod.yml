@@ -138,3 +138,4 @@ bot:
   expDay: 30
   isDelete: true
   notify_channel: xxxxx
+  head_photo: /tmp/head.jpeg

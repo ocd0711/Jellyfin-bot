@@ -59,4 +59,7 @@ class BotConfig {
 
     @Value("\${bot.group_nick}")
     lateinit var GROUP_NICK: String
+
+    @Value("\${bot.head_photo}")
+    lateinit var HEAD_PHOTO: String
 }

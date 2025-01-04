@@ -142,3 +142,4 @@ bot:
   notify_channel: xxxxxx
   wikiName: 暂无 wiki
   wikiUrl: https://ocdlive.com
+  head_photo: /tmp/head.jpeg
