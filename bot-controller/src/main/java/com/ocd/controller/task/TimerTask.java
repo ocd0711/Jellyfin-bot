@@ -69,8 +69,7 @@ public class TimerTask {
             TelegramClient telegramClient = new OkHttpTelegramClient(BotConfig.getInstance().COMMANDS_TOKEN);
             SendPhoto sendPhoto = new SendPhoto(BotConfig.getInstance().GROUP_ID, MessageUtil.INSTANCE.getHeadImageAsInputFile());
             sendPhoto.setParseMode("HTML");
-            sendPhoto.setCaption(stringBuilder.toString());
-            telegramClient.execute(sendPhoto);
+            MessageUtil.INSTANCE.sendLongCaption(telegramClient, sendPhoto, stringBuilder.toString());
         } catch (Exception e) {
             log.error("生成每日排行榜失败", e);
         }
@@ -102,8 +101,7 @@ public class TimerTask {
             TelegramClient telegramClient = new OkHttpTelegramClient(BotConfig.getInstance().COMMANDS_TOKEN);
             SendPhoto sendPhoto = new SendPhoto(BotConfig.getInstance().GROUP_ID, MessageUtil.INSTANCE.getHeadImageAsInputFile());
             sendPhoto.setParseMode("HTML");
-            sendPhoto.setCaption(stringBuilder.toString());
-            telegramClient.execute(sendPhoto);
+            MessageUtil.INSTANCE.sendLongCaption(telegramClient, sendPhoto, stringBuilder.toString());
         } catch (Exception e) {
             log.error("生成每周排行榜失败", e);
         }
@@ -128,8 +126,7 @@ public class TimerTask {
             TelegramClient telegramClient = new OkHttpTelegramClient(BotConfig.getInstance().COMMANDS_TOKEN);
             SendPhoto sendPhoto = new SendPhoto(BotConfig.getInstance().GROUP_ID, MessageUtil.INSTANCE.getHeadImageAsInputFile());
             sendPhoto.setParseMode("HTML");
-            sendPhoto.setCaption(stringBuilder.toString());
-            telegramClient.execute(sendPhoto);
+            MessageUtil.INSTANCE.sendLongCaption(telegramClient, sendPhoto, stringBuilder.toString());
         } catch (Exception e) {
             log.error("生成用户每日排行榜失败", e);
         }
@@ -154,8 +151,7 @@ public class TimerTask {
             TelegramClient telegramClient = new OkHttpTelegramClient(BotConfig.getInstance().COMMANDS_TOKEN);
             SendPhoto sendPhoto = new SendPhoto(BotConfig.getInstance().GROUP_ID, MessageUtil.INSTANCE.getHeadImageAsInputFile());
             sendPhoto.setParseMode("HTML");
-            sendPhoto.setCaption(stringBuilder.toString());
-            telegramClient.execute(sendPhoto);
+            MessageUtil.INSTANCE.sendLongCaption(telegramClient, sendPhoto, stringBuilder.toString());
         } catch (Exception e) {
             log.error("生成用户每周排行榜失败", e);
         }
@@ -180,8 +176,7 @@ public class TimerTask {
             TelegramClient telegramClient = new OkHttpTelegramClient(BotConfig.getInstance().COMMANDS_TOKEN);
             SendPhoto sendPhoto = new SendPhoto(BotConfig.getInstance().GROUP_ID, ChartUtil.generatePieChartAsInputFile(deviceShows));
             sendPhoto.setParseMode("HTML");
-            sendPhoto.setCaption(stringBuilder.toString());
-            telegramClient.execute(sendPhoto);
+            MessageUtil.INSTANCE.sendLongCaption(telegramClient, sendPhoto, stringBuilder.toString());
         } catch (Exception e) {
             log.error("生成设备每周排行榜失败", e);
         }

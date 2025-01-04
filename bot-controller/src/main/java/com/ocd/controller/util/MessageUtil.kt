@@ -11,6 +11,7 @@ import org.apache.commons.lang3.StringUtils
 import org.slf4j.LoggerFactory
 import org.springframework.core.io.ClassPathResource
 import org.telegram.telegrambots.meta.api.methods.send.SendMessage
+import org.telegram.telegrambots.meta.api.methods.send.SendPhoto
 import org.telegram.telegrambots.meta.api.objects.InputFile
 import org.telegram.telegrambots.meta.api.objects.User
 import org.telegram.telegrambots.meta.api.objects.chatmember.ChatMember
@@ -482,6 +483,31 @@ $returnStr
             telegramClient.execute(sendMessage)
         } catch (e: Exception) {
             logger.error("sendChangeBindMessage error", e)
+        }
+    }
+
+    fun sendLongCaption(telegramClient: TelegramClient, sendPhoto: SendPhoto, caption: String) {
+        val maxLength = 4096
+
+        if (caption.length <= maxLength) {
+            sendPhoto.caption = caption
+            telegramClient.execute(sendPhoto)
+            return
+        }
+
+        val initialCaption = caption.substring(0, maxLength)
+        sendPhoto.caption = initialCaption
+        telegramClient.execute(sendPhoto)
+
+        var currentIndex = maxLength
+        while (currentIndex < caption.length) {
+            val endIndex = (currentIndex + maxLength).coerceAtMost(caption.length)
+            val partCaption = caption.substring(currentIndex, endIndex)
+
+            val sendMessage = SendMessage(sendPhoto.chatId, partCaption)
+            telegramClient.execute(sendMessage)
+
+            currentIndex = endIndex
         }
     }
 }
