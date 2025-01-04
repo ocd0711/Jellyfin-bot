@@ -271,11 +271,13 @@ public class AuthorityUtil {
                                 getMessage()) + "\n%s",
                         AuthorityUtil.userService.userMapper.selectCount(
                                 new QueryWrapper<com.ocd.bean.mysql.User>().lambda().isNotNull(com.ocd.bean.mysql.User::getEmbyId)
-                                        .in(com.ocd.bean.mysql.User::getDeactivate, 0)
+                                        .in(com.ocd.bean.mysql.User::getUserType, List.of(1, 2))
+                                        .eq(com.ocd.bean.mysql.User::getDeactivate, 0)
                         ),
                         AuthorityUtil.userService.userMapper.selectCount(
                                 new QueryWrapper<com.ocd.bean.mysql.User>().lambda().isNotNull(com.ocd.bean.mysql.User::getEmbyId)
-                                        .in(com.ocd.bean.mysql.User::getDeactivate, 1)
+                                        .in(com.ocd.bean.mysql.User::getUserType, List.of(1, 2))
+                                        .eq(com.ocd.bean.mysql.User::getDeactivate, 1)
                         ),
                         EmbyUtil.getInstance().LibraryCountStr())
         );
