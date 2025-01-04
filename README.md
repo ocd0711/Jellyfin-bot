@@ -3,7 +3,7 @@
 ## 📜 项目说明
 
 - **用 Telegram 管理 Jellyfin 用户**（开服）的一个小工具
-- **推荐使用 docker 搭建, Jellyfin 由于使用 mysql 魔改版本, 使用官方版本可能需要自行修改部分代码 [魔改版 Jellyfin Dockerhub](https://hub.docker.com/repository/docker/ocd0711/jellyfin/general)**
+- ~~**推荐使用 docker 搭建, Jellyfin 由于使用 mysql 魔改版本, 使用官方版本可能需要自行修改部分代码 [魔改版 Jellyfin Dockerhub](https://hub.docker.com/repository/docker/ocd0711/jellyfin/general)**~~ 已兼容 emby/jellyfin 官方版
 - 此项目考虑并发和其他问题未使用 python
 - 由于此项目最开始基于 emby, 且用于私服, 项目新建时间为 2022 年中间弃坑 n 久, 导致代码很乱, 并且有无用业务残留, 凑合着看吧
 - 由于上面这个原因此项目没有保留旧的 commit 信息, 请谅解

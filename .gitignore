@@ -43,3 +43,4 @@ mysql
 
 /bot-controller/src/main/resources/application-prod.yml
 /bot-controller/src/main/resources/application-test.yml
+/bot-controller/src/main/resources/application-demo.yml
