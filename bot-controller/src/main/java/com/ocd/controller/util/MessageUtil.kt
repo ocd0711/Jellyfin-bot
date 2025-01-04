@@ -361,7 +361,7 @@ object MessageUtil {
         isManage: Boolean = false
     ): String {
         val activityLog =
-            if (embyUserDto == null) null else AuthorityUtil.activityLogsService.getLastPlay(embyUserDto.id)?.dateCreated
+            if (embyUserDto == null) null else EmbyUtil.getInstance().getUserPlayback(cacheUser)?.get(0)?.dateCreated
         var out =
             "用户名称: ${if (embyUserDto == null || cacheUser.getEmbyName() == null) "无号" else cacheUser.getEmbyName()}\n" +
                     "绑定 tg id: ${cacheUser.tgId}\n" +

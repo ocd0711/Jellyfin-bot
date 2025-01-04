@@ -3,6 +3,8 @@ package com.ocd.controller.util
 import com.alibaba.fastjson.JSON
 import com.alibaba.fastjson.JSONArray
 import com.isen.bean.constant.ConstantStrings
+import com.ocd.bean.dto.jellby.PlaybackData
+import com.ocd.bean.dto.jellby.PlaybackRecord
 import com.ocd.bean.dto.result.*
 import com.ocd.bean.mysql.HideMedia
 import com.ocd.bean.mysql.Line
@@ -658,40 +660,31 @@ class EmbyUtil {
         return if (AuthorityUtil.accountCount == null) 0 else AuthorityUtil.accountCount - getAllEmbyUser().size
     }
 
-    /**
-     * curl 'https://tanhuatv.site/user_usage_stats/user_activity?days=42&end_date=2024-12-06&stamp=1733546602946' \
-     * -X 'GET' \
-     * -H 'Accept: application/json' \
-     * -H 'Sec-Fetch-Site: same-origin' \
-     * -H 'Cookie: cf_clearance=DtR0EssrfeQMY8z_yOFIrNdNF6x5A20yAKdJRXC4FuY-1733546406-1.2.1.1-gWazkaut9NTGEZeLyE5gEsRJhPe8pYzCTuaCMff8xmQH6Lq853cW8s8Cm.cTDETBNtzdCOgk3BJpqFZQOxPrERWK03HScaYTDMAbvAlEUvEiRmeRR2Vs4Qa0ki_3C1y1sX5fXueZtC4GY4zqK7lmP69bkmcvF0bYQyiqNd0SiJovBYb2qS4BouHd7Ntg1ciEeWQa3xvPEY6IRFWQC8dk.qYkr7js5tEgiDrpbh2fM8S.UGOfDJat.q36oQ.y1KEHT7m6HweQIOHaF9I2ML_zLnjkDnLuz_1Riw16NW8WSLp18KkiRYBir83wjobh9Cpr9E2FIY.7sG.IDx34adnoy4FmqRvnG43xOCAF7tpwWPlOq8KC708hGcDuVbltQ1desYrzJ7gauP127V33YE69Ew' \
-     * -H 'Sec-Fetch-Dest: empty' \
-     * -H 'Accept-Language: zh-CN,zh-Hans;q=0.9' \
-     * -H 'Sec-Fetch-Mode: cors' \
-     * -H 'User-Agent: Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/18.2 Safari/605.1.15' \
-     * -H 'Accept-Encoding: gzip, deflate, br' \
-     * -H 'Authorization: MediaBrowser Client="Jellyfin Web", Device="Safari", DeviceId="TW96aWxsYS81LjAgKE1hY2ludG9zaDsgSW50ZWwgTWFjIE9TIFggMTBfMTVfNykgQXBwbGVXZWJLaXQvNjA1LjEuMTUgKEtIVE1MLCBsaWtlIEdlY2tvKSBWZXJzaW9uLzE4LjIgU2FmYXJpLzYwNS4xLjE1fDE3MzEzOTI5NzU5NTY1", Version="10.11.0", Token="f2af1951e5f7406d8b27911074f605d4"' \
-     * -H 'Priority: u=3, i'
-     *
-     * async def emby_cust_commit(self, user_id=None, days=7, method=None):
-     *         _url = f'{self.url}/emby/user_usage_stats/submit_custom_query'
-     *         sub_time = datetime.now(timezone(timedelta(hours=8)))
-     *         start_time = (sub_time - timedelta(days=days)).strftime("%Y-%m-%d %H:%M:%S")
-     *         end_time = sub_time.strftime("%Y-%m-%d %H:%M:%S")
-     *         sql = ''
-     *         if method == 'sp':
-     *             sql += "SELECT UserId, SUM(PlayDuration - PauseDuration) AS WatchTime FROM PlaybackActivity "
-     *             sql += f"WHERE DateCreated >= '{start_time}' AND DateCreated < '{end_time}' GROUP BY UserId ORDER BY WatchTime DESC"
-     *         elif user_id != 'None':
-     *             sql += "SELECT MAX(DateCreated) AS LastLogin,SUM(PlayDuration - PauseDuration) / 60 AS WatchTime FROM PlaybackActivity "
-     *             sql += f"WHERE UserId = '{user_id}' AND DateCreated >= '{start_time}' AND DateCreated < '{end_time}' GROUP BY UserId"
-     *         data = {"CustomQueryString": sql, "ReplaceUserId": True}  # user_name
-     *         # print(sql)
-     *         resp = r.post(_url, headers=self.headers, json=data, timeout=30)
-     *         if resp.status_code == 200:
-     *             # print(resp.json())
-     *             rst = resp.json()["results"]
-     *             return rst
-     *         else:
-     *             return None
-     */
+    @JvmOverloads
+    fun getUserPlayback(user: User, limitCount: Int = 1): List<PlaybackRecord>? {
+        try {
+            val headers = HttpHeaders().apply {
+                set("X-Emby-Token", apikey)
+                contentType = MediaType.APPLICATION_JSON
+            }
+            val map: HashMap<String, Any> = HashMap()
+            map["CustomQueryString"] =
+                "SELECT * FROM PlaybackActivity WHERE UserId = '${user.embyId}' ORDER BY DateCreated DESC  LIMIT $limitCount"
+            map["ReplaceUserId"] = false
+            val entity = HttpEntity(map, headers)
+            val uri = UriComponentsBuilder.fromHttpUrl("${url}user_usage_stats/submit_custom_query")
+            val response = HttpUtil.getInstance()
+                .restTemplate()
+                .exchange(
+                    uri.build().toUri(),
+                    HttpMethod.POST,
+                    entity,
+                    String::class.java
+                )
+            val playbackData = JSON.parseObject(response.body, PlaybackData::class.java)
+            return playbackData.mapResultsToPlaybackRecords()
+        } catch (e: Exception) {
+            return null
+        }
+    }
 }

@@ -37,3 +37,9 @@ build/
 Home.md
 
 log.txt
+
+log
+mysql
+
+/bot-controller/src/main/resources/application-prod.yml
+/bot-controller/src/main/resources/application-test.yml

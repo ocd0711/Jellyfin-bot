@@ -4,8 +4,8 @@ import cn.hutool.core.date.DateUtil;
 import com.alibaba.fastjson.JSON;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.isen.bean.constant.ConstantStrings;
+import com.ocd.bean.dto.jellby.PlaybackRecord;
 import com.ocd.bean.dto.result.EmbyUserResult;
-import com.ocd.bean.mysql.ActivityLogs;
 import com.ocd.bean.mysql.Info;
 import com.ocd.controller.config.BotConfig;
 import com.ocd.service.mysql.*;
@@ -27,14 +27,13 @@ import java.util.*;
 public class AuthorityUtil {
 
     @Autowired
-    public AuthorityUtil(UserService userService, LineService lineService, InvitecodeService invitecodeService, InfoService infoService, HideMediaService hideMediaService, ShopService shopService, ActivityLogsService activityLogsService, DevicesService devicesService) {
+    public AuthorityUtil(UserService userService, LineService lineService, InvitecodeService invitecodeService, InfoService infoService, HideMediaService hideMediaService, ShopService shopService, DevicesService devicesService) {
         AuthorityUtil.userService = userService;
         AuthorityUtil.lineService = lineService;
         AuthorityUtil.invitecodeService = invitecodeService;
         AuthorityUtil.infoService = infoService;
         AuthorityUtil.hideMediaService = hideMediaService;
         AuthorityUtil.shopService = shopService;
-        AuthorityUtil.activityLogsService = activityLogsService;
         AuthorityUtil.devicesService = devicesService;
     }
 
@@ -49,8 +48,6 @@ public class AuthorityUtil {
     public static HideMediaService hideMediaService;
 
     public static ShopService shopService;
-
-    public static ActivityLogsService activityLogsService;
 
     public static DevicesService devicesService;
 
@@ -161,8 +158,8 @@ public class AuthorityUtil {
 //                    } else {
                     boolean needSend = false;
                     try {
-                        ActivityLogs activityLogs = AuthorityUtil.activityLogsService.getLastPlay(user.getEmbyId());
-                        Long betweenDay = activityLogs == null ? null : DateUtil.betweenDay(activityLogs.getDateCreated(), new Date(), true);
+                        List<PlaybackRecord> activityLogs = EmbyUtil.getInstance().getUserPlayback(user);
+                        Long betweenDay = activityLogs == null ? null : DateUtil.betweenDay(activityLogs.get(0).getDateCreated(), new Date(), true);
                         if (betweenDay == null || betweenDay >= BotConfig.getInstance().getEXPDAY()) {
                             if (betweenDay == null || betweenDay >= BotConfig.getInstance().getEXPDAY() + 7) {
                                 EmbyUtil.getInstance().deleteUser(user);
