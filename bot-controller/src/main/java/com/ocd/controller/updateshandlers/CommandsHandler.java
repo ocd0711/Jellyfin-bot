@@ -665,7 +665,7 @@ public class CommandsHandler extends CommandLongPollingTelegramBot {
                                         AuthorityUtil.userService.userMapper.updateById(groupUserCache);
                                         SendMessage sendMessageRequestBan = new SendMessage(userChat.getId().toString(), "");
                                         sendMessageRequestBan.enableMarkdownV2(true);
-                                        sendMessageRequestBan.setText("离开" + BotConfig.getInstance().GROUP_NICK + " " + "[" + myChatMemberUser.getFirstName() + "]" + "(tg://user?id=" + myChatMemberUser.getId() + ")" + " 已永封, 一路走好");
+                                        sendMessageRequestBan.setText("离开" + BotConfig.getInstance().GROUP_NICK + " " + "[" + MessageUtil.INSTANCE.escapeMarkdownV2(myChatMemberUser.getFirstName()) + "]" + "(tg://user?id=" + myChatMemberUser.getId() + ")" + " 已永封, 一路走好");
                                         EmbyUtil.getInstance().deleteUser(groupUserCache);
                                         BanChatMember banChatMember = new BanChatMember(userChat.getId().toString(), myChatMemberUser.getId());
                                         banChatMember.setUntilDateInstant(DateUtil.offsetMonth(new Date(), 24).toInstant());
@@ -686,7 +686,7 @@ public class CommandsHandler extends CommandLongPollingTelegramBot {
                                     AuthorityUtil.userService.createUser(groupUserCache);
                                     SendMessage sendMessageRequestJoin = new SendMessage(userChat.getId().toString(), "");
                                     sendMessageRequestJoin.enableMarkdownV2(true);
-                                    sendMessageRequestJoin.setText("欢迎来到" + BotConfig.getInstance().GROUP_NICK + " " + "[" + myChatMemberUser.getFirstName() + "]" + "(tg://user?id=" + myChatMemberUser.getId() + ")" + " 记得去 @" + BotConfig.getInstance().COMMANDS_USER + " 启用 bot");
+                                    sendMessageRequestJoin.setText("欢迎来到" + BotConfig.getInstance().GROUP_NICK + " " + "[" + MessageUtil.INSTANCE.escapeMarkdownV2(myChatMemberUser.getFirstName()) + "]" + "(tg://user?id=" + myChatMemberUser.getId() + ")" + " 记得去 @" + BotConfig.getInstance().COMMANDS_USER + " 启用 bot");
                                     try {
                                         telegramClient.execute(sendMessageRequestJoin);
                                     } catch (TelegramApiException e) {
