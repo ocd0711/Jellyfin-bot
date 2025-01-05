@@ -360,9 +360,10 @@ object MessageUtil {
         cacheUser: com.ocd.bean.mysql.User,
         isManage: Boolean = false
     ): String {
-        val activityLog =
-            if (embyUserDto == null) null else EmbyUtil.getInstance().getUserPlayback(cacheUser.embyId)
-                ?.get(0)?.dateCreated
+        val activityLog = embyUserDto?.let {
+            val playbackRecords = EmbyUtil.getInstance().getUserPlayback(cacheUser.embyId)
+            playbackRecords.firstOrNull()?.dateCreated
+        }
         var out =
             "用户名称: ${if (embyUserDto == null || cacheUser.getEmbyName() == null) "无号" else cacheUser.getEmbyName()}\n" +
                     "绑定 tg id: ${cacheUser.tgId}\n" +

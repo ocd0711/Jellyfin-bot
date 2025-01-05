@@ -156,7 +156,7 @@ public class AuthorityUtil {
                     boolean needSend = false;
                     try {
                         List<PlaybackRecord> activityLogs = EmbyUtil.getInstance().getUserPlayback(user.getEmbyId());
-                        Long betweenDay = activityLogs == null ? null : DateUtil.betweenDay(activityLogs.get(0).getDateCreated(), new Date(), true);
+                        Long betweenDay = activityLogs.isEmpty() ? null : DateUtil.betweenDay(activityLogs.get(0).getDateCreated(), new Date(), true);
                         if (betweenDay == null || betweenDay >= BotConfig.getInstance().getEXPDAY()) {
                             if (betweenDay == null || betweenDay >= BotConfig.getInstance().getEXPDAY() + 7) {
                                 EmbyUtil.getInstance().deleteUser(user);
