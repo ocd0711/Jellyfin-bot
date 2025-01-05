@@ -361,7 +361,8 @@ object MessageUtil {
         isManage: Boolean = false
     ): String {
         val activityLog =
-            if (embyUserDto == null) null else EmbyUtil.getInstance().getUserPlayback(cacheUser.embyId)?.get(0)?.dateCreated
+            if (embyUserDto == null) null else EmbyUtil.getInstance().getUserPlayback(cacheUser.embyId)
+                ?.get(0)?.dateCreated
         var out =
             "用户名称: ${if (embyUserDto == null || cacheUser.getEmbyName() == null) "无号" else cacheUser.getEmbyName()}\n" +
                     "绑定 tg id: ${cacheUser.tgId}\n" +
@@ -454,12 +455,28 @@ $returnStr
     @JvmOverloads
     fun getHeadImageAsInputFile(imagePath: String? = BotConfig.getInstance().HEAD_PHOTO): InputFile {
         val imageInputStream: InputStream
+
         if (imagePath != null && File(imagePath).exists()) {
-            imageInputStream = File(imagePath).inputStream()
+            val directory = File(imagePath)
+            val imageFiles = directory.listFiles { _, name ->
+                name.endsWith(".jpg", ignoreCase = true) ||
+                        name.endsWith(".jpeg", ignoreCase = true) ||
+                        name.endsWith(".png", ignoreCase = true) ||
+                        name.endsWith(".gif", ignoreCase = true)
+            }
+
+            if (imageFiles != null && imageFiles.isNotEmpty()) {
+                val randomImage = imageFiles[Random.nextInt(imageFiles.size)]
+                imageInputStream = randomImage.inputStream()
+            } else {
+                val resource = ClassPathResource("head.jpeg")
+                imageInputStream = resource.inputStream
+            }
         } else {
             val resource = ClassPathResource("head.jpeg")
             imageInputStream = resource.inputStream
         }
+
         val imageBytes = imageInputStream.readBytes()
         return InputFile(ByteArrayInputStream(imageBytes), "head.jpeg")
     }

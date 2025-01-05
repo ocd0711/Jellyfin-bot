@@ -73,4 +73,5 @@ bot:
   notify_channel: xxxxxx
   wikiName: 暂无 wiki
   wikiUrl: https://ocdlive.com
-  head_photo: /tmp/head.jpeg
+  # 头图存储目录(目录下可以多张, 每次随机取一张做展示)
+  head_photo: /tmp/img
