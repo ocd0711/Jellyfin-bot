@@ -124,7 +124,7 @@ public class AuthorityUtil {
 //                        sendMessage.setChatId(BotConfig.getInstance().CHANNEL);
 //                        sendMessage.setChatId(BotConfig.getInstance().GROUP_ID);
                         sendMessage.setChatId(BotConfig.getInstance().NOTIFY_CHANNEL);
-                        sendMessage.setText(String.format("#bot检查扬号: Emby 账号 %s ( %s ) 已被扬, 原因: 未绑定 tg 用户", embyUserDto.getName(), embyUserDto.getId()));
+                        sendMessage.setText(String.format("#bot检查扬号: 观影账号 %s ( %s ) 已被扬, 原因: 未绑定 tg 用户", embyUserDto.getName(), embyUserDto.getId()));
                         telegramClient.execute(sendMessage);
                     } catch (TelegramApiException e) {
                         log.error(e.toString());
@@ -134,7 +134,7 @@ public class AuthorityUtil {
                         EmbyUtil.getInstance().deleteUser(user);
 //                        sendMessage.setChatId(BotConfig.getInstance().GROUP_ID);
                         sendMessage.setChatId(BotConfig.getInstance().NOTIFY_CHANNEL);
-                        sendMessage.setText(String.format("#bot检查扬号: Emby 账号 %s ( %s ) 已被扬, 原因: %s 不在群内", embyUserDto.getName(), embyUserDto.getId(), user.getTgId()));
+                        sendMessage.setText(String.format("#bot检查扬号: 观影账号 %s ( %s ) 已被扬, 原因: %s 不在群内", embyUserDto.getName(), embyUserDto.getId(), user.getTgId()));
                         telegramClient.execute(sendMessage);
                     } catch (TelegramApiException e) {
                         log.error(e.toString());

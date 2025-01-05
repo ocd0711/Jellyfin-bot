@@ -1,8 +1,8 @@
-# Jellyfin Telegram Bot 管理工具
+# Jellyfin/Emby Telegram Bot 管理工具
 
 ## 📜 项目说明
 
-- **用 Telegram 管理 Jellyfin 用户**（开服）的一个小工具
+- **用 Telegram 管理 Jellyfin/Emby 用户**（开服）的一个小工具
 - ~~**推荐使用 docker 搭建, Jellyfin 由于使用 mysql 魔改版本, 使用官方版本可能需要自行修改部分代码 [魔改版 Jellyfin Dockerhub](https://hub.docker.com/repository/docker/ocd0711/jellyfin/general)**~~ 已兼容 emby/jellyfin 官方版
 - 此项目考虑并发和其他问题未使用 python
 - 由于此项目最开始基于 emby, 且用于私服, 项目新建时间为 2022 年中间弃坑 n 久, 导致代码很乱, 并且有无用业务残留, 凑合着看吧
@@ -16,11 +16,12 @@
 ### Docker 部署方式
 
 - 环境: `docker`, `docker-compose`
-- 新建文件夹, 并且将后面 [点击跳转](https://github.com/ocd0711/Jellyfin-bot/tree/master/bot-controller) 地址下的文件全部放在这个文件夹下
+- 参考 [点击跳转](https://github.com/ocd0711/Jellyfin-bot/tree/master/docker) 的 docker compose 配置(配置内有 `redis` 容器, 也可自己对接)
 - 修改 `application.yml` 配置文件
 - `docker compose up -d` 即可运行
+- `mysql` 需要自建, 建标语句在 [点击跳转](https://github.com/ocd0711/Jellyfin-bot/tree/master/init.sql)
 
-### 自行编译部署方式
+### 自行编译部署方式(不推荐, 需要知道的有点多)
 
 - 环境: `java 17`, `maven 3.x`, `docker`, `redis`
 - 修改 `bot-controller/src/main/resources/application-prod.yml` 配置文件

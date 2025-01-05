@@ -1,9 +1,4 @@
-# emby
-
-# 下为建表语句(与实际数据库同步, 如有修改记得同步)
-
-``` sql
-// 需屏蔽的媒体库
+-- 需屏蔽的媒体库
 CREATE TABLE `hide_media`
 (
     `id`                   int(11)               NOT NULL AUTO_INCREMENT COMMENT '主键id',
@@ -11,7 +6,7 @@ CREATE TABLE `hide_media`
     PRIMARY KEY (`id`)
 ) ENGINE=InnoDB AUTO_INCREMENT=0 DEFAULT CHARSET=utf8mb4;
 
-// 商品列表
+-- 商品列表
 CREATE TABLE `shop`
 (
     `id`                   int(11)               NOT NULL AUTO_INCREMENT COMMENT '主键id',
@@ -19,7 +14,7 @@ CREATE TABLE `shop`
     PRIMARY KEY (`id`)
 ) ENGINE=InnoDB AUTO_INCREMENT=0 DEFAULT CHARSET=utf8mb4;
 
-// invitecode 存储
+-- invitecode 存储
 CREATE TABLE `invitecode`
 (
     `id`                   int(11)               NOT NULL AUTO_INCREMENT COMMENT '主键id',
@@ -30,7 +25,7 @@ CREATE TABLE `invitecode`
     PRIMARY KEY (`id`)
 ) ENGINE=InnoDB AUTO_INCREMENT=0 DEFAULT CHARSET=utf8mb4;
 
-// 加点提示语
+-- 加点提示语
 CREATE TABLE `line`
 (
     `id`                   int(11)               NOT NULL AUTO_INCREMENT COMMENT '主键id',
@@ -40,7 +35,7 @@ CREATE TABLE `line`
     PRIMARY KEY (`id`)
 ) ENGINE=InnoDB AUTO_INCREMENT=0 DEFAULT CHARSET=utf8mb4;
 
-// 加点提示语
+-- 加点提示语
 CREATE TABLE `info`
 (
     `id`                   int(11)               NOT NULL AUTO_INCREMENT COMMENT '主键id',
@@ -48,7 +43,7 @@ CREATE TABLE `info`
     PRIMARY KEY (`id`)
 ) ENGINE=InnoDB AUTO_INCREMENT=0 DEFAULT CHARSET=utf8mb4;
 
-// 用户表
+-- 用户表
 tg id - emby账号
 CREATE TABLE `user`
 (
@@ -69,4 +64,3 @@ CREATE TABLE `user`
     `points`               int(11)               NOT NULL DEFAULT 0 COMMENT '用户积分',
     PRIMARY KEY (`id`)
 ) ENGINE=InnoDB AUTO_INCREMENT=0 DEFAULT CHARSET=utf8mb4;
-```

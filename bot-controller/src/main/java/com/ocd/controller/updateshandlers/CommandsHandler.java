@@ -173,7 +173,7 @@ public class CommandsHandler extends CommandLongPollingTelegramBot {
                                             AuthorityUtil.userService.userMapper.updateById(cacheUser);
                                         }
 //                                        outString = "已 ban 且 emby 号已扬: \n" + JSON.toJSONString(replyUser) + "\n" + JSON.toJSONString(cacheUser);
-                                        outString = new StringBuilder("已 ban 且 emby 号已扬");
+                                        outString = new StringBuilder("已 ban 且观影号已扬");
                                     }
                                     break;
                                 case "unban":
@@ -193,7 +193,7 @@ public class CommandsHandler extends CommandLongPollingTelegramBot {
 //                                        outString = "解 ban: \n" + JSON.toJSONString(replyUser) + "\n" + JSON.toJSONString(cacheUser);
                                         outString = new StringBuilder("解 ban");
                                     } else {
-                                        outString = new StringBuilder("不是黑户就别玩了撒(已清除 ban 统计, 如已绑定 emby 账号不会清除信息)");
+                                        outString = new StringBuilder("不是黑户就别玩了撒(已清除 ban 统计, 如已绑定观影账号不会清除信息)");
                                     }
                                     break;
                                 case "admin":
@@ -276,7 +276,7 @@ public class CommandsHandler extends CommandLongPollingTelegramBot {
                                     } else {
                                         EmbyUtil.getInstance().deleteUser(cacheUser);
                                         AuthorityUtil.userService.userMapper.updateById(cacheUser);
-                                        outString = new StringBuilder("💣 已经注销 emby 账号, 可联系管理重新开号");
+                                        outString = new StringBuilder("💣 已经注销观影账号, 可联系管理重新开号");
                                     }
                                     break;
                                 case "gift":
@@ -963,7 +963,7 @@ public class CommandsHandler extends CommandLongPollingTelegramBot {
                                         String embyName = datas[0];
                                         com.ocd.bean.mysql.User sqlUser = AuthorityUtil.userService.userMapper.selectOne(new QueryWrapper<com.ocd.bean.mysql.User>().lambda().eq(com.ocd.bean.mysql.User::getTgId, update.getMessage().getFrom().getId()));
                                         if (sqlUser.haveEmby())
-                                            outDoing = "tg 已绑定过 emby 账号, /start 查看信息";
+                                            outDoing = "tg 已绑定过观影账号, /start 查看信息";
                                         else if (sqlUser.getExchange() == null && !AuthorityUtil.openRegister || ((AuthorityUtil.openRegister && EmbyUtil.getInstance().getCanRegisterSize() <= 0))) {
                                             outDoing = "无注册权限";
                                         } else {
@@ -1061,10 +1061,10 @@ public class CommandsHandler extends CommandLongPollingTelegramBot {
 
         InlineKeyboardRow rowLine1 = new InlineKeyboardRow();
         if (cacheUser.haveEmby()) {
-            InlineKeyboardButton block = new InlineKeyboardButton(cacheUser.getDeactivate() ? "🔓解封 jellyfin 账号" : "🔒封禁 jellyfin 账号");
+            InlineKeyboardButton block = new InlineKeyboardButton(cacheUser.getDeactivate() ? "🔓解封观影账号" : "🔒封禁观影账号");
             block.setCallbackData("block " + replyUser.getId());
             rowLine1.add(block);
-            InlineKeyboardButton del = new InlineKeyboardButton("❗ 删除 emby 账号");
+            InlineKeyboardButton del = new InlineKeyboardButton("❗ 删除观影账号");
             del.setCallbackData("del " + replyUser.getId());
             if (!cacheUser.getAdmin()) rowLine1.add(del);
         }

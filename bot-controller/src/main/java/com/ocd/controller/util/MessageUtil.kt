@@ -137,13 +137,13 @@ object MessageUtil {
     }
 
     fun getCreateButton(user: com.ocd.bean.mysql.User): InlineKeyboardButton {
-        var info = InlineKeyboardButton("🎉注册 jellyfin 账户")
+        var info = InlineKeyboardButton("🎉注册观影账户")
         info.callbackData = "create " + user.tgId
         return info
     }
 
     fun getBindButton(user: com.ocd.bean.mysql.User): InlineKeyboardButton {
-        var info = InlineKeyboardButton("🗝️绑定 jellyfin 账户")
+        var info = InlineKeyboardButton("🗝️绑定观影账户")
         info.callbackData = "bind " + user.tgId
         return info
     }
