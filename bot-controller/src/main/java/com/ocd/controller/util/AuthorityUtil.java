@@ -9,6 +9,7 @@ import com.ocd.bean.dto.result.EmbyUserResult;
 import com.ocd.bean.mysql.Info;
 import com.ocd.controller.config.BotConfig;
 import com.ocd.service.mysql.*;
+import com.ocd.util.FormatUtil;
 import com.ocd.util.HttpUtil;
 import lombok.extern.log4j.Log4j2;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -161,7 +162,7 @@ public class AuthorityUtil {
                             Long betweenDay = activityLogs.isEmpty() ? null : DateUtil.betweenDay(activityLogs.get(0).getDateCreated(), new Date(), true);
                             if (betweenDay == null || betweenDay >= BotConfig.getInstance().getEXPDAY()) {
                                 if (betweenDay == null || betweenDay >= BotConfig.getInstance().getEXPDAY() + 7) {
-                                    lastDate = activityLogs.get(0).getDateCreated().toString();
+                                    lastDate = FormatUtil.INSTANCE.dateToString(activityLogs.get(0).getDateCreated());
                                     EmbyUtil.getInstance().deleteUser(user);
                                     AuthorityUtil.userService.userMapper.updateById(user);
                                     needSend = true;

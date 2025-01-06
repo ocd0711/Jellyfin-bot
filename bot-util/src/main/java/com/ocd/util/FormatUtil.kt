@@ -20,6 +20,8 @@ object FormatUtil {
 
     val sdfShow = SimpleDateFormat(dateShow)
 
+    val datePlayback = SimpleDateFormat("yyyy-MM-dd HH:mm:ss")
+
     val other = SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSSSSSS'Z'")
 
     val quectelDate = SimpleDateFormat("yyyy-MM-dd")
@@ -55,6 +57,11 @@ object FormatUtil {
 
     fun getQuectelDate(time: String): Date {
         return quectelDate.parse(time)
+    }
+
+    fun playbackToDate(time: String?): Date? {
+        time ?: return null
+        return datePlayback.parse(time)
     }
 
     fun dateToString(date: Date?): String {

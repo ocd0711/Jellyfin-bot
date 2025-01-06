@@ -2,8 +2,7 @@ package com.ocd.bean.dto.jellby
 
 import com.alibaba.fastjson2.annotation.JSONCreator
 import com.alibaba.fastjson2.annotation.JSONField
-import java.text.SimpleDateFormat
-import java.util.*
+import com.ocd.util.FormatUtil
 
 /**
  * @author ch.hu
@@ -16,13 +15,9 @@ data class PlaybackData @JSONCreator constructor(
     @JSONField(name = "message") val message: String
 ) {
     fun mapResultsToPlaybackRecords(): List<PlaybackRecord> {
-        val dateFormat = SimpleDateFormat("yyyy-MM-dd HH:mm:ss.SSSSSSS", Locale.getDefault())
-
         return results.map { row ->
-            val dateCreated = dateFormat.parse(row[0])
-
             PlaybackRecord(
-                dateCreated = dateCreated,
+                dateCreated = FormatUtil.playbackToDate(row[0])!!,
                 userId = row[1],
                 itemId = row[2],
                 itemType = row[3],

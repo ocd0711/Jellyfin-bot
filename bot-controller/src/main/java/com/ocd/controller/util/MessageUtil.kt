@@ -360,10 +360,10 @@ object MessageUtil {
         cacheUser: com.ocd.bean.mysql.User,
         isManage: Boolean = false
     ): String {
-        val activityLog = embyUserDto?.let {
+        val activityLog = FormatUtil.dateToString(embyUserDto?.let {
             val playbackRecords = EmbyUtil.getInstance().getUserPlayback(cacheUser.embyId)
             playbackRecords?.firstOrNull()?.dateCreated
-        }
+        })
         var out =
             "用户名称: ${if (embyUserDto == null || cacheUser.getEmbyName() == null) "无号" else cacheUser.getEmbyName()}\n" +
                     "绑定 tg id: ${cacheUser.tgId}\n" +
@@ -382,7 +382,7 @@ object MessageUtil {
                             embyUserDto.lastActivityDate
                         )
                     }\n" +
-                    "最后观看时间: ${FormatUtil.dateToString(activityLog)}\n" +
+                    "最后观看时间: ${activityLog}\n" +
                     "积分: ${cacheUser.points}\n"
         if (isManage)
             out = out + "登录设备数量: ${EmbyUtil.getInstance().viewingEquipment(cacheUser.embyId).size}\n"
