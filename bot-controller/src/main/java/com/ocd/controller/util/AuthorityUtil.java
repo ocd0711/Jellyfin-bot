@@ -28,13 +28,14 @@ import java.util.*;
 public class AuthorityUtil {
 
     @Autowired
-    public AuthorityUtil(UserService userService, LineService lineService, InvitecodeService invitecodeService, InfoService infoService, HideMediaService hideMediaService, ShopService shopService) {
+    public AuthorityUtil(UserService userService, LineService lineService, InvitecodeService invitecodeService, InfoService infoService, HideMediaService hideMediaService, ShopService shopService, BotConfig botConfig) {
         AuthorityUtil.userService = userService;
         AuthorityUtil.lineService = lineService;
         AuthorityUtil.invitecodeService = invitecodeService;
         AuthorityUtil.infoService = infoService;
         AuthorityUtil.hideMediaService = hideMediaService;
         AuthorityUtil.shopService = shopService;
+        AuthorityUtil.botConfig = botConfig;
     }
 
     public static UserService userService;
@@ -52,6 +53,8 @@ public class AuthorityUtil {
     public static boolean openRegister = false;
 
     public static Integer accountCount = null;
+
+    public static BotConfig botConfig;
 
     public static String checkTgUser(User user) {
         String sendMessage = EmbyUtil.getInstance().checkServerHealth();
@@ -73,9 +76,9 @@ public class AuthorityUtil {
 
     public static String checkChatMember(long tgId, long chatId, TelegramClient telegramClient) {
         GetChatMember getChatMember = new GetChatMember(String.valueOf(chatId), tgId);
-        getChatMember.setChatId(BotConfig.getInstance().GROUP_ID);
+        getChatMember.setChatId(AuthorityUtil.botConfig.groupId);
         getChatMember.setUserId(tgId);
-        String out = "请先加入聊天群组和通知频道！\n" + "\n" + "公告频道：" + BotConfig.getInstance().CHANNEL + "\n" + "聊天吹水群：" + BotConfig.getInstance().GROUPNAME;
+        String out = "请先加入聊天群组和通知频道！\n" + "\n" + "公告频道：" + AuthorityUtil.botConfig.channel + "\n" + "聊天吹水群：" + AuthorityUtil.botConfig.groupName;
         try {
             ChatMember chatMember = telegramClient.execute(getChatMember);
             if (!ConstantStrings.INSTANCE.getGroupIn().contains(chatMember.getStatus()))
@@ -87,7 +90,7 @@ public class AuthorityUtil {
     }
 
     public static ChatMember checkChatMemberBean(long tgId, TelegramClient telegramClient) {
-        GetChatMember getChatMember = new GetChatMember(BotConfig.getInstance().GROUP_ID.toString(), tgId);
+        GetChatMember getChatMember = new GetChatMember(AuthorityUtil.botConfig.groupId.toString(), tgId);
         try {
             ChatMember chatMember = telegramClient.execute(getChatMember);
             return chatMember;
@@ -124,17 +127,17 @@ public class AuthorityUtil {
                         EmbyUtil.getInstance().deleteEmbyById(embyUserDto.getId());
 //                        sendMessage.setChatId(BotConfig.getInstance().CHANNEL);
 //                        sendMessage.setChatId(BotConfig.getInstance().GROUP_ID);
-                        sendMessage.setChatId(BotConfig.getInstance().NOTIFY_CHANNEL);
+                        sendMessage.setChatId(AuthorityUtil.botConfig.notifyChannel);
                         sendMessage.setText(String.format("#bot检查扬号: 观影账号 %s ( %s ) 已被扬, 原因: 未绑定 tg 用户", embyUserDto.getName(), embyUserDto.getId()));
                         telegramClient.execute(sendMessage);
                     } catch (TelegramApiException e) {
                         log.error(e.toString());
                     }
-                } else if (AuthorityUtil.checkChatMember(Long.parseLong(user.getTgId()), Long.parseLong(BotConfig.getInstance().GROUP_ID), telegramClient) != null) {
+                } else if (AuthorityUtil.checkChatMember(Long.parseLong(user.getTgId()), Long.parseLong(AuthorityUtil.botConfig.groupId), telegramClient) != null) {
                     try {
                         EmbyUtil.getInstance().deleteUser(user);
 //                        sendMessage.setChatId(BotConfig.getInstance().GROUP_ID);
-                        sendMessage.setChatId(BotConfig.getInstance().NOTIFY_CHANNEL);
+                        sendMessage.setChatId(AuthorityUtil.botConfig.notifyChannel);
                         sendMessage.setText(String.format("#bot检查扬号: 观影账号 %s ( %s ) 已被扬, 原因: %s 不在群内", embyUserDto.getName(), embyUserDto.getId(), user.getTgId()));
                         telegramClient.execute(sendMessage);
                     } catch (TelegramApiException e) {
@@ -160,8 +163,8 @@ public class AuthorityUtil {
                         List<PlaybackRecord> activityLogs = EmbyUtil.getInstance().getUserPlayback(user.getEmbyId());
                         if (activityLogs != null) {
                             Long betweenDay = activityLogs.isEmpty() ? null : DateUtil.betweenDay(activityLogs.get(0).getDateCreated(), new Date(), true);
-                            if (betweenDay == null || betweenDay >= BotConfig.getInstance().getEXPDAY()) {
-                                if (betweenDay == null || betweenDay >= BotConfig.getInstance().getEXPDAY() + 7) {
+                            if (betweenDay == null || betweenDay >= AuthorityUtil.botConfig.getExpDay()) {
+                                if (betweenDay == null || betweenDay >= AuthorityUtil.botConfig.getExpDay() + 7) {
                                     lastDate = FormatUtil.INSTANCE.dateToString(activityLogs.get(0).getDateCreated());
                                     EmbyUtil.getInstance().deleteUser(user);
                                     AuthorityUtil.userService.userMapper.updateById(user);
@@ -180,13 +183,13 @@ public class AuthorityUtil {
                     }
                     if (needSend) {
                         sendMessage.setChatId(user.getTgId());
-                        sendMessage.setText(user.getTgId() + " " + "最后观看时间:" + lastDate + " " + BotConfig.getInstance().getEXPDAY() + " 天未观看" + ((BotConfig.getInstance().getISDELETE() && !user.haveEmby()) ? "删除账户" : ("禁用账户" + (BotConfig.getInstance().getISDELETE() ? "(7 天内未解封删除用户)" : ""))));
+                        sendMessage.setText(user.getTgId() + " " + "最后观看时间:" + lastDate + " " + AuthorityUtil.botConfig.getExpDay() + " 天未观看" + ((AuthorityUtil.botConfig.getDelete() && !user.haveEmby()) ? "删除账户" : ("禁用账户" + (AuthorityUtil.botConfig.getDelete() ? "(7 天内未解封删除用户)" : ""))));
                         try {
                             telegramClient.execute(sendMessage);
                         } catch (TelegramApiException e) {
                             // nothing
                         } finally {
-                            sendMessage.setChatId(BotConfig.getInstance().NOTIFY_CHANNEL);
+                            sendMessage.setChatId(AuthorityUtil.botConfig.notifyChannel);
                             sendMessage.enableMarkdownV2(true);
                             sendMessage.setText(MessageUtil.INSTANCE.getAccountMessage(user, embyUserDto));
                             try {
@@ -269,10 +272,10 @@ public class AuthorityUtil {
 //            }
 //        });
         // 发送运行时间通知
-        sendMessage.setChatId(BotConfig.getInstance().GROUP_ID);
+        sendMessage.setChatId(AuthorityUtil.botConfig.groupId);
         List<Info> infos = infoService.infoMapper.selectList(null);
         sendMessage.setText(
-                String.format("欢迎来到" + BotConfig.getInstance().GROUP_NICK + " - 今日用户信息通知已发送完成\n活跃-%s 停用/待杀-%s" + (infos.isEmpty() ? "" : "\n" + infos.get(0).
+                String.format("欢迎来到" + AuthorityUtil.botConfig.groupNick + " - 今日用户信息通知已发送完成\n活跃-%s 停用/待杀-%s" + (infos.isEmpty() ? "" : "\n" + infos.get(0).
                                 getMessage()) + "\n%s",
                         AuthorityUtil.userService.userMapper.selectCount(
                                 new QueryWrapper<com.ocd.bean.mysql.User>().lambda().isNotNull(com.ocd.bean.mysql.User::getEmbyId)

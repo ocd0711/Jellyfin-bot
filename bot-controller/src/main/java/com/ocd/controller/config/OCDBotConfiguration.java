@@ -1,6 +1,7 @@
 package com.ocd.controller.config;
 
 import com.ocd.controller.updateshandlers.CommandsHandler;
+import com.ocd.controller.util.AuthorityUtil;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.telegram.telegrambots.longpolling.BotSession;
@@ -45,6 +46,6 @@ public class OCDBotConfiguration {
 
     @Bean
     public BotSession botSession(TelegramBotsLongPollingApplication botsApplication, CommandsHandler commandsHandler) throws TelegramApiException {
-        return botsApplication.registerBot(BotConfig.getInstance().COMMANDS_TOKEN, commandsHandler);
+        return botsApplication.registerBot(AuthorityUtil.botConfig.token, commandsHandler);
     }
 }

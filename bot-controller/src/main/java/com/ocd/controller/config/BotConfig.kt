@@ -1,8 +1,7 @@
 package com.ocd.controller.config
 
-import org.springframework.beans.factory.annotation.Value
+import org.springframework.boot.context.properties.ConfigurationProperties
 import org.springframework.stereotype.Component
-import javax.annotation.PostConstruct
 
 /**
  * @author OCD
@@ -11,58 +10,34 @@ import javax.annotation.PostConstruct
  * @date 2022/12/15 10:21
  */
 @Component
+@ConfigurationProperties(prefix = "bot")
 class BotConfig {
 
-    private object BotConfigUtilHoder {
-        @JvmStatic
-        var mInstance: BotConfig = BotConfig()
-    }
+    var jellyfin: Boolean = true
 
-    companion object {
-        @JvmStatic
-        fun getInstance(): BotConfig {
-            return BotConfigUtilHoder.mInstance
-        }
-    }
+    lateinit var groupNick: String
 
-    @PostConstruct
-    fun init() {
-        BotConfigUtilHoder.mInstance = this
-    }
+    lateinit var token: String
 
-    @Value("\${bot.token}")
-    lateinit var COMMANDS_TOKEN: String
+    lateinit var name: String
 
-    @Value("\${bot.name}")
-    lateinit var COMMANDS_USER: String
+    lateinit var groupId: String
 
-    @Value("\${bot.groupId}")
-    lateinit var GROUP_ID: String
+    lateinit var channel: String
 
-    @Value("\${bot.channel}")
-    lateinit var CHANNEL: String
+    lateinit var groupName: String
 
-    @Value("\${bot.groupName}")
-    lateinit var GROUPNAME: String
+    var unblockPoints: Int = 100
 
-    @Value("\${bot.unblockPoints}")
-    lateinit var UNBLOCKPOINTS: String
+    var expDay: Int = 14
 
-    @Value("\${bot.expDay}")
-    val EXPDAY: Int = 14
+    var delete: Boolean = false
 
-    @Value("\${bot.isDelete}")
-    val ISDELETE: Boolean = false
+    lateinit var notifyChannel: String
 
-    @Value("\${bot.notify_channel}")
-    lateinit var NOTIFY_CHANNEL: String
+    lateinit var wikiName: String
 
-    @Value("\${bot.group_nick}")
-    lateinit var GROUP_NICK: String
+    lateinit var wikiUrl: String
 
-    @Value("\${bot.head_photo}")
-    lateinit var HEAD_PHOTO: String
-
-    @Value("\${bot.is_jellyfin}")
-    val IS_JELLYGIN: Boolean = true
+    lateinit var headPhoto: String
 }

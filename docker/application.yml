@@ -1,3 +1,7 @@
+logging:
+  level:
+    root: info
+
 # spring配置
 spring:
   mail:
@@ -50,7 +54,7 @@ emby-jump: web/index.html#!/item?id=%s&serverId=%s
 
 bot:
   # 是否是 Jellyfin, false 为 Emby
-  is_jellyfin: true
+  jellyfin: true
   # 群组名称
   group_nick: xxxxxx
   # bot token
@@ -68,7 +72,7 @@ bot:
   # 过期检测天数
   expDay: 30
   # 是否删除账号
-  isDelete: true
+  delete: true
   # 账号通知频道 ID
   notify_channel: xxxxxx
   wikiName: 暂无 wiki

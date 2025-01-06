@@ -1,7 +1,6 @@
 package com.ocd.controller.task;
 
 import com.ocd.bean.dto.result.PlaybackShowsResult;
-import com.ocd.controller.config.BotConfig;
 import com.ocd.controller.util.AuthorityUtil;
 import com.ocd.controller.util.ChartUtil;
 import com.ocd.controller.util.EmbyUtil;
@@ -40,7 +39,7 @@ public class TimerTask {
     @Async("taskScheduler")
     @Scheduled(cron = "0 0 0 * * ?")
     public void embyTask() {
-        AuthorityUtil.cleanTask(new OkHttpTelegramClient(BotConfig.getInstance().COMMANDS_TOKEN));
+        AuthorityUtil.cleanTask(new OkHttpTelegramClient(AuthorityUtil.botConfig.token));
     }
 
     /**
@@ -66,8 +65,8 @@ public class TimerTask {
             for (int i = 0; i < 10; i++) {
                 stringBuilder.append(i + 1).append(". ").append(String.format("%s - %s&#10;", tvShows.get(i).getLabel(), tvShows.get(i).getCount()));
             }
-            TelegramClient telegramClient = new OkHttpTelegramClient(BotConfig.getInstance().COMMANDS_TOKEN);
-            SendPhoto sendPhoto = new SendPhoto(BotConfig.getInstance().GROUP_ID, MessageUtil.INSTANCE.getHeadImageAsInputFile());
+            TelegramClient telegramClient = new OkHttpTelegramClient(AuthorityUtil.botConfig.token);
+            SendPhoto sendPhoto = new SendPhoto(AuthorityUtil.botConfig.groupId, MessageUtil.INSTANCE.getHeadImageAsInputFile());
             sendPhoto.setParseMode("HTML");
             MessageUtil.INSTANCE.sendLongCaption(telegramClient, sendPhoto, stringBuilder.toString());
         } catch (Exception e) {
@@ -98,8 +97,8 @@ public class TimerTask {
             for (int i = 0; i < 10; i++) {
                 stringBuilder.append(i + 1).append(". ").append(String.format("%s - %s&#10;", tvShows.get(i).getLabel(), tvShows.get(i).getCount()));
             }
-            TelegramClient telegramClient = new OkHttpTelegramClient(BotConfig.getInstance().COMMANDS_TOKEN);
-            SendPhoto sendPhoto = new SendPhoto(BotConfig.getInstance().GROUP_ID, MessageUtil.INSTANCE.getHeadImageAsInputFile());
+            TelegramClient telegramClient = new OkHttpTelegramClient(AuthorityUtil.botConfig.token);
+            SendPhoto sendPhoto = new SendPhoto(AuthorityUtil.botConfig.groupId, MessageUtil.INSTANCE.getHeadImageAsInputFile());
             sendPhoto.setParseMode("HTML");
             MessageUtil.INSTANCE.sendLongCaption(telegramClient, sendPhoto, stringBuilder.toString());
         } catch (Exception e) {
@@ -123,8 +122,8 @@ public class TimerTask {
             for (int i = 0; i < 10; i++) {
                 stringBuilder.append(i + 1).append(". ").append(String.format("%s - %s&#10;", userShows.get(i).getLabel(), ChartUtil.INSTANCE.formatSecondsToTime(userShows.get(i).getTime())));
             }
-            TelegramClient telegramClient = new OkHttpTelegramClient(BotConfig.getInstance().COMMANDS_TOKEN);
-            SendPhoto sendPhoto = new SendPhoto(BotConfig.getInstance().GROUP_ID, MessageUtil.INSTANCE.getHeadImageAsInputFile());
+            TelegramClient telegramClient = new OkHttpTelegramClient(AuthorityUtil.botConfig.token);
+            SendPhoto sendPhoto = new SendPhoto(AuthorityUtil.botConfig.groupId, MessageUtil.INSTANCE.getHeadImageAsInputFile());
             sendPhoto.setParseMode("HTML");
             MessageUtil.INSTANCE.sendLongCaption(telegramClient, sendPhoto, stringBuilder.toString());
         } catch (Exception e) {
@@ -148,8 +147,8 @@ public class TimerTask {
             for (int i = 0; i < 10; i++) {
                 stringBuilder.append(i + 1).append(". ").append(String.format("%s - %s&#10;", userShows.get(i).getLabel(), ChartUtil.INSTANCE.formatSecondsToTime(userShows.get(i).getTime())));
             }
-            TelegramClient telegramClient = new OkHttpTelegramClient(BotConfig.getInstance().COMMANDS_TOKEN);
-            SendPhoto sendPhoto = new SendPhoto(BotConfig.getInstance().GROUP_ID, MessageUtil.INSTANCE.getHeadImageAsInputFile());
+            TelegramClient telegramClient = new OkHttpTelegramClient(AuthorityUtil.botConfig.token);
+            SendPhoto sendPhoto = new SendPhoto(AuthorityUtil.botConfig.groupId, MessageUtil.INSTANCE.getHeadImageAsInputFile());
             sendPhoto.setParseMode("HTML");
             MessageUtil.INSTANCE.sendLongCaption(telegramClient, sendPhoto, stringBuilder.toString());
         } catch (Exception e) {
@@ -173,8 +172,8 @@ public class TimerTask {
             for (int i = 0; i < deviceShows.size(); i++) {
                 stringBuilder.append(i + 1).append(". ").append(String.format("%s - %s&#10;", deviceShows.get(i).getLabel(), deviceShows.get(i).getCount()));
             }
-            TelegramClient telegramClient = new OkHttpTelegramClient(BotConfig.getInstance().COMMANDS_TOKEN);
-            SendPhoto sendPhoto = new SendPhoto(BotConfig.getInstance().GROUP_ID, ChartUtil.generatePieChartAsInputFile(deviceShows));
+            TelegramClient telegramClient = new OkHttpTelegramClient(AuthorityUtil.botConfig.token);
+            SendPhoto sendPhoto = new SendPhoto(AuthorityUtil.botConfig.groupId, ChartUtil.generatePieChartAsInputFile(deviceShows));
             sendPhoto.setParseMode("HTML");
             MessageUtil.INSTANCE.sendLongCaption(telegramClient, sendPhoto, stringBuilder.toString());
         } catch (Exception e) {

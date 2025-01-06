@@ -13,7 +13,6 @@ import com.ocd.controller.commands.OpenCommand;
 import com.ocd.controller.commands.StartCommand;
 import com.ocd.controller.commands.StatisticsCommand;
 import com.ocd.controller.commands.UserNotifyCommand;
-import com.ocd.controller.config.BotConfig;
 import com.ocd.controller.util.AuthorityUtil;
 import com.ocd.controller.util.EmbyUtil;
 import com.ocd.controller.util.MessageUtil;
@@ -290,7 +289,7 @@ public class CommandsHandler extends CommandLongPollingTelegramBot {
                                             Invitecode invitecode = new Invitecode(AuthorityUtil.invitecode(), 1);
                                             AuthorityUtil.invitecodeService.invitecodeMapper.insert(invitecode);
                                             SendMessage giftMessage = new SendMessage(userId.toString(), "");
-                                            giftMessage.setText("注册码: https://t.me/" + BotConfig.getInstance().COMMANDS_USER + "?start=" + invitecode.getInvitecode());
+                                            giftMessage.setText("注册码: https://t.me/" + AuthorityUtil.botConfig.name + "?start=" + invitecode.getInvitecode());
                                             try {
                                                 telegramClient.execute(giftMessage);
                                             } catch (TelegramApiException e) {
@@ -313,7 +312,7 @@ public class CommandsHandler extends CommandLongPollingTelegramBot {
                                             Invitecode invitecode = new Invitecode(AuthorityUtil.invitecode(), 0);
                                             AuthorityUtil.invitecodeService.invitecodeMapper.insert(invitecode);
                                             SendMessage giftMessage = new SendMessage(userId.toString(), "");
-                                            giftMessage.setText("♾️: https://t.me/" + BotConfig.getInstance().COMMANDS_USER + "?start=" + invitecode.getInvitecode());
+                                            giftMessage.setText("♾️: https://t.me/" + AuthorityUtil.botConfig.name + "?start=" + invitecode.getInvitecode());
                                             try {
                                                 telegramClient.execute(giftMessage);
                                             } catch (TelegramApiException e) {
@@ -377,7 +376,7 @@ public class CommandsHandler extends CommandLongPollingTelegramBot {
                                         case "line":
                                             StringBuilder editCaptionLine = new StringBuilder();
                                             if (cacheUser == null)
-                                                editCaptionLine.append("不是" + BotConfig.getInstance().GROUP_NICK + "用户!");
+                                                editCaptionLine.append("不是" + AuthorityUtil.botConfig.groupNick + "用户!");
                                             else if (!cacheUser.haveEmby()) {
                                                 editCaptionLine.append("无账号无法查看");
                                             } else if (cacheUser.getDeactivate()) {
@@ -389,7 +388,7 @@ public class CommandsHandler extends CommandLongPollingTelegramBot {
                                                     lines.forEach(line -> stringBuffer.append(String.format(ConstantStrings.INSTANCE.getLineStr(), line.getMessage(), line.getIp(), line.getPort(), EmbyUtil.getInstance().checkUrl(line) ? "✅" : "❌")));
                                                     stringBuffer.append("\n").append(MessageUtil.INSTANCE.getServerStats());
                                                 } else
-                                                    stringBuffer.append("无'" + BotConfig.getInstance().GROUP_NICK + "'账号\n");
+                                                    stringBuffer.append("无'" + AuthorityUtil.botConfig.groupNick + "'账号\n");
                                                 editCaptionLine.append(stringBuffer);
                                             }
                                             editMessageCaption.setCaption(editCaptionLine.toString());
@@ -397,7 +396,7 @@ public class CommandsHandler extends CommandLongPollingTelegramBot {
                                         case "hide":
                                             StringBuilder editCaptionHide = new StringBuilder();
                                             if (cacheUser == null)
-                                                editCaptionHide.append("不是" + BotConfig.getInstance().GROUP_NICK + "用户!");
+                                                editCaptionHide.append("不是" + AuthorityUtil.botConfig.groupNick + "用户!");
                                             else if (!cacheUser.haveEmby() || cacheUser.getDeactivate()) {
                                                 editCaptionHide.append("无账号无法操作");
                                             } else {
@@ -408,7 +407,7 @@ public class CommandsHandler extends CommandLongPollingTelegramBot {
                                         case "device":
                                             StringBuilder editCaptionDevice = new StringBuilder();
                                             if (cacheUser == null)
-                                                editCaptionDevice.append("不是" + BotConfig.getInstance().GROUP_NICK + "用户!");
+                                                editCaptionDevice.append("不是" + AuthorityUtil.botConfig.groupNick + "用户!");
                                             else if (!cacheUser.haveEmby() || cacheUser.getDeactivate()) {
                                                 editCaptionDevice.append("无账号无法操作");
                                             } else {
@@ -466,9 +465,9 @@ public class CommandsHandler extends CommandLongPollingTelegramBot {
                                                     EmbyUtil.getInstance().deactivateUser(cacheUser, false);
                                                     editMessageCaption.setCaption(MessageUtil.INSTANCE.getUserInfo(embyUserDtoUnblock, cacheUser) + "\n周五大赦天下 - 解除");
                                                 } else {
-                                                    if (cacheUser.getPoints() >= Integer.parseInt(BotConfig.getInstance().UNBLOCKPOINTS)) {
+                                                    if (cacheUser.getPoints() >= AuthorityUtil.botConfig.getUnblockPoints()) {
                                                         EmbyUtil.getInstance().deactivateUser(cacheUser, false);
-                                                        cacheUser.setPoints(cacheUser.getPoints() - Integer.parseInt(BotConfig.getInstance().UNBLOCKPOINTS));
+                                                        cacheUser.setPoints(cacheUser.getPoints() - AuthorityUtil.botConfig.getUnblockPoints());
                                                         AuthorityUtil.userService.userMapper.updateById(cacheUser);
                                                     } else {
                                                         editMessageCaption.setCaption("非周五无法解封/积分不足");
@@ -646,7 +645,7 @@ public class CommandsHandler extends CommandLongPollingTelegramBot {
             if (update.getChatMember() != null) {
 //                log.info("入群/退群: {}", JSON.toJSONString(update));
                 // 入群/退群 操作 Start
-                if (StringUtils.equals(update.getChatMember().getChat().getId().toString(), BotConfig.getInstance().GROUP_ID)) {
+                if (StringUtils.equals(update.getChatMember().getChat().getId().toString(), AuthorityUtil.botConfig.groupId)) {
                     if (update.getChatMember().getNewChatMember() != null) {
                         Chat userChat = update.getChatMember().getChat();
                         User myChatMemberUser = update.getChatMember().getNewChatMember().getUser();
@@ -665,7 +664,7 @@ public class CommandsHandler extends CommandLongPollingTelegramBot {
                                         AuthorityUtil.userService.userMapper.updateById(groupUserCache);
                                         SendMessage sendMessageRequestBan = new SendMessage(userChat.getId().toString(), "");
                                         sendMessageRequestBan.enableMarkdownV2(true);
-                                        sendMessageRequestBan.setText("离开" + BotConfig.getInstance().GROUP_NICK + " " + "[" + MessageUtil.INSTANCE.escapeMarkdownV2(myChatMemberUser.getFirstName()) + "]" + "(tg://user?id=" + myChatMemberUser.getId() + ")" + " 已永封, 一路走好");
+                                        sendMessageRequestBan.setText("离开" + AuthorityUtil.botConfig.groupNick + " " + "[" + MessageUtil.INSTANCE.escapeMarkdownV2(myChatMemberUser.getFirstName()) + "]" + "(tg://user?id=" + myChatMemberUser.getId() + ")" + " 已永封, 一路走好");
                                         EmbyUtil.getInstance().deleteUser(groupUserCache);
                                         BanChatMember banChatMember = new BanChatMember(userChat.getId().toString(), myChatMemberUser.getId());
                                         banChatMember.setUntilDateInstant(DateUtil.offsetMonth(new Date(), 24).toInstant());
@@ -686,7 +685,7 @@ public class CommandsHandler extends CommandLongPollingTelegramBot {
                                     AuthorityUtil.userService.createUser(groupUserCache);
                                     SendMessage sendMessageRequestJoin = new SendMessage(userChat.getId().toString(), "");
                                     sendMessageRequestJoin.enableMarkdownV2(true);
-                                    sendMessageRequestJoin.setText("欢迎来到" + BotConfig.getInstance().GROUP_NICK + " " + "[" + MessageUtil.INSTANCE.escapeMarkdownV2(myChatMemberUser.getFirstName()) + "]" + "(tg://user?id=" + myChatMemberUser.getId() + ")" + " 记得去 @" + BotConfig.getInstance().COMMANDS_USER + " 启用 bot");
+                                    sendMessageRequestJoin.setText("欢迎来到" + AuthorityUtil.botConfig.groupNick + " " + "[" + MessageUtil.INSTANCE.escapeMarkdownV2(myChatMemberUser.getFirstName()) + "]" + "(tg://user?id=" + myChatMemberUser.getId() + ")" + " 记得去 @" + AuthorityUtil.botConfig.name + " 启用 bot");
                                     try {
                                         telegramClient.execute(sendMessageRequestJoin);
                                     } catch (TelegramApiException e) {
@@ -721,8 +720,8 @@ public class CommandsHandler extends CommandLongPollingTelegramBot {
 
 
                         InlineKeyboardRow rowLine1 = new InlineKeyboardRow();
-                        InlineKeyboardButton wiki = new InlineKeyboardButton("✳️ 暂无 WIKI 占位");
-                        wiki.setUrl("https://ocdlive.com");
+                        InlineKeyboardButton wiki = new InlineKeyboardButton(AuthorityUtil.botConfig.wikiName);
+                        wiki.setUrl(AuthorityUtil.botConfig.wikiUrl);
                         rowLine1.add(wiki);
                         rows.add(rowLine1);
                         inlineKeyboardMarkup.setKeyboard(rows);
@@ -732,7 +731,7 @@ public class CommandsHandler extends CommandLongPollingTelegramBot {
                         } catch (TelegramApiException e) {
                             throw new RuntimeException(e);
                         }
-                    } else if (message.getText().contains(BotConfig.getInstance().GROUP_NICK)) {
+                    } else if (message.getText().contains(AuthorityUtil.botConfig.groupNick)) {
                         SendMessage sendMessageRequest = new SendMessage(message.getChatId().toString(), "");
                         if (message.isTopicMessage())
                             sendMessageRequest.setMessageThreadId(message.getMessageThreadId());
@@ -762,7 +761,7 @@ public class CommandsHandler extends CommandLongPollingTelegramBot {
                             String[] messageDatas = messageData.split(" ");
                             String content = messageData.replace(messageDatas[0] + " ", "");
                             if (messageDatas[0].equals("channel")) {
-                                SendMessage sendMessage = new SendMessage(BotConfig.getInstance().CHANNEL, "");
+                                SendMessage sendMessage = new SendMessage(AuthorityUtil.botConfig.channel, "");
                                 sendMessage.setText(content);
                                 List<InlineKeyboardRow> rows = new ArrayList<>();
                                 InlineKeyboardMarkup inlineKeyboardMarkup = new InlineKeyboardMarkup(rows);
@@ -786,7 +785,7 @@ public class CommandsHandler extends CommandLongPollingTelegramBot {
                                 if (cacheUser == null) {
                                     outString = "无此用户";
                                 } else {
-                                    GetChatMember getChatMember = new GetChatMember(BotConfig.getInstance().GROUP_ID, Long.parseLong(cacheUser.getTgId()));
+                                    GetChatMember getChatMember = new GetChatMember(AuthorityUtil.botConfig.groupId, Long.parseLong(cacheUser.getTgId()));
                                     try {
                                         chatMember = telegramClient.execute(getChatMember);
                                         outString = id(cacheUser, chatMember.getUser(), deleteMessage, outString, sendMessageRequest, message);
@@ -802,7 +801,7 @@ public class CommandsHandler extends CommandLongPollingTelegramBot {
                                     if (cacheUser == null) {
                                         outString = "无此用户";
                                     } else {
-                                        GetChatMember getChatMember = new GetChatMember(BotConfig.getInstance().GROUP_ID, Long.parseLong(cacheUser.getTgId()));
+                                        GetChatMember getChatMember = new GetChatMember(AuthorityUtil.botConfig.groupId, Long.parseLong(cacheUser.getTgId()));
                                         try {
                                             chatMember = telegramClient.execute(getChatMember);
                                             outString = id(cacheUser, chatMember.getUser(), deleteMessage, outString, sendMessageRequest, message);
@@ -822,7 +821,7 @@ public class CommandsHandler extends CommandLongPollingTelegramBot {
                                         Integer dateOffset = Integer.valueOf(inviteParams[1]);
                                         Integer forward = Integer.valueOf(inviteParams[2]);
                                         // 多用户邀请/是否发送群组
-                                        CreateChatInviteLink createChatInviteLink = new CreateChatInviteLink(BotConfig.getInstance().GROUP_ID);
+                                        CreateChatInviteLink createChatInviteLink = new CreateChatInviteLink(AuthorityUtil.botConfig.groupId);
                                         createChatInviteLink.setMemberLimit(num);
                                         Date date = DateUtil.endOfDay(DateUtil.offsetDay(new Date(), dateOffset));
                                         createChatInviteLink.setExpireDate((int) (date.getTime() / 1000));
@@ -848,7 +847,7 @@ public class CommandsHandler extends CommandLongPollingTelegramBot {
                                         Integer dateOffset = Integer.valueOf(inviteParams[1]);
                                         Integer forward = Integer.valueOf(inviteParams[2]);
                                         // 多用户邀请/是否发送群组
-                                        CreateChatInviteLink createChatInviteLink = new CreateChatInviteLink(BotConfig.getInstance().GROUP_ID);
+                                        CreateChatInviteLink createChatInviteLink = new CreateChatInviteLink(AuthorityUtil.botConfig.groupId);
                                         createChatInviteLink.setMemberLimit(num);
                                         Date date = DateUtil.offsetHour(new Date(), dateOffset);
                                         createChatInviteLink.setExpireDate((int) (date.getTime() / 1000));
@@ -872,7 +871,7 @@ public class CommandsHandler extends CommandLongPollingTelegramBot {
                         try {
                             Message messageEnd = telegramClient.execute(sendMessageRequest);
                             if (needForward) {
-                                ForwardMessage forwardMessage = new ForwardMessage(BotConfig.getInstance().CHANNEL, messageEnd.getChatId().toString(), messageEnd.getMessageId());
+                                ForwardMessage forwardMessage = new ForwardMessage(AuthorityUtil.botConfig.channel, messageEnd.getChatId().toString(), messageEnd.getMessageId());
                                 telegramClient.execute(forwardMessage);
                             }
                         } catch (TelegramApiException e) {
@@ -948,14 +947,14 @@ public class CommandsHandler extends CommandLongPollingTelegramBot {
                                             if (embyUserResult == null || StringUtils.isBlank(embyUserResult.getId()))
                                                 outDoing = "校验失败, 请确认账号密码";
                                             else if (operatorsUser.haveEmby())
-                                                outDoing = "已有" + BotConfig.getInstance().GROUP_NICK + "账号, 无需重复绑定";
+                                                outDoing = "已有" + AuthorityUtil.botConfig.groupNick + "账号, 无需重复绑定";
                                             else if (AuthorityUtil.userService.userMapper.exists(new QueryWrapper<com.ocd.bean.mysql.User>().lambda().eq(com.ocd.bean.mysql.User::getEmbyName, embyUsername).ne(com.ocd.bean.mysql.User::getTgId, operatorsUser.getTgId()))) {
                                                 outDoing = "此账号已被他人绑定, 换绑申请已发群内, 联系管理处理";
                                                 MessageUtil.INSTANCE.sendChangeBindMessage(telegramClient, operatorsUser, embyUsername);
                                             } else {
                                                 operatorsUser.updateEmbyByEmbyUser(embyUserResult);
                                                 AuthorityUtil.userService.userMapper.updateById(operatorsUser);
-                                                outDoing = "成功绑定" + BotConfig.getInstance().GROUP_NICK + ", /start 操纵面板";
+                                                outDoing = "成功绑定" + AuthorityUtil.botConfig.groupNick + ", /start 操纵面板";
                                             }
                                         }
                                         break;
@@ -1001,7 +1000,7 @@ public class CommandsHandler extends CommandLongPollingTelegramBot {
                                                         for (int i = 0; i < count; i++) {
                                                             Invitecode invitecode = new Invitecode(AuthorityUtil.invitecode(), shop.getMonth());
                                                             AuthorityUtil.invitecodeService.invitecodeMapper.insert(invitecode);
-                                                            cacheString.append("生成邀请链接(" + (shop.getMonth() == 0 ? "♾️" : "注册码") + ")  " + " https://t.me/" + BotConfig.getInstance().COMMANDS_USER + "?start=" + invitecode.getInvitecode() + "\n");
+                                                            cacheString.append("生成邀请链接(" + (shop.getMonth() == 0 ? "♾️" : "注册码") + ")  " + " https://t.me/" + AuthorityUtil.botConfig.name + "?start=" + invitecode.getInvitecode() + "\n");
                                                         }
                                                         outDoing = cacheString.toString();
                                                     }
@@ -1025,7 +1024,7 @@ public class CommandsHandler extends CommandLongPollingTelegramBot {
                             } catch (TelegramApiException ignored) {
                             }
                         }
-                    } else if (message.isReply() && BotConfig.getInstance().COMMANDS_TOKEN.contains(message.getReplyToMessage().getFrom().getId().toString())) {
+                    } else if (message.isReply() && AuthorityUtil.botConfig.token.contains(message.getReplyToMessage().getFrom().getId().toString())) {
                         // 随便聊天的 api
                         SendMessage sendMessageRequest = new SendMessage(message.getChatId().toString(), "");
                         if (message.isTopicMessage())

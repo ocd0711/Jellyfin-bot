@@ -9,7 +9,6 @@ import com.ocd.bean.dto.result.*
 import com.ocd.bean.mysql.HideMedia
 import com.ocd.bean.mysql.Line
 import com.ocd.bean.mysql.User
-import com.ocd.controller.config.BotConfig
 import com.ocd.util.HttpUtil
 import org.apache.commons.lang3.StringUtils
 import org.springframework.beans.factory.annotation.Value
@@ -80,9 +79,9 @@ class EmbyUtil {
         var status: StringBuilder = StringBuilder()
         try {
             HttpUtil.getInstance().restTemplate().getForObject(url, String::class.java)
-            status.append("${BotConfig.getInstance().GROUP_NICK}: 正常")
+            status.append("${AuthorityUtil.botConfig.groupNick}: 正常")
         } catch (e: Exception) {
-            status.append("${BotConfig.getInstance().GROUP_NICK}: 异常")
+            status.append("${AuthorityUtil.botConfig.groupNick}: 异常")
         }
         return status.toString()
     }
@@ -168,7 +167,7 @@ class EmbyUtil {
             }
             val entity = HttpEntity(map, headers)
             val uri =
-                UriComponentsBuilder.fromHttpUrl(if (BotConfig.getInstance().IS_JELLYGIN) "${url}Users/Password" else "${url}Users/${user.embyId}/Password")
+                UriComponentsBuilder.fromHttpUrl(if (AuthorityUtil.botConfig.jellyfin) "${url}Users/Password" else "${url}Users/${user.embyId}/Password")
                     .queryParam("userId", user.embyId)
             val response = HttpUtil.getInstance()
                 .restTemplate()
@@ -268,7 +267,7 @@ class EmbyUtil {
             map["MaxActiveSessions"] = 3
             map["RemoteClientBitrateLimit"] = 80000000
             map["SyncPlayAccess"] = "None"
-            if (!BotConfig.getInstance().IS_JELLYGIN) {
+            if (!AuthorityUtil.botConfig.jellyfin) {
                 map["IsHidden"] = true
                 map["IsHiddenFromUnusedDevices"] = true
                 map["EnableSyncTranscoding"] = false
@@ -313,7 +312,7 @@ class EmbyUtil {
             map["RemoteClientBitrateLimit"] = 80000000
             map["SyncPlayAccess"] = "None"
             map["IsAdministrator"] = user.superAdmin
-            if (!BotConfig.getInstance().IS_JELLYGIN) {
+            if (!AuthorityUtil.botConfig.jellyfin) {
                 map["IsHidden"] = true
                 map["IsHiddenFromUnusedDevices"] = true
                 map["EnableSyncTranscoding"] = false
@@ -357,7 +356,7 @@ class EmbyUtil {
             map["MaxActiveSessions"] = 3
             map["RemoteClientBitrateLimit"] = 80000000
             map["SyncPlayAccess"] = "None"
-            if (!BotConfig.getInstance().IS_JELLYGIN) {
+            if (!AuthorityUtil.botConfig.jellyfin) {
                 map["IsHidden"] = true
                 map["IsHiddenFromUnusedDevices"] = true
                 map["EnableSyncTranscoding"] = false
@@ -398,7 +397,7 @@ class EmbyUtil {
                 user,
                 user.hideMedia,
                 embyMediaFoldersDtos.filter { embyMediaFoldersDto -> !hideMediaList.contains(embyMediaFoldersDto.name) }
-                    .stream().map { (if (BotConfig.getInstance().IS_JELLYGIN) it.id else it.guid) }
+                    .stream().map { (if (AuthorityUtil.botConfig.jellyfin) it.id else it.guid) }
                     .collect(Collectors.toList())
             )
 
@@ -522,7 +521,7 @@ class EmbyUtil {
             }
             val entity = HttpEntity<String>(headers)
             val uri =
-                UriComponentsBuilder.fromHttpUrl(if (BotConfig.getInstance().IS_JELLYGIN) "${url}Devices?userId=$embyId" else "${url}Devices")
+                UriComponentsBuilder.fromHttpUrl(if (AuthorityUtil.botConfig.jellyfin) "${url}Devices?userId=$embyId" else "${url}Devices")
             val response = HttpUtil.getInstance()
                 .restTemplate()
                 .exchange(

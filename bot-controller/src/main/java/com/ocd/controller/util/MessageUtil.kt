@@ -3,7 +3,6 @@ package com.ocd.controller.util
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper
 import com.isen.bean.constant.ConstantStrings
 import com.ocd.bean.dto.result.EmbyUserResult
-import com.ocd.controller.config.BotConfig
 import com.ocd.util.FormatUtil
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
@@ -254,7 +253,7 @@ object MessageUtil {
 🚪 开放注册状态: %s
 👤 用户总数: %s
 🏖️ 活跃: %s
-👻 ${if (BotConfig.getInstance().ISDELETE) "待杀(七天内)" else "停用"}: %s
+👻 ${if (AuthorityUtil.botConfig.delete) "待杀(七天内)" else "停用"}: %s
 💨 允许注册数: %s
 
 🍉你好鸭 %s 请选择功能${if (isFlush) "(用户状态已刷新)" else ""}👇
@@ -370,7 +369,7 @@ object MessageUtil {
                     "超管: ${cacheUser.superAdmin}\n" +
                     "管理: ${cacheUser.admin}\n" +
                     "部分分类状态: ${if (cacheUser.hideMedia) "隐藏" else "显示"}\n" +
-                    BotConfig.getInstance().GROUP_NICK + " 启用状态: ${if (embyUserDto == null || !cacheUser.haveEmby()) "无号" else (if (cacheUser.deactivate) "过期停用" else "正常")}\n" +
+                    AuthorityUtil.botConfig.groupNick + " 启用状态: ${if (embyUserDto == null || !cacheUser.haveEmby()) "无号" else (if (cacheUser.deactivate) "过期停用" else "正常")}\n" +
                     "bot 绑定时间: ${FormatUtil.dateToString(cacheUser.createTime)}\n" +
                     "最后登录时间: ${
                         if (embyUserDto == null || !cacheUser.haveEmby()) "无号" else FormatUtil.formatOtherStringTimeToDateStr(
@@ -386,9 +385,9 @@ object MessageUtil {
                     "积分: ${cacheUser.points}\n"
         if (isManage)
             out = out + "登录设备数量: ${EmbyUtil.getInstance().viewingEquipment(cacheUser.embyId).size}\n"
-        out = out + (if (BotConfig.getInstance().ISDELETE)
-            "保号规则: ${if (cacheUser.userType == 2) "白名单 ♾️" else "${BotConfig.getInstance().EXPDAY} 天内有观看记录(无记录删号)"}"
-        else "保号规则: ${if (cacheUser.userType == 2) "白名单 ♾️" else "${BotConfig.getInstance().EXPDAY} 天内有观看记录(每周五自助解封/${BotConfig.getInstance().UNBLOCKPOINTS} 积分解封)"}")
+        out = out + (if (AuthorityUtil.botConfig.delete)
+            "保号规则: ${if (cacheUser.userType == 2) "白名单 ♾️" else "${AuthorityUtil.botConfig.expDay} 天内有观看记录(无记录删号)"}"
+        else "保号规则: ${if (cacheUser.userType == 2) "白名单 ♾️" else "${AuthorityUtil.botConfig.expDay} 天内有观看记录(每周五自助解封/${AuthorityUtil.botConfig.unblockPoints} 积分解封)"}")
         return out
     }
 
@@ -414,12 +413,12 @@ object MessageUtil {
     }
 
     fun getAccountMessage(user: com.ocd.bean.mysql.User, embyUser: EmbyUserResult?): String {
-        val action = if (BotConfig.getInstance().ISDELETE && !user.haveEmby()) {
+        val action = if (AuthorityUtil.botConfig.delete && !user.haveEmby()) {
             "删除账户"
         } else {
-            "禁用账户" + if (BotConfig.getInstance().ISDELETE) "(7 天内未解封删除用户)" else ""
+            "禁用账户" + if (AuthorityUtil.botConfig.delete) "(7 天内未解封删除用户)" else ""
         }
-        val returnStr = escapeMarkdownV2("#ACCOUNT ${BotConfig.getInstance().EXPDAY} 天未观看 $action")
+        val returnStr = escapeMarkdownV2("#ACCOUNT ${AuthorityUtil.botConfig.expDay} 天未观看 $action")
 
         val embyName = escapeMarkdownV2(embyUser?.name ?: "Unknown User")
         val embyId = escapeMarkdownV2(embyUser?.id ?: "N/A")
@@ -454,7 +453,7 @@ $returnStr
     }
 
     @JvmOverloads
-    fun getHeadImageAsInputFile(imagePath: String? = BotConfig.getInstance().HEAD_PHOTO): InputFile {
+    fun getHeadImageAsInputFile(imagePath: String? = AuthorityUtil.botConfig.headPhoto): InputFile {
         val imageInputStream: InputStream
 
         if (imagePath != null && File(imagePath).exists()) {
@@ -488,7 +487,7 @@ $returnStr
         embyName: String
     ) {
         val sendMessage = SendMessage(
-            BotConfig.getInstance().GROUP_ID, "用户: [${user.tgId}](tg://user?id=${user.tgId})\n" +
+            AuthorityUtil.botConfig.groupId, "用户: [${user.tgId}](tg://user?id=${user.tgId})\n" +
                     "处理结果: 更换绑定账户 $embyName\n" +
                     "管理信息: \\#changeBind"
         )

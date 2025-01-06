@@ -3,7 +3,6 @@ package com.ocd.controller.commands;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.isen.bean.constant.ConstantStrings;
 import com.ocd.bean.mysql.Invitecode;
-import com.ocd.controller.config.BotConfig;
 import com.ocd.controller.util.AuthorityUtil;
 import com.ocd.controller.util.EmbyUtil;
 import com.ocd.controller.util.MessageUtil;
@@ -14,7 +13,6 @@ import org.telegram.telegrambots.extensions.bots.commandbot.commands.IBotCommand
 import org.telegram.telegrambots.extensions.bots.commandbot.commands.ICommandRegistry;
 import org.telegram.telegrambots.meta.api.methods.commands.SetMyCommands;
 import org.telegram.telegrambots.meta.api.methods.send.SendPhoto;
-import org.telegram.telegrambots.meta.api.objects.InputFile;
 import org.telegram.telegrambots.meta.api.objects.User;
 import org.telegram.telegrambots.meta.api.objects.chat.Chat;
 import org.telegram.telegrambots.meta.exceptions.TelegramApiException;
@@ -114,7 +112,7 @@ public class StartCommand extends BotCommand {
                 else if (invitecode.getUsed()) sendPhotoRequest.setCaption("邀请码已被使用");
                 else if (sqlUser.haveEmby()) {
                     if (sqlUser.getUserType() == 2) {
-                        sendPhotoRequest.setCaption("已是 " + BotConfig.getInstance().GROUP_NICK + " ♾️ 用户, 无需续期/兑换");
+                        sendPhotoRequest.setCaption("已是 " + AuthorityUtil.botConfig.groupNick + " ♾️ 用户, 无需续期/兑换");
                     } else {
                         if (invitecode.getMonth() == 0) sqlUser.setUserType(2);
                         else sqlUser.setUserType(1);
