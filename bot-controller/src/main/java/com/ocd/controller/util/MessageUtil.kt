@@ -362,7 +362,7 @@ object MessageUtil {
     ): String {
         val activityLog = embyUserDto?.let {
             val playbackRecords = EmbyUtil.getInstance().getUserPlayback(cacheUser.embyId)
-            playbackRecords.firstOrNull()?.dateCreated
+            playbackRecords?.firstOrNull()?.dateCreated
         }
         var out =
             "用户名称: ${if (embyUserDto == null || cacheUser.getEmbyName() == null) "无号" else cacheUser.getEmbyName()}\n" +

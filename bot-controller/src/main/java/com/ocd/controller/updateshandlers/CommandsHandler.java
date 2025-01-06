@@ -67,7 +67,7 @@ import java.util.*;
 public class CommandsHandler extends CommandLongPollingTelegramBot {
 
     private final LineService lineService;
-    List<String> userButtons = Arrays.asList("info", "main", "line", "invite", "openRegister", "bind", "create", "reset", "hide", "unblock", "checkin", "device", "logout", "shop", "flush");
+    List<String> userButtons = Arrays.asList("info", "main", "line", "openRegister", "bind", "create", "reset", "hide", "unblock", "checkin", "device", "logout", "shop", "flush");
 
     /**
      * Constructor.

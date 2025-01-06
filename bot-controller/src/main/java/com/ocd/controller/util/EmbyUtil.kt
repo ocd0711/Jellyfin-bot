@@ -695,7 +695,7 @@ class EmbyUtil {
     }
 
     @JvmOverloads
-    fun getUserPlayback(embyId: String, limitCount: Int? = 1): List<PlaybackRecord> {
+    fun getUserPlayback(embyId: String, limitCount: Int? = 1): List<PlaybackRecord>? {
         try {
             val headers = HttpHeaders().apply {
                 set("X-Emby-Token", apikey)
@@ -715,10 +715,12 @@ class EmbyUtil {
                     entity,
                     String::class.java
                 )
+            if (response.statusCode != HttpStatus.OK && response.statusCode != HttpStatus.NO_CONTENT)
+                return null
             val playbackData = JSON.parseObject(response.body, PlaybackData::class.java)
             return playbackData.mapResultsToPlaybackRecords()
         } catch (e: Exception) {
-            return emptyList()
+            return null
         }
     }
 }

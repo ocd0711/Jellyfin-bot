@@ -154,28 +154,32 @@ public class AuthorityUtil {
 //                        }
 //                    } else {
                     boolean needSend = false;
+                    String lastDate = "";
                     try {
                         List<PlaybackRecord> activityLogs = EmbyUtil.getInstance().getUserPlayback(user.getEmbyId());
-                        Long betweenDay = activityLogs.isEmpty() ? null : DateUtil.betweenDay(activityLogs.get(0).getDateCreated(), new Date(), true);
-                        if (betweenDay == null || betweenDay >= BotConfig.getInstance().getEXPDAY()) {
-                            if (betweenDay == null || betweenDay >= BotConfig.getInstance().getEXPDAY() + 7) {
-                                EmbyUtil.getInstance().deleteUser(user);
-                                AuthorityUtil.userService.userMapper.updateById(user);
-                                needSend = true;
+                        if (activityLogs != null) {
+                            Long betweenDay = activityLogs.isEmpty() ? null : DateUtil.betweenDay(activityLogs.get(0).getDateCreated(), new Date(), true);
+                            if (betweenDay == null || betweenDay >= BotConfig.getInstance().getEXPDAY()) {
+                                if (betweenDay == null || betweenDay >= BotConfig.getInstance().getEXPDAY() + 7) {
+                                    lastDate = activityLogs.get(0).getDateCreated().toString();
+                                    EmbyUtil.getInstance().deleteUser(user);
+                                    AuthorityUtil.userService.userMapper.updateById(user);
+                                    needSend = true;
+                                } else {
+                                    boolean cache = user.getDeactivate();
+                                    EmbyUtil.getInstance().deactivateUser(user, true);
+                                    needSend = !cache;
+                                }
                             } else {
-                                boolean cache = user.getDeactivate();
-                                EmbyUtil.getInstance().deactivateUser(user, true);
-                                needSend = !cache;
+                                user.setUserType(1);
+                                EmbyUtil.getInstance().deactivateUser(user, false);
                             }
-                        } else {
-                            user.setUserType(1);
-                            EmbyUtil.getInstance().deactivateUser(user, false);
                         }
-                    } catch (Exception e) {
+                    } catch (Exception ignored) {
                     }
                     if (needSend) {
                         sendMessage.setChatId(user.getTgId());
-                        sendMessage.setText(BotConfig.getInstance().getEXPDAY() + " 天未观看" + ((BotConfig.getInstance().getISDELETE() && !user.haveEmby()) ? "删除账户" : ("禁用账户" + (BotConfig.getInstance().getISDELETE() ? "(7 天内未解封删除用户)" : ""))));
+                        sendMessage.setText(user.getTgId() + " " + "最后观看时间:" + lastDate + " " + BotConfig.getInstance().getEXPDAY() + " 天未观看" + ((BotConfig.getInstance().getISDELETE() && !user.haveEmby()) ? "删除账户" : ("禁用账户" + (BotConfig.getInstance().getISDELETE() ? "(7 天内未解封删除用户)" : ""))));
                         try {
                             telegramClient.execute(sendMessage);
                         } catch (TelegramApiException e) {
