@@ -387,6 +387,7 @@ public class CommandsHandler extends CommandLongPollingTelegramBot {
                                                 if (cacheUser.haveEmby()) {
                                                     lines.forEach(line -> stringBuffer.append(String.format(ConstantStrings.INSTANCE.getLineStr(), line.getMessage(), line.getIp(), line.getPort(), EmbyUtil.getInstance().checkUrl(line) ? "✅" : "❌")));
                                                     stringBuffer.append("\n").append(MessageUtil.INSTANCE.getServerStats());
+                                                    stringBuffer.append("\n").append(EmbyUtil.getInstance().LibraryCountStr());
                                                 } else
                                                     stringBuffer.append("无'" + AuthorityUtil.botConfig.groupNick + "'账号\n");
                                                 editCaptionLine.append(stringBuffer);
