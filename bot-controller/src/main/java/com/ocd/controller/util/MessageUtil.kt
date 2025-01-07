@@ -487,9 +487,12 @@ $returnStr
         user: com.ocd.bean.mysql.User,
         embyName: String
     ) {
+        val oldUser = AuthorityUtil.userService.userMapper.selectOne(
+            QueryWrapper<com.ocd.bean.mysql.User>().lambda().eq(com.ocd.bean.mysql.User::getEmbyName, embyName)
+        )
         val sendMessage = SendMessage(
             AuthorityUtil.botConfig.groupId, "用户: [${user.tgId}](tg://user?id=${user.tgId})\n" +
-                    "处理结果: 更换绑定账户 $embyName\n" +
+                    "处理结果: 更换绑定账户 $embyName ${escapeMarkdownV2("${user.tgId} -> ${oldUser.tgId}")}\n" +
                     "管理信息: \\#changeBind"
         )
         sendMessage.enableMarkdownV2(true)

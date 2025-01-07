@@ -326,6 +326,7 @@ public class CommandsHandler extends CommandLongPollingTelegramBot {
                                     outString = new StringBuilder(datas[2] + " 账户已换绑");
                                     com.ocd.bean.mysql.User removeEmbyUser = AuthorityUtil.userService.userMapper.selectOne(new QueryWrapper<com.ocd.bean.mysql.User>().lambda().eq(com.ocd.bean.mysql.User::getEmbyName, datas[2]));
                                     if (removeEmbyUser != null) {
+                                        outString.append("原账户: ").append(removeEmbyUser.getTgId());
                                         cacheUser.updateByUser(removeEmbyUser);
                                         removeEmbyUser.cleanEmby();
                                         AuthorityUtil.userService.userMapper.updateById(removeEmbyUser);
