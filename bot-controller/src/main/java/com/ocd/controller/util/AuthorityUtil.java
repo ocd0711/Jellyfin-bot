@@ -182,16 +182,15 @@ public class AuthorityUtil {
                     } catch (Exception ignored) {
                     }
                     if (needSend) {
-                        sendMessage.setChatId(user.getTgId());
-                        sendMessage.setText(user.getTgId() + " " + "最后观看时间:" + lastDate + " " + AuthorityUtil.botConfig.getExpDay() + " 天未观看" + ((AuthorityUtil.botConfig.getDelete() && !user.haveEmby()) ? "删除账户" : ("禁用账户" + (AuthorityUtil.botConfig.getDelete() ? "(7 天内未解封删除用户)" : ""))));
+                        sendMessage.setChatId(AuthorityUtil.botConfig.notifyChannel);
+                        sendMessage.enableMarkdownV2(true);
+                        sendMessage.setText(MessageUtil.INSTANCE.getAccountMessage(user, embyUserDto, lastDate));
                         try {
                             telegramClient.execute(sendMessage);
                         } catch (TelegramApiException e) {
                             // nothing
                         } finally {
-                            sendMessage.setChatId(AuthorityUtil.botConfig.notifyChannel);
-                            sendMessage.enableMarkdownV2(true);
-                            sendMessage.setText(MessageUtil.INSTANCE.getAccountMessage(user, embyUserDto));
+                            sendMessage.setChatId(user.getTgId());
                             try {
                                 telegramClient.execute(sendMessage);
                             } catch (TelegramApiException e) {

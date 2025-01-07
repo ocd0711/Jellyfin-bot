@@ -412,7 +412,7 @@ object MessageUtil {
         return nextMidnight.toEpochSecond(ZoneOffset.UTC) - now.toEpochSecond(ZoneOffset.UTC)
     }
 
-    fun getAccountMessage(user: com.ocd.bean.mysql.User, embyUser: EmbyUserResult?): String {
+    fun getAccountMessage(user: com.ocd.bean.mysql.User, embyUser: EmbyUserResult?, lastDate: String?): String {
         val action = if (AuthorityUtil.botConfig.delete && !user.haveEmby()) {
             "删除账户"
         } else {
@@ -425,6 +425,7 @@ object MessageUtil {
         val tgId = escapeMarkdownV2(user.tgId ?: "0")
 
         val endRes = """
+${user.tgId} 最后观看时间: $lastDate
 [$embyName](tg://user?id=$tgId), $embyId
 $returnStr
     """
