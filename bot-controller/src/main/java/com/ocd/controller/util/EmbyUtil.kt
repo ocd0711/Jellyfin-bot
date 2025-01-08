@@ -1,10 +1,12 @@
 package com.ocd.controller.util
 
+import cn.hutool.core.date.DateUtil
 import com.alibaba.fastjson.JSON
 import com.alibaba.fastjson.JSONArray
 import com.isen.bean.constant.ConstantStrings
 import com.ocd.bean.dto.jellby.PlaybackData
 import com.ocd.bean.dto.jellby.PlaybackRecord
+import com.ocd.bean.dto.jellby.PlaybackUserRecord
 import com.ocd.bean.dto.result.*
 import com.ocd.bean.mysql.HideMedia
 import com.ocd.bean.mysql.Line
@@ -15,8 +17,12 @@ import org.springframework.beans.factory.annotation.Value
 import org.springframework.http.*
 import org.springframework.stereotype.Component
 import org.springframework.web.util.UriComponentsBuilder
+import java.awt.image.BufferedImage
+import java.io.ByteArrayInputStream
+import java.util.*
 import java.util.stream.Collectors
 import javax.annotation.PostConstruct
+import javax.imageio.ImageIO
 
 /**
  * @author OCD
@@ -694,7 +700,7 @@ class EmbyUtil {
     }
 
     @JvmOverloads
-    fun getUserPlayback(embyId: String, limitCount: Int? = 1): List<PlaybackRecord>? {
+    fun getUserPlayback(embyId: String, limitCount: Int? = 1): List<PlaybackUserRecord>? {
         try {
             val headers = HttpHeaders().apply {
                 set("X-Emby-Token", apikey)
@@ -703,6 +709,84 @@ class EmbyUtil {
             val map: HashMap<String, Any> = HashMap()
             map["CustomQueryString"] =
                 "SELECT * FROM PlaybackActivity WHERE UserId = '$embyId' ORDER BY DateCreated DESC ${if (limitCount != null) "LIMIT $limitCount" else ""}"
+            map["ReplaceUserId"] = false
+            val entity = HttpEntity(map, headers)
+            val uri = UriComponentsBuilder.fromHttpUrl("${url}user_usage_stats/submit_custom_query")
+            val response = HttpUtil.getInstance()
+                .restTemplate()
+                .exchange(
+                    uri.build().toUri(),
+                    HttpMethod.POST,
+                    entity,
+                    String::class.java
+                )
+            if (response.statusCode != HttpStatus.OK && response.statusCode != HttpStatus.NO_CONTENT)
+                return null
+            val playbackData = JSON.parseObject(response.body, PlaybackData::class.java)
+            return playbackData.mapUserResultsToPlaybackRecords()
+        } catch (e: Exception) {
+            return null
+        }
+    }
+
+    @JvmOverloads
+    fun getItemBackdrop(itemId: String, width: Int = 1280, quality: Int = 70): BufferedImage? {
+        return try {
+            val headers = HttpHeaders().apply {
+                set("X-Emby-Token", apikey)
+            }
+            val entity = HttpEntity<String>(headers)
+            val uri =
+                UriComponentsBuilder.fromHttpUrl("${url}emby/Items/$itemId/Images/Primary")
+            uri.queryParam("maxWidth", width)
+            uri.queryParam("quality", quality)
+            val response = HttpUtil.getInstance()
+                .restTemplate()
+                .exchange(
+                    uri.build().toUri(),
+                    HttpMethod.GET,
+                    entity,
+                    ByteArray::class.java
+                )
+
+            val imageBytes = response.body
+            if (imageBytes != null) {
+                val inputStream = ByteArrayInputStream(imageBytes)
+                ImageIO.read(inputStream)
+            } else {
+                null
+            }
+        } catch (e: Exception) {
+            null
+        }
+    }
+
+    @JvmOverloads
+    fun getPlaybackInfo(
+        isMovie: Boolean,
+        date: Date,
+        days: Int = 1,
+        limitCount: Int = 10
+    ): List<PlaybackRecord>? {
+        try {
+            val startDate = DateUtil.offsetDay(date, -days)
+            val startStr = DateUtil.format(startDate, "yyyy-MM-dd HH:mm:ss:SSSSSS")
+            val endStr = DateUtil.format(date, "yyyy-MM-dd HH:mm:ss:SSSSSS")
+            val headers = HttpHeaders().apply {
+                set("X-Emby-Token", apikey)
+                contentType = MediaType.APPLICATION_JSON
+            }
+            val map: HashMap<String, Any> = HashMap()
+            map["CustomQueryString"] =
+                """
+                    SELECT *, substr(ItemName,0, instr(ItemName, ' - ')) AS name, SUM(PlayDuration) AS total_duarion, COUNT(1) AS count FROM PlaybackActivity
+                    WHERE ItemType = '${if (isMovie) "Movie" else "Episode"}'
+                    AND DateCreated >= '$startStr'
+                    AND DateCreated <= '$endStr'
+                    GROUP BY ItemName
+                    ORDER BY count
+                    DESC LIMIT $limitCount
+                """.trimIndent()
             map["ReplaceUserId"] = false
             val entity = HttpEntity(map, headers)
             val uri = UriComponentsBuilder.fromHttpUrl("${url}user_usage_stats/submit_custom_query")

@@ -360,8 +360,8 @@ object MessageUtil {
         isManage: Boolean = false
     ): String {
         val activityLog = FormatUtil.dateToString(embyUserDto?.let {
-            val playbackRecords = EmbyUtil.getInstance().getUserPlayback(cacheUser.embyId)
-            playbackRecords?.firstOrNull()?.dateCreated
+            val playbackUserRecords = EmbyUtil.getInstance().getUserPlayback(cacheUser.embyId)
+            playbackUserRecords?.firstOrNull()?.dateCreated
         })
         var out =
             "用户名称: ${if (embyUserDto == null || cacheUser.getEmbyName() == null) "无号" else cacheUser.getEmbyName()}\n" +

@@ -14,6 +14,22 @@ data class PlaybackData @JSONCreator constructor(
     @JSONField(name = "results") val results: List<List<String>>,
     @JSONField(name = "message") val message: String
 ) {
+    fun mapUserResultsToPlaybackRecords(): List<PlaybackUserRecord> {
+        return results.map { row ->
+            PlaybackUserRecord(
+                dateCreated = FormatUtil.playbackToDate(row[0])!!,
+                userId = row[1],
+                itemId = row[2],
+                itemType = row[3],
+                itemName = row[4],
+                playbackMethod = row[5],
+                clientName = row[6],
+                deviceName = row[7],
+                playDuration = row[8]
+            )
+        }
+    }
+
     fun mapResultsToPlaybackRecords(): List<PlaybackRecord> {
         return results.map { row ->
             PlaybackRecord(
@@ -25,7 +41,10 @@ data class PlaybackData @JSONCreator constructor(
                 playbackMethod = row[5],
                 clientName = row[6],
                 deviceName = row[7],
-                playDuration = row[8]
+                playDuration = row[8],
+                name = row.get(9),
+                totalDuarion = row[10],
+                count = row[11]
             )
         }
     }

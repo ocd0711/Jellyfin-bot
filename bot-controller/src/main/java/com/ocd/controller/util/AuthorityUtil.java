@@ -5,6 +5,7 @@ import com.alibaba.fastjson.JSON;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.isen.bean.constant.ConstantStrings;
 import com.ocd.bean.dto.jellby.PlaybackRecord;
+import com.ocd.bean.dto.jellby.PlaybackUserRecord;
 import com.ocd.bean.dto.result.EmbyUserResult;
 import com.ocd.bean.mysql.Info;
 import com.ocd.controller.config.BotConfig;
@@ -160,12 +161,12 @@ public class AuthorityUtil {
                     boolean needSend = false;
                     String lastDate = "";
                     try {
-                        List<PlaybackRecord> activityLogs = EmbyUtil.getInstance().getUserPlayback(user.getEmbyId());
+                        List<PlaybackUserRecord> activityLogs = EmbyUtil.getInstance().getUserPlayback(user.getEmbyId());
                         if (activityLogs != null) {
                             Long betweenDay = activityLogs.isEmpty() ? null : DateUtil.betweenDay(activityLogs.get(0).getDateCreated(), new Date(), true);
+                            lastDate = activityLogs.isEmpty() ? "无" : FormatUtil.INSTANCE.dateToString(activityLogs.get(0).getDateCreated());
                             if (betweenDay == null || betweenDay >= AuthorityUtil.botConfig.getExpDay()) {
                                 if (betweenDay == null || betweenDay >= AuthorityUtil.botConfig.getExpDay() + 7) {
-                                    lastDate = FormatUtil.INSTANCE.dateToString(activityLogs.get(0).getDateCreated());
                                     EmbyUtil.getInstance().deleteUser(user);
                                     AuthorityUtil.userService.userMapper.updateById(user);
                                     needSend = true;

@@ -1,6 +1,7 @@
 package com.ocd.bean.dto.result;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
+import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
@@ -10,6 +11,7 @@ import lombok.NoArgsConstructor;
  * Description:
  */
 @NoArgsConstructor
+@AllArgsConstructor
 @Data
 public class PlaybackShowsResult {
 

@@ -1,10 +1,8 @@
 package com.ocd.controller.task;
 
+import com.ocd.bean.dto.jellby.PlaybackRecord;
 import com.ocd.bean.dto.result.PlaybackShowsResult;
-import com.ocd.controller.util.AuthorityUtil;
-import com.ocd.controller.util.ChartUtil;
-import com.ocd.controller.util.EmbyUtil;
-import com.ocd.controller.util.MessageUtil;
+import com.ocd.controller.util.*;
 import com.ocd.util.FormatUtil;
 import lombok.extern.slf4j.Slf4j;
 import org.slf4j.Logger;
@@ -17,6 +15,7 @@ import org.telegram.telegrambots.meta.api.methods.send.SendPhoto;
 import org.telegram.telegrambots.meta.generics.TelegramClient;
 
 import java.util.Comparator;
+import java.util.Date;
 import java.util.List;
 
 /**
@@ -51,22 +50,20 @@ public class TimerTask {
         log.info("开始生成每日播放排行榜...");
 
         try {
-            List<PlaybackShowsResult> movieShows = EmbyUtil.getInstance().getShowInfo(true, FormatUtil.INSTANCE.dateToShowString());
-            List<PlaybackShowsResult> tvShows = EmbyUtil.getInstance().getShowInfo(false, FormatUtil.INSTANCE.dateToShowString());
-            movieShows.sort(Comparator.comparingLong(PlaybackShowsResult::getCount).reversed());
-            tvShows.sort(Comparator.comparingLong(PlaybackShowsResult::getCount).reversed());
+            List<PlaybackRecord> movieShows = EmbyUtil.getInstance().getPlaybackInfo(true, new Date());
+            List<PlaybackRecord> tvShows = EmbyUtil.getInstance().getPlaybackInfo(false, new Date());
             StringBuilder stringBuilder = new StringBuilder();
             stringBuilder.append("<b>【播放日榜】</b>&#10;&#10;");
             stringBuilder.append("<b>▎电影:</b>&#10;");
             for (int i = 0; i < 10; i++) {
-                stringBuilder.append(i + 1).append(". ").append(String.format("%s - %s&#10;", movieShows.get(i).getLabel(), movieShows.get(i).getCount()));
+                stringBuilder.append(i + 1).append(". ").append(String.format("%s - %s&#10;", movieShows.get(i).getItemName(), movieShows.get(i).getCount()));
             }
             stringBuilder.append("&#10;<b>▎剧集:</b>&#10;");
             for (int i = 0; i < 10; i++) {
-                stringBuilder.append(i + 1).append(". ").append(String.format("%s - %s&#10;", tvShows.get(i).getLabel(), tvShows.get(i).getCount()));
+                stringBuilder.append(i + 1).append(". ").append(String.format("%s - %s&#10;", tvShows.get(i).getName(), tvShows.get(i).getCount()));
             }
             TelegramClient telegramClient = new OkHttpTelegramClient(AuthorityUtil.botConfig.token);
-            SendPhoto sendPhoto = new SendPhoto(AuthorityUtil.botConfig.groupId, MessageUtil.INSTANCE.getHeadImageAsInputFile());
+            SendPhoto sendPhoto = new SendPhoto(AuthorityUtil.botConfig.groupId, ImageGenerator.generateRankingImage(false, movieShows.size() > 5 ? movieShows.subList(0, 5) : movieShows, tvShows.size() > 5 ? tvShows.subList(0, 5) : tvShows, 1280));
             sendPhoto.setParseMode("HTML");
             MessageUtil.INSTANCE.sendLongCaption(telegramClient, sendPhoto, stringBuilder.toString());
         } catch (Exception e) {
@@ -83,22 +80,20 @@ public class TimerTask {
         log.info("开始生成每周播放排行榜...");
 
         try {
-            List<PlaybackShowsResult> movieShows = EmbyUtil.getInstance().getShowInfo(true, FormatUtil.INSTANCE.dateToShowString(), 7);
-            List<PlaybackShowsResult> tvShows = EmbyUtil.getInstance().getShowInfo(false, FormatUtil.INSTANCE.dateToShowString(), 7);
-            movieShows.sort(Comparator.comparingLong(PlaybackShowsResult::getCount).reversed());
-            tvShows.sort(Comparator.comparingLong(PlaybackShowsResult::getCount).reversed());
+            List<PlaybackRecord> movieShows = EmbyUtil.getInstance().getPlaybackInfo(true, new Date(), 7);
+            List<PlaybackRecord> tvShows = EmbyUtil.getInstance().getPlaybackInfo(false, new Date(), 7);
             StringBuilder stringBuilder = new StringBuilder();
             stringBuilder.append("<b>【播放周榜】</b>&#10;&#10;");
             stringBuilder.append("<b>▎电影:</b>&#10;");
             for (int i = 0; i < 10; i++) {
-                stringBuilder.append(i + 1).append(". ").append(String.format("%s - %s&#10;", movieShows.get(i).getLabel(), movieShows.get(i).getCount()));
+                stringBuilder.append(i + 1).append(". ").append(String.format("%s - %s&#10;", movieShows.get(i).getItemName(), movieShows.get(i).getCount()));
             }
             stringBuilder.append("&#10;<b>▎剧集:</b>&#10;");
             for (int i = 0; i < 10; i++) {
-                stringBuilder.append(i + 1).append(". ").append(String.format("%s - %s&#10;", tvShows.get(i).getLabel(), tvShows.get(i).getCount()));
+                stringBuilder.append(i + 1).append(". ").append(String.format("%s - %s&#10;", tvShows.get(i).getName(), tvShows.get(i).getCount()));
             }
             TelegramClient telegramClient = new OkHttpTelegramClient(AuthorityUtil.botConfig.token);
-            SendPhoto sendPhoto = new SendPhoto(AuthorityUtil.botConfig.groupId, MessageUtil.INSTANCE.getHeadImageAsInputFile());
+            SendPhoto sendPhoto = new SendPhoto(AuthorityUtil.botConfig.groupId, ImageGenerator.generateRankingImage(true, movieShows.size() > 5 ? movieShows.subList(0, 5) : movieShows, tvShows.size() > 5 ? tvShows.subList(0, 5) : tvShows, 1280));
             sendPhoto.setParseMode("HTML");
             MessageUtil.INSTANCE.sendLongCaption(telegramClient, sendPhoto, stringBuilder.toString());
         } catch (Exception e) {

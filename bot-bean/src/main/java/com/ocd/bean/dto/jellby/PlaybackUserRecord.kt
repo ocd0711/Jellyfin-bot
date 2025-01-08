@@ -8,7 +8,7 @@ import java.util.*
  * @date 2025/01/04 15:48
  * Description:
  */
-data class PlaybackRecord(
+data class PlaybackUserRecord(
     @JSONField(name = "DateCreated") val dateCreated: Date,
     @JSONField(name = "UserId") val userId: String,
     @JSONField(name = "ItemId") val itemId: String,
@@ -17,8 +17,5 @@ data class PlaybackRecord(
     @JSONField(name = "PlaybackMethod") val playbackMethod: String,
     @JSONField(name = "ClientName") val clientName: String,
     @JSONField(name = "DeviceName") val deviceName: String,
-    @JSONField(name = "PlayDuration") val playDuration: String,
-    @JSONField(name = "name") val name: String,
-    @JSONField(name = "totalDuarion") val totalDuarion: String,
-    @JSONField(name = "count") val count: String
+    @JSONField(name = "PlayDuration") val playDuration: String
 )
