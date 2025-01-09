@@ -56,13 +56,15 @@ public class TimerTask {
             StringBuilder stringBuilder = new StringBuilder();
             stringBuilder.append("<b>【播放日榜】</b>&#10;&#10;");
             stringBuilder.append("<b>▎电影:</b>&#10;");
-            for (int i = 0; i < 10; i++) {
-                stringBuilder.append(i + 1).append(". ").append(String.format("%s - %s&#10;", movieShows.get(i).getItemName(), movieShows.get(i).getCount()));
-            }
+            if (movieShows != null)
+                for (int i = 0; i < movieShows.size(); i++) {
+                    stringBuilder.append(i + 1).append(". ").append(String.format("%s - %s&#10;", movieShows.get(i).getItemName(), movieShows.get(i).getCount()));
+                }
             stringBuilder.append("&#10;<b>▎剧集:</b>&#10;");
-            for (int i = 0; i < 10; i++) {
-                stringBuilder.append(i + 1).append(". ").append(String.format("%s - %s&#10;", tvShows.get(i).getName(), tvShows.get(i).getCount()));
-            }
+            if (tvShows != null)
+                for (int i = 0; i < tvShows.size(); i++) {
+                    stringBuilder.append(i + 1).append(". ").append(String.format("%s - %s&#10;", tvShows.get(i).getName(), tvShows.get(i).getCount()));
+                }
             TelegramClient telegramClient = new OkHttpTelegramClient(AuthorityUtil.botConfig.token);
             SendPhoto sendPhoto = new SendPhoto(AuthorityUtil.botConfig.groupId, ImageGenerator.generateRankingImage(false, movieShows.size() > 5 ? movieShows.subList(0, 5) : movieShows, tvShows.size() > 5 ? tvShows.subList(0, 5) : tvShows, 1280));
             sendPhoto.setParseMode("HTML");
@@ -86,13 +88,15 @@ public class TimerTask {
             StringBuilder stringBuilder = new StringBuilder();
             stringBuilder.append("<b>【播放周榜】</b>&#10;&#10;");
             stringBuilder.append("<b>▎电影:</b>&#10;");
-            for (int i = 0; i < 10; i++) {
-                stringBuilder.append(i + 1).append(". ").append(String.format("%s - %s&#10;", movieShows.get(i).getItemName(), movieShows.get(i).getCount()));
-            }
+            if (movieShows != null)
+                for (int i = 0; i < movieShows.size(); i++) {
+                    stringBuilder.append(i + 1).append(". ").append(String.format("%s - %s&#10;", movieShows.get(i).getItemName(), movieShows.get(i).getCount()));
+                }
             stringBuilder.append("&#10;<b>▎剧集:</b>&#10;");
-            for (int i = 0; i < 10; i++) {
-                stringBuilder.append(i + 1).append(". ").append(String.format("%s - %s&#10;", tvShows.get(i).getName(), tvShows.get(i).getCount()));
-            }
+            if (tvShows != null)
+                for (int i = 0; i < tvShows.size(); i++) {
+                    stringBuilder.append(i + 1).append(". ").append(String.format("%s - %s&#10;", tvShows.get(i).getName(), tvShows.get(i).getCount()));
+                }
             TelegramClient telegramClient = new OkHttpTelegramClient(AuthorityUtil.botConfig.token);
             SendPhoto sendPhoto = new SendPhoto(AuthorityUtil.botConfig.groupId, ImageGenerator.generateRankingImage(true, movieShows.size() > 5 ? movieShows.subList(0, 5) : movieShows, tvShows.size() > 5 ? tvShows.subList(0, 5) : tvShows, 1280));
             sendPhoto.setParseMode("HTML");
