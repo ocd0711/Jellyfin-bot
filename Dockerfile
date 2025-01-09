@@ -22,6 +22,10 @@ RUN apt-get update && apt-get install -y \
     fontconfig \
     && rm -rf /var/lib/apt/lists/*
 
+COPY ./fonts/*.ttf /usr/share/fonts/truetype/custom/
+
+RUN fc-cache -f -v
+
 WORKDIR /app
 
 COPY --from=build /app/bot-controller/target/*-exec.jar app.jar

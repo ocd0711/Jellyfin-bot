@@ -43,7 +43,7 @@ public class ImageGenerator {
         int titleHeight = 70;
 
         // 绘制标题
-        g.setFont(new Font("Arial", Font.BOLD, 48));
+        g.setFont(new Font("Alibaba PuHuiTi 3.0", Font.BOLD, 48));
         String title = isWeekly ? "WEEKLY TOP" : "DAILY TOP";
         int titleWidth = g.getFontMetrics().stringWidth(title);
         g.setColor(TEXT_COLOR);
