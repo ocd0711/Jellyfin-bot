@@ -38,7 +38,8 @@ public class TimerTask {
     @Async("taskScheduler")
     @Scheduled(cron = "0 0 0 * * ?")
     public void embyTask() {
-        AuthorityUtil.cleanTask(new OkHttpTelegramClient(AuthorityUtil.botConfig.token));
+        if (AuthorityUtil.botConfig.getCleanTask())
+            AuthorityUtil.cleanTask(new OkHttpTelegramClient(AuthorityUtil.botConfig.token));
     }
 
     /**

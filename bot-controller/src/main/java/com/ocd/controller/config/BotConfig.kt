@@ -40,4 +40,6 @@ class BotConfig {
     lateinit var wikiUrl: String
 
     lateinit var headPhoto: String
+
+    var cleanTask: Boolean = true
 }

@@ -79,3 +79,5 @@ bot:
   wikiUrl: https://ocdlive.com
   # 头图存储目录(目录下可以多张, 每次随机取一张做展示)
   head_photo: /tmp/img
+  # 是否开启 活跃检测、用户状态同步 等功能
+  clean_task: true
