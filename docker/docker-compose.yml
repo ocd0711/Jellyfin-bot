@@ -12,6 +12,7 @@ services:
       - ./hello.txt:/tmp/hello.txt:rw
     #      - /etc/timezone:/etc/timezone
     #      - /etc/localtime:/etc/localtime
+      - ./head:/tmp/head
     restart: always
     user: 0:0
     healthcheck:
