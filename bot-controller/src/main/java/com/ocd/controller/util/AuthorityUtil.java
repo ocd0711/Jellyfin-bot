@@ -1,41 +1,36 @@
 package com.ocd.controller.util;
 
-import cn.hutool.core.date.DateUtil;
 import com.alibaba.fastjson.JSON;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.isen.bean.constant.ConstantStrings;
-import com.ocd.bean.dto.jellby.PlaybackRecord;
-import com.ocd.bean.dto.jellby.PlaybackUserRecord;
-import com.ocd.bean.dto.result.EmbyUserResult;
-import com.ocd.bean.mysql.Info;
 import com.ocd.controller.config.BotConfig;
 import com.ocd.service.mysql.*;
-import com.ocd.util.FormatUtil;
 import com.ocd.util.HttpUtil;
 import lombok.extern.log4j.Log4j2;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import org.telegram.telegrambots.meta.api.methods.groupadministration.GetChatMember;
-import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
 import org.telegram.telegrambots.meta.api.objects.User;
 import org.telegram.telegrambots.meta.api.objects.chatmember.ChatMember;
 import org.telegram.telegrambots.meta.exceptions.TelegramApiException;
 import org.telegram.telegrambots.meta.generics.TelegramClient;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.HashSet;
+import java.util.Locale;
+import java.util.Set;
 
 @Component
 @Log4j2
 public class AuthorityUtil {
 
     @Autowired
-    public AuthorityUtil(UserService userService, LineService lineService, InvitecodeService invitecodeService, InfoService infoService, HideMediaService hideMediaService, ShopService shopService, BotConfig botConfig) {
+    public AuthorityUtil(UserService userService, LineService lineService, InvitecodeService invitecodeService, InfoService infoService, HideMediaService hideMediaService, BotConfig botConfig) {
         AuthorityUtil.userService = userService;
         AuthorityUtil.lineService = lineService;
         AuthorityUtil.invitecodeService = invitecodeService;
         AuthorityUtil.infoService = infoService;
         AuthorityUtil.hideMediaService = hideMediaService;
-        AuthorityUtil.shopService = shopService;
         AuthorityUtil.botConfig = botConfig;
     }
 
@@ -48,8 +43,6 @@ public class AuthorityUtil {
     public static InfoService infoService;
 
     public static HideMediaService hideMediaService;
-
-    public static ShopService shopService;
 
     public static boolean openRegister = false;
 
@@ -113,188 +106,6 @@ public class AuthorityUtil {
         userService.userMapper.selectList(new QueryWrapper<com.ocd.bean.mysql.User>().lambda().eq(com.ocd.bean.mysql.User::getSuperAdmin, 0).isNotNull(com.ocd.bean.mysql.User::getEmbyId)).forEach(user -> {
             EmbyUtil.getInstance().initUser(user);
         });
-    }
-
-    public static void cleanTask(TelegramClient telegramClient) {
-        SendMessage sendMessage = new SendMessage("", "");
-        List<EmbyUserResult> embyUserDtos = EmbyUtil.getInstance().getAllEmbyUser();
-        embyUserDtos.forEach(embyUserDto -> {
-            if (!embyUserDto.getPolicy().getIsAdministrator()) {
-                EmbyUtil.getInstance().initPolicy(embyUserDto.getId());
-                com.ocd.bean.mysql.User user = userService.userMapper.selectOne(new QueryWrapper<com.ocd.bean.mysql.User>().lambda().eq(com.ocd.bean.mysql.User::getEmbyId, embyUserDto.getId()));
-                if (user == null) {
-                    // 未绑定 TG
-                    try {
-                        EmbyUtil.getInstance().deleteEmbyById(embyUserDto.getId());
-//                        sendMessage.setChatId(BotConfig.getInstance().CHANNEL);
-//                        sendMessage.setChatId(BotConfig.getInstance().GROUP_ID);
-                        sendMessage.setChatId(AuthorityUtil.botConfig.notifyChannel);
-                        sendMessage.setText(String.format("#bot检查扬号: 观影账号 %s ( %s ) 已被扬, 原因: 未绑定 tg 用户", embyUserDto.getName(), embyUserDto.getId()));
-                        telegramClient.execute(sendMessage);
-                    } catch (TelegramApiException e) {
-                        log.error(e.toString());
-                    }
-                } else if (AuthorityUtil.checkChatMember(Long.parseLong(user.getTgId()), Long.parseLong(AuthorityUtil.botConfig.groupId), telegramClient) != null) {
-                    try {
-                        EmbyUtil.getInstance().deleteUser(user);
-//                        sendMessage.setChatId(BotConfig.getInstance().GROUP_ID);
-                        sendMessage.setChatId(AuthorityUtil.botConfig.notifyChannel);
-                        sendMessage.setText(String.format("#bot检查扬号: 观影账号 %s ( %s ) 已被扬, 原因: %s 不在群内", embyUserDto.getName(), embyUserDto.getId(), user.getTgId()));
-                        telegramClient.execute(sendMessage);
-                    } catch (TelegramApiException e) {
-                        log.error(e.toString());
-                    }
-                } else if (user.getUserType() != 2) {
-//                    DayOfWeek dayOfWeek = LocalDate.now().getDayOfWeek();
-//                    if (dayOfWeek == DayOfWeek.FRIDAY) {
-//                        if (user.getDeactivate()) {
-//                            EmbyUtil.getInstance().deactivateUser(user, false);
-//                            sendMessage.setChatId(user.getTgId());
-//                            sendMessage.setText("周五大赦天下 - 解除");
-//                            try {
-//                                telegramClient.execute(sendMessage);
-//                            } catch (TelegramApiException e) {
-//                                // nothing
-//                            }
-//                        }
-//                    } else {
-                    boolean needSend = false;
-                    String lastDate = "";
-                    try {
-                        List<PlaybackUserRecord> activityLogs = EmbyUtil.getInstance().getUserPlayback(user.getEmbyId());
-                        if (activityLogs != null) {
-                            Long betweenDay = activityLogs.isEmpty() ? null : DateUtil.betweenDay(activityLogs.get(0).getDateCreated(), new Date(), true);
-                            lastDate = activityLogs.isEmpty() ? "无" : FormatUtil.INSTANCE.dateToString(activityLogs.get(0).getDateCreated());
-                            if (betweenDay == null || betweenDay >= AuthorityUtil.botConfig.getExpDay()) {
-                                if (betweenDay == null || betweenDay >= AuthorityUtil.botConfig.getExpDay() + 7) {
-                                    EmbyUtil.getInstance().deleteUser(user);
-                                    AuthorityUtil.userService.userMapper.updateById(user);
-                                    needSend = true;
-                                } else {
-                                    boolean cache = user.getDeactivate();
-                                    EmbyUtil.getInstance().deactivateUser(user, true);
-                                    needSend = !cache;
-                                }
-                            } else {
-                                user.setUserType(1);
-                                EmbyUtil.getInstance().deactivateUser(user, false);
-                            }
-                        }
-                    } catch (Exception ignored) {
-                    }
-                    if (needSend) {
-                        sendMessage.setChatId(AuthorityUtil.botConfig.notifyChannel);
-                        sendMessage.enableMarkdownV2(true);
-                        sendMessage.setText(MessageUtil.INSTANCE.getAccountMessage(user, embyUserDto, lastDate));
-                        try {
-                            telegramClient.execute(sendMessage);
-                        } catch (TelegramApiException e) {
-                            // nothing
-                        } finally {
-                            sendMessage.setChatId(user.getTgId());
-                            try {
-                                telegramClient.execute(sendMessage);
-                            } catch (TelegramApiException e) {
-                                // nothing
-                            }
-                        }
-                    }
-                }
-//                }
-//                else if (user.getUserType() != 2 && user.getExpiredTime() != null) {
-//                    Date today = DateUtil.beginOfDay(new Date());
-//                    Date embyEndDate = DateUtil.beginOfDay(user.getExpiredTime());
-//                    if (today.after(embyEndDate)) {
-//                        // 停用账号
-//                        if (!user.getDeactivate()) {
-//                            try {
-//                                EmbyUtil.getInstance().deactivateUser(user, true);
-//                                sendMessage.setChatId(user.getTgId());
-//                                sendMessage.setText(String.format("#bot检查停用: Emby 账号 %s ( %s ) 已被停用, 原因: 过期", embyUserDto.getName(), embyUserDto.getId()));
-//                                sender.execute(sendMessage);
-//                            } catch (TelegramApiException e) {
-//                                log.error(e.toString());
-//                            }
-//                        }
-//                    } else {
-//                        // 启用账号
-//                        if (user.getDeactivate() && user.getStartBot()) {
-//                            try {
-//                                EmbyUtil.getInstance().deactivateUser(user, false);
-//                                sendMessage.setChatId(user.getTgId());
-//                                sendMessage.setText(String.format("#bot检查启用: Emby 账号 %s ( %s ) 已被启用, 原因: 有效期内", embyUserDto.getName(), embyUserDto.getId()));
-//                                sender.execute(sendMessage);
-//                            } catch (TelegramApiException e) {
-//                                log.error(e.toString());
-//                            }
-//                        }
-//                    }
-//                }
-            }
-        });
-        //        if (!embyUserDtos.isEmpty())
-//            AuthorityUtil.userService.userMapper.selectList(new QueryWrapper<com.ocd.bean.mysql.User>().lambda().isNotNull(com.ocd.bean.mysql.User::getEmbyId).eq(com.ocd.bean.mysql.User::getDeactivate, 0)).forEach(user -> {
-//                if (embyUserDtos.stream().noneMatch(embyUserDto -> embyUserDto.getId().equals(user.getEmbyId()))) {
-//                    user.cleanWhite();
-//                    AuthorityUtil.userService.userMapper.updateById(user);
-//                } else if (user.getExpiredTime() == null) {
-//                    try {
-//                        sendMessage.setChatId("5340385875");
-//                        sendMessage.setText("用户信息异常" + (user.getUserType() == 2 ? ",白名单用户已处理" : "") + ": " + JSON.toJSONString(user));
-//                        sender.execute(sendMessage);
-//                        sendMessage.setChatId(user.getTgId());
-//                        if (user.getUserType() == 2) {
-//                            user.setExpiredTime(new Date());
-//                            AuthorityUtil.userService.userMapper.updateById(user);
-//                            sendMessage.setText("白名单用户: 此账号用户信息异常已修正, /info 可查看用户信息");
-//                        } else {
-//                            EmbyUtil.getInstance().deactivateUser(user, true);
-//                            user.setDeactivate(true);
-//                            AuthorityUtil.userService.userMapper.updateById(user);
-//                            sendMessage.setText("此账号用户已停用");
-//                        }
-//                        sender.execute(sendMessage);
-//                    } catch (TelegramApiException e) {
-//                        log.error(e.toString());
-//                    }
-//                }
-//            });
-//        // 用户到期通知
-//        AuthorityUtil.userService.userMapper.selectList(new QueryWrapper<com.ocd.bean.mysql.User>().lambda().ne(com.ocd.bean.mysql.User::getUserType, 2).eq(com.ocd.bean.mysql.User::getDeactivate, 0).isNotNull(com.ocd.bean.mysql.User::getEmbyId).ge(com.ocd.bean.mysql.User::getExpiredTime, DateUtil.beginOfDay(DateUtil.offsetDay(new Date(), -3))).le(com.ocd.bean.mysql.User::getExpiredTime, DateUtil.endOfDay(new Date()))).forEach(user -> {
-//            if (embyUserDtos.stream().noneMatch(embyUserDto -> embyUserDto.getId().equals(user.getEmbyId()))) {
-//                try {
-//                    sendMessage.setChatId(user.getTgId());
-//                    sendMessage.setText(String.format("您的账号将于 %s 到期, 请注意续费时间\n本通知将在账号停用三天前每天 0 点通知一次(未续费账号封存, 续费后启用观看记录等用户信息不会丢失)", DateUtil.beginOfDay(user.getExpiredTime())));
-//                    sender.execute(sendMessage);
-//                } catch (TelegramApiException e) {
-//                    log.error(e.toString());
-//                }
-//            }
-//        });
-        // 发送运行时间通知
-        sendMessage.setChatId(AuthorityUtil.botConfig.groupId);
-        List<Info> infos = infoService.infoMapper.selectList(null);
-        sendMessage.setText(
-                String.format("欢迎来到" + AuthorityUtil.botConfig.groupNick + " - 今日用户信息通知已发送完成\n活跃-%s 停用/待杀-%s" + (infos.isEmpty() ? "" : "\n" + infos.get(0).
-                                getMessage()) + "\n%s",
-                        AuthorityUtil.userService.userMapper.selectCount(
-                                new QueryWrapper<com.ocd.bean.mysql.User>().lambda().isNotNull(com.ocd.bean.mysql.User::getEmbyId)
-                                        .in(com.ocd.bean.mysql.User::getUserType, List.of(1, 2))
-                                        .eq(com.ocd.bean.mysql.User::getDeactivate, 0)
-                        ),
-                        AuthorityUtil.userService.userMapper.selectCount(
-                                new QueryWrapper<com.ocd.bean.mysql.User>().lambda().isNotNull(com.ocd.bean.mysql.User::getEmbyId)
-                                        .in(com.ocd.bean.mysql.User::getUserType, List.of(1, 2))
-                                        .eq(com.ocd.bean.mysql.User::getDeactivate, 1)
-                        ),
-                        EmbyUtil.getInstance().LibraryCountStr())
-        );
-        try {
-            telegramClient.execute(sendMessage);
-        } catch (
-                TelegramApiException e) {
-            log.error(e.toString());
-        }
     }
 
     public static String invitecode() {

@@ -113,30 +113,32 @@ public class StartCommand extends BotCommand {
                 else if (sqlUser.haveEmby()) {
                     if (sqlUser.getUserType() == 2) {
                         sendPhotoRequest.setCaption("已是 " + AuthorityUtil.botConfig.groupNick + " ♾️ 用户, 无需续期/兑换");
+                    } else if (invitecode.getDays() == 0) {
+                        sendPhotoRequest.setCaption("此为注册码, 无法续期");
                     } else {
-                        if (invitecode.getMonth() == 0) sqlUser.setUserType(2);
+                        if (invitecode.getDays() == -1) sqlUser.setUserType(2);
                         else sqlUser.setUserType(1);
+                        sqlUser.setExchange(invitecode.getInvitecode());
                         invitecode.sUse(sqlUser.getTgId());
                         EmbyUtil.getInstance().deactivateUser(sqlUser, false);
                         AuthorityUtil.invitecodeService.invitecodeMapper.updateById(invitecode);
+                        sqlUser.addExpDate(invitecode.getDays());
                         AuthorityUtil.userService.userMapper.updateById(sqlUser);
-                        String outStr = "兑换码续期成功, /start 自行操作";
-//                    if (invitecode.getMonth() == 0 || invitecode.getMonth() >= 12) {
-//                        Invitecode newInvitecode = new Invitecode(AuthorityUtil.invitecode(), 1);
-//                        AuthorityUtil.invitecodeService.invitecodeMapper.insert(newInvitecode);
-//                        outStr = outStr + "\n" + "续期大于一年, 赠送一个月体验卡(可以邀请好友注册): https://t.me/TanhuaTvBot?start=" + newInvitecode.getInvitecode();
-//                    }
+                        String outStr = "兑换成功, /start 自行操作";
                         sendPhotoRequest.setCaption(outStr);
                     }
                 } else {
-                    if (sqlUser.getExchange() != null) {
+                    if (invitecode.getDays() > 0) {
+                        sendPhotoRequest.setCaption("此为续期码, 无法注册");
+                    } else if (sqlUser.getExchange() != null) {
                         sendPhotoRequest.setCaption("当前有未使用的兑换码, 先开号再使用新兑换码");
                     } else {
                         sqlUser.setExchange(invitecode.getInvitecode());
-                        if (invitecode.getMonth() == 0) sqlUser.setUserType(2);
+                        if (invitecode.getDays() == -1) sqlUser.setUserType(2);
                         else sqlUser.setUserType(1);
                         invitecode.sUse(sqlUser.getTgId());
                         AuthorityUtil.invitecodeService.invitecodeMapper.updateById(invitecode);
+                        sqlUser.addExpDate(invitecode.getDays());
                         AuthorityUtil.userService.userMapper.updateById(sqlUser);
                         sendPhotoRequest.setCaption("兑换码使用成功, /start 自行注册");
                     }

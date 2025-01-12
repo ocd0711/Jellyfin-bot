@@ -23,18 +23,17 @@ public class Invitecode {
 
     private Boolean used;
 
-    private Integer month;
+    private Integer days;
 
     private String tgId;
 
-    public Invitecode(String invitecode, Integer month) {
+    public Invitecode(String invitecode, Integer days) {
         this.invitecode = invitecode;
-        this.month = month;
+        this.days = days;
     }
 
     public void sUse(String tgId) {
         this.tgId = tgId;
         this.used = true;
     }
-
 }

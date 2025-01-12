@@ -6,14 +6,6 @@ CREATE TABLE `hide_media`
     PRIMARY KEY (`id`)
 ) ENGINE=InnoDB AUTO_INCREMENT=0 DEFAULT CHARSET=utf8mb4;
 
--- 商品列表
-CREATE TABLE `shop`
-(
-    `id`                   int(11)               NOT NULL AUTO_INCREMENT COMMENT '主键id',
-    `month`                int(100)              NOT NULL COMMENT '邀请码续期月份, 0 为 ♾️',
-    PRIMARY KEY (`id`)
-) ENGINE=InnoDB AUTO_INCREMENT=0 DEFAULT CHARSET=utf8mb4;
-
 -- invitecode 存储
 CREATE TABLE `invitecode`
 (
@@ -21,7 +13,7 @@ CREATE TABLE `invitecode`
     `invitecode`           varchar(200)          NOT NULL COMMENT '️邀请码',
     `used`                 int(1)                DEFAULT 0 COMMENT '是否被使用',
     `tg_id`                varchar(100)          DEFAULT NULL COMMENT 'tg id',
-    `month`                int(100)              DEFAULT NULL COMMENT '续期月数',
+    `days`                 int(100)              DEFAULT NULL COMMENT '续期天数, -1 为白名单, 0 为注册码(注册后的剩余天数由 expDay 决定), 大于 0 为续期天数',
     PRIMARY KEY (`id`)
 ) ENGINE=InnoDB AUTO_INCREMENT=0 DEFAULT CHARSET=utf8mb4;
 
@@ -44,7 +36,6 @@ CREATE TABLE `info`
 ) ENGINE=InnoDB AUTO_INCREMENT=0 DEFAULT CHARSET=utf8mb4;
 
 -- 用户表
-tg id - emby账号
 CREATE TABLE `user`
 (
     `id`                   int(11)               NOT NULL AUTO_INCREMENT COMMENT '主键id',
@@ -60,6 +51,7 @@ CREATE TABLE `user`
     `hide_media`           int(1)                DEFAULT 0 COMMENT '是否隐藏部分媒体库',
     `deactivate`           int(1)                DEFAULT 0 COMMENT 'emby 是否停用',
     `exchange`             varchar(200)          DEFAULT NULL COMMENT '使用的注册码',
+    `exp_time`             datetime              DEFAULT NULL COMMENT '过期时间',
     `create_time`          datetime              NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
     `points`               int(11)               NOT NULL DEFAULT 0 COMMENT '用户积分',
     PRIMARY KEY (`id`)

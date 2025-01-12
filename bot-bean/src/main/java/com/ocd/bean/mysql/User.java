@@ -1,5 +1,6 @@
 package com.ocd.bean.mysql;
 
+import cn.hutool.core.date.DateUtil;
 import com.baomidou.mybatisplus.annotation.*;
 import com.ocd.bean.dto.excel.DevicesExcel;
 import com.ocd.bean.dto.result.EmbyUserResult;
@@ -90,6 +91,12 @@ public class User {
     private Integer points = 0;
 
     /**
+     * 过期时间
+     */
+    @TableField(insertStrategy = FieldStrategy.IGNORED, updateStrategy = FieldStrategy.IGNORED)
+    private Date expTime;
+
+    /**
      * 创建时间
      */
     @TableField(fill = FieldFill.INSERT)
@@ -97,6 +104,7 @@ public class User {
 
     public void ban() {
         cleanEmby();
+        points = 0;
         userType = 3;
         embyName = "封禁用户";
         embyId = "封禁用户";
@@ -115,7 +123,6 @@ public class User {
         embyName = null;
         deactivate = false;
         exchange = null;
-        points = 0;
     }
 
     public void cleanWhite() {
@@ -146,5 +153,11 @@ public class User {
         this.embyId = user.getEmbyId();
         this.userType = user.getUserType();
         this.deactivate = user.getDeactivate();
+    }
+
+    public void addExpDate(Integer days) {
+        if (expTime == null)
+            expTime = new Date();
+        expTime = DateUtil.offsetDay(expTime, days);
     }
 }

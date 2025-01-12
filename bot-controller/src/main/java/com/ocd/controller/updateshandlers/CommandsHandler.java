@@ -8,7 +8,6 @@ import com.isen.bean.constant.ConstantStrings;
 import com.ocd.bean.dto.result.EmbyUserResult;
 import com.ocd.bean.mysql.Invitecode;
 import com.ocd.bean.mysql.Line;
-import com.ocd.bean.mysql.Shop;
 import com.ocd.controller.commands.OpenCommand;
 import com.ocd.controller.commands.StartCommand;
 import com.ocd.controller.commands.StatisticsCommand;
@@ -65,7 +64,6 @@ import java.util.*;
 @Slf4j
 public class CommandsHandler extends CommandLongPollingTelegramBot {
 
-    private final LineService lineService;
     List<String> userButtons = Arrays.asList("info", "main", "line", "openRegister", "bind", "create", "reset", "hide", "unblock", "checkin", "device", "logout", "shop", "flush");
 
     /**
@@ -96,7 +94,6 @@ public class CommandsHandler extends CommandLongPollingTelegramBot {
                 startCommand.execute(absSender, message.getFrom(), message.getChat(), new String[]{});
             }
         });
-        this.lineService = lineService;
     }
 
     @Override
@@ -286,7 +283,7 @@ public class CommandsHandler extends CommandLongPollingTelegramBot {
                                     } else {
                                         if (cacheUser.getUserType() == 3) outString = new StringBuilder("封禁用户哦!");
                                         else {
-                                            Invitecode invitecode = new Invitecode(AuthorityUtil.invitecode(), 1);
+                                            Invitecode invitecode = new Invitecode(AuthorityUtil.invitecode(), 0);
                                             AuthorityUtil.invitecodeService.invitecodeMapper.insert(invitecode);
                                             SendMessage giftMessage = new SendMessage(userId.toString(), "");
                                             giftMessage.setText("注册码: https://t.me/" + AuthorityUtil.botConfig.name + "?start=" + invitecode.getInvitecode());
@@ -309,7 +306,7 @@ public class CommandsHandler extends CommandLongPollingTelegramBot {
                                         else if (cacheUser.getUserType() == 2)
                                             outString = new StringBuilder("用户已是 ♾️");
                                         else {
-                                            Invitecode invitecode = new Invitecode(AuthorityUtil.invitecode(), 0);
+                                            Invitecode invitecode = new Invitecode(AuthorityUtil.invitecode(), -1);
                                             AuthorityUtil.invitecodeService.invitecodeMapper.insert(invitecode);
                                             SendMessage giftMessage = new SendMessage(userId.toString(), "");
                                             giftMessage.setText("♾️: https://t.me/" + AuthorityUtil.botConfig.name + "?start=" + invitecode.getInvitecode());
@@ -443,9 +440,9 @@ public class CommandsHandler extends CommandLongPollingTelegramBot {
                                             String editCaptionInfo = MessageUtil.INSTANCE.getUserInfo(embyUserDto, cacheUser);
                                             editMessageCaption.setCaption(editCaptionInfo);
                                             InlineKeyboardRow rowUnblock = new InlineKeyboardRow();
-                                            if (cacheUser.getDeactivate()) {
-                                                rowUnblock.add(MessageUtil.INSTANCE.getUnblockButton(cacheUser));
-                                            }
+//                                            if (cacheUser.getDeactivate()) {
+//                                                rowUnblock.add(MessageUtil.INSTANCE.getUnblockButton(cacheUser));
+//                                            }
                                             rowUnblock.add(MessageUtil.INSTANCE.getCheckinButton(cacheUser));
                                             rows.add(rowUnblock);
                                             break;
@@ -548,10 +545,7 @@ public class CommandsHandler extends CommandLongPollingTelegramBot {
                                                 editMessageCaption.setCaption("注册码生成仅管理可以用");
                                             } else {
                                                 StringBuilder shopStringBuild = new StringBuilder();
-                                                shopStringBuild.append("输入指令, 指令说明(数量 类型)(ex: 1 1)\n类型:\n");
-                                                AuthorityUtil.shopService.shopMapper.selectList(null).forEach(shop -> {
-                                                    shopStringBuild.append(shop.getId() + ": " + (shop.getMonth() == 0 ? "白名单" : shop.getMonth() + "月") + "\n");
-                                                });
+                                                shopStringBuild.append("输入指令, 指令说明(数量 天数)(ex: 1 1)\n天数:\n-1 为白名单\n0 为注册码(注册后的剩余天数" + AuthorityUtil.botConfig.getExpDay() + ")\n大于 0 为续期天数");
                                                 editMessageCaption.setCaption(shopStringBuild.toString());
                                                 RedisUtil.set(ConstantStrings.INSTANCE.getRedisTypeKey(userId.toString(), ""), command, null);
                                             }
@@ -974,11 +968,12 @@ public class CommandsHandler extends CommandLongPollingTelegramBot {
                                                 if (sqlUser.getExchange() != null) {
                                                     Invitecode invitecode = AuthorityUtil.invitecodeService.invitecodeMapper.selectOne(new QueryWrapper<Invitecode>().lambda().eq(Invitecode::getInvitecode, sqlUser.getExchange()));
                                                     if (invitecode == null) {
-                                                        outDoing = "账单异常, 联系政工办处理";
+                                                        outDoing = "账单异常, 联系开发者处理";
                                                     } else {
                                                         outDoing = "开号成功, /start 查看信息\n默认密码空, 请及时修改密码";
                                                     }
                                                 } else {
+                                                    sqlUser.addExpDate(AuthorityUtil.botConfig.getExpDay());
                                                     outDoing = "开号成功, /start 查看信息\n默认密码空, 请及时修改密码";
                                                 }
                                             }
@@ -990,22 +985,23 @@ public class CommandsHandler extends CommandLongPollingTelegramBot {
                                         else
                                             try {
                                                 Integer count = Integer.parseInt(datas[0]);
-                                                Integer type = Integer.parseInt(datas[1]);
+                                                Integer days = Integer.parseInt(datas[1]);
                                                 com.ocd.bean.mysql.User shopUser = AuthorityUtil.userService.userMapper.selectOne(new QueryWrapper<com.ocd.bean.mysql.User>().lambda().eq(com.ocd.bean.mysql.User::getTgId, update.getMessage().getFrom().getId()));
                                                 if (!shopUser.getAdmin()) {
                                                     outDoing = "注册码生成仅管理可以用";
                                                 } else {
-                                                    Shop shop = AuthorityUtil.shopService.shopMapper.selectById(type);
-                                                    if (shop == null) outDoing = "商品不存在异常操作";
-                                                    else {
-                                                        StringBuilder cacheString = new StringBuilder();
-                                                        for (int i = 0; i < count; i++) {
-                                                            Invitecode invitecode = new Invitecode(AuthorityUtil.invitecode(), shop.getMonth());
-                                                            AuthorityUtil.invitecodeService.invitecodeMapper.insert(invitecode);
-                                                            cacheString.append("生成邀请链接(" + (shop.getMonth() == 0 ? "♾️" : "注册码") + ")  " + " https://t.me/" + AuthorityUtil.botConfig.name + "?start=" + invitecode.getInvitecode() + "\n");
-                                                        }
-                                                        outDoing = cacheString.toString();
+                                                    StringBuilder cacheString = new StringBuilder();
+                                                    for (int i = 0; i < count; i++) {
+                                                        Invitecode invitecode = new Invitecode(AuthorityUtil.invitecode(), days);
+                                                        AuthorityUtil.invitecodeService.invitecodeMapper.insert(invitecode);
+                                                        if (days == -1)
+                                                            cacheString.append("生成邀请链接(♾️)  " + " https://t.me/" + AuthorityUtil.botConfig.name + "?start=" + invitecode.getInvitecode() + "\n");
+                                                        if (days == 0)
+                                                            cacheString.append("生成邀请链接(注册码)  " + " https://t.me/" + AuthorityUtil.botConfig.name + "?start=" + invitecode.getInvitecode() + "\n");
+                                                        else
+                                                            cacheString.append("生成邀请链接(续期码 " + days + " 天)  " + " https://t.me/" + AuthorityUtil.botConfig.name + "?start=" + invitecode.getInvitecode() + "\n");
                                                     }
+                                                    outDoing = cacheString.toString();
                                                 }
                                             } catch (NumberFormatException e) {
                                                 outDoing = "参数错误";

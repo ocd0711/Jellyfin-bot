@@ -67,11 +67,11 @@ bot:
   channel: xxxxxx
   # @群组
   groupName: xxxxxx
-  # 解封积分
+  # 解封/续期积分
   unblockPoints: 150
   # 过期检测天数
   expDay: 30
-  # 是否删除账号
+  # 是否删除账号 - 过期账号 ${exp_del_day} 天后删除
   delete: true
   # 账号通知频道 ID
   notify_channel: xxxxxx
@@ -81,3 +81,11 @@ bot:
   head_photo: /tmp/img
   # 是否开启 活跃检测、用户状态同步 等功能
   clean_task: true
+  # 签到积分最小值
+  check_min: 1
+  # 签到积分最大值
+  check_max: 10
+  # 是否开启续期保号
+  open_auto_renewal: false
+  # 过期后停用多久删除
+  exp_del_day: 7

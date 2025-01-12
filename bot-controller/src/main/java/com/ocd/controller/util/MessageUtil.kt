@@ -385,9 +385,16 @@ object MessageUtil {
                     "积分: ${cacheUser.points}\n"
         if (isManage)
             out = out + "登录设备数量: ${EmbyUtil.getInstance().viewingEquipment(cacheUser.embyId).size}\n"
-        out = out + (if (AuthorityUtil.botConfig.delete)
-            "保号规则: ${if (cacheUser.userType == 2) "白名单 ♾️" else "${AuthorityUtil.botConfig.expDay} 天内有观看记录(无记录删号)"}"
-        else "保号规则: ${if (cacheUser.userType == 2) "白名单 ♾️" else "${AuthorityUtil.botConfig.expDay} 天内有观看记录(每周五自助解封/${AuthorityUtil.botConfig.unblockPoints} 积分解封)"}")
+        if (cacheUser.userType == 2)
+            out = out + "保号规则: 白名单 ♾️\n"
+        else {
+            out = """$out
+保号规则:
+  观看: ${if (AuthorityUtil.botConfig.cleanTask) "${AuthorityUtil.botConfig.expDay} 天内有观看记录" else "无"}
+  积分: ${if (AuthorityUtil.botConfig.openAutoRenewal) "${AuthorityUtil.botConfig.unblockPoints} 积分自动续期" else "无"}
+  以上条件不满足账户停用 ${AuthorityUtil.botConfig.expDelDay} 天后删号
+""".trimIndent()
+        }
         return out
     }
 
@@ -395,7 +402,7 @@ object MessageUtil {
         val redisKey = ConstantStrings.getRedisTypeKey(cacheUser.tgId, "points")
         if (RedisUtil.contain(redisKey)) return "今日已签到"
         RedisUtil.set(redisKey, Date(), secondsUntilNextMidnight())
-        val num = Random.nextInt(5, 10)
+        val num = Random.nextInt(AuthorityUtil.botConfig.checkMin, AuthorityUtil.botConfig.checkMax)
         cacheUser.points += num
         AuthorityUtil.userService.userMapper.updateById(cacheUser)
         return "签到获得积分: $num\n当前积分: ${cacheUser.points}\n"
@@ -412,20 +419,21 @@ object MessageUtil {
         return nextMidnight.toEpochSecond(ZoneOffset.UTC) - now.toEpochSecond(ZoneOffset.UTC)
     }
 
-    fun getAccountMessage(user: com.ocd.bean.mysql.User, embyUser: EmbyUserResult?, lastDate: String?): String {
+    fun getAccountMessage(user: com.ocd.bean.mysql.User, lastDate: String?, isPlay: Boolean): String {
         val action = if (AuthorityUtil.botConfig.delete && !user.haveEmby()) {
             "删除账户"
         } else {
-            "禁用账户" + if (AuthorityUtil.botConfig.delete) "(7 天内未解封删除用户)" else ""
+            "禁用账户${if (AuthorityUtil.botConfig.expDelDay > 0) " (${AuthorityUtil.botConfig.expDelDay} 内不启用则删除)" else ""}"
         }
-        val returnStr = escapeMarkdownV2("#ACCOUNT ${AuthorityUtil.botConfig.expDay} 天未观看 $action")
+        val returnStr =
+            escapeMarkdownV2("#ACCOUNT ${if (isPlay) "${AuthorityUtil.botConfig.expDay} 天未观看 $action" else "账户过期"}")
 
-        val embyName = escapeMarkdownV2(embyUser?.name ?: "Unknown User")
-        val embyId = escapeMarkdownV2(embyUser?.id ?: "N/A")
-        val tgId = escapeMarkdownV2(user.tgId ?: "0")
+        val embyName = escapeMarkdownV2(user.embyName ?: "Unknown User")
+        val embyId = escapeMarkdownV2(user.embyId ?: "N/A")
+        val tgId = escapeMarkdownV2(user.tgId)
 
         val endRes = """
-${user.tgId} 最后观看时间: $lastDate
+${user.tgId} 最后观看时间: $lastDate 到期时间: ${FormatUtil.dateToString(user.expTime)}
 [$embyName](tg://user?id=$tgId), $embyId
 $returnStr
     """

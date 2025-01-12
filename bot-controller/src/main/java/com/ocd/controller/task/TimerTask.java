@@ -1,7 +1,13 @@
 package com.ocd.controller.task;
 
+import cn.hutool.core.date.DateUtil;
+import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
+import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.ocd.bean.dto.jellby.PlaybackRecord;
+import com.ocd.bean.dto.jellby.PlaybackUserRecord;
+import com.ocd.bean.dto.result.EmbyUserResult;
 import com.ocd.bean.dto.result.PlaybackShowsResult;
+import com.ocd.bean.mysql.User;
 import com.ocd.controller.util.*;
 import com.ocd.util.FormatUtil;
 import lombok.extern.slf4j.Slf4j;
@@ -11,7 +17,9 @@ import org.springframework.scheduling.annotation.Async;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 import org.telegram.telegrambots.client.okhttp.OkHttpTelegramClient;
+import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
 import org.telegram.telegrambots.meta.api.methods.send.SendPhoto;
+import org.telegram.telegrambots.meta.exceptions.TelegramApiException;
 import org.telegram.telegrambots.meta.generics.TelegramClient;
 
 import java.util.Comparator;
@@ -31,15 +39,112 @@ public class TimerTask {
     private static Logger logger = LoggerFactory.getLogger(TimerTask.class);
 
     /**
-     * 1. 整点判断 emby 库内用户是否绑定 tg
-     * 2. 未绑定用户扬号
-     * 3. 清吧/会所同步
+     * 0 点判断 emby 库内用户是否绑定 tg, 同步账户配置
      */
     @Async("taskScheduler")
     @Scheduled(cron = "0 0 0 * * ?")
-    public void embyTask() {
-        if (AuthorityUtil.botConfig.getCleanTask())
-            AuthorityUtil.cleanTask(new OkHttpTelegramClient(AuthorityUtil.botConfig.token));
+    public void cleanUnbindAccount() {
+        List<EmbyUserResult> allEmbyUser = EmbyUtil.getInstance().getAllEmbyUser();
+        List<User> allUser = AuthorityUtil.userService.userMapper.selectList(new QueryWrapper<User>().lambda().isNotNull(User::getEmbyId));
+        TelegramClient telegramClient = new OkHttpTelegramClient(AuthorityUtil.botConfig.token);
+        SendMessage sendMessage = new SendMessage(AuthorityUtil.botConfig.notifyChannel, "");
+        allEmbyUser.stream().filter(embyUserResult -> !allUser.stream().map(User::getEmbyId).toList().contains(embyUserResult.getId())).forEach(embyUserResult -> {
+            try {
+                EmbyUtil.getInstance().deleteEmbyById(embyUserResult.getId());
+                sendMessage.setText(String.format("#bot检查扬号: 观影账号 %s ( %s ) 已被扬, 原因: 未绑定 tg 用户", embyUserResult.getName(), embyUserResult.getId()));
+                telegramClient.execute(sendMessage);
+            } catch (TelegramApiException e) {
+                log.error(e.toString());
+            }
+        });
+        allEmbyUser.stream().filter(embyUserResult -> !embyUserResult.getPolicy().getIsAdministrator() && allUser.stream().map(User::getEmbyId).toList().contains(embyUserResult.getId())).forEach(embyUserResult -> {
+            EmbyUtil.getInstance().initPolicy(embyUserResult.getId());
+        });
+    }
+
+    /**
+     * 0 点判断保号
+     */
+    @Async("taskScheduler")
+    @Scheduled(cron = "0 0 0 * * ?")
+    public void checkUser() {
+        Date expDate = DateUtil.beginOfDay(new Date());
+        LambdaQueryWrapper<User> queryWrapper = new QueryWrapper<User>().lambda()
+                .eq(User::getUserType, 1);
+//                .lt(User::getExpTime, expDate);
+        List<User> expEmbyUser = AuthorityUtil.userService.userMapper.selectList(queryWrapper);
+        TelegramClient telegramClient = new OkHttpTelegramClient(AuthorityUtil.botConfig.token);
+        SendMessage sendMessage = new SendMessage("", "");
+        expEmbyUser.forEach(user -> {
+            List<PlaybackUserRecord> activityLogs = EmbyUtil.getInstance().getUserPlayback(user.getEmbyId());
+            Long betweenPlayDay = activityLogs.isEmpty() ? null : DateUtil.betweenDay(activityLogs.get(0).getDateCreated(), new Date(), true);
+            Long betweenExpDay = DateUtil.betweenDay(user.getExpTime(), new Date(), true);
+            String lastDate = activityLogs.isEmpty() ? "无" : FormatUtil.INSTANCE.dateToString(activityLogs.get(0).getDateCreated());
+            if (AuthorityUtil.botConfig.getCleanTask() && (betweenPlayDay == null || betweenPlayDay >= AuthorityUtil.botConfig.getExpDay())) {
+                if (AuthorityUtil.botConfig.getDelete() && (betweenPlayDay == null || betweenPlayDay >= AuthorityUtil.botConfig.getExpDelDay() + AuthorityUtil.botConfig.getExpDelDay())) {
+                    EmbyUtil.getInstance().deleteUser(user);
+                    user.cleanEmby();
+                } else {
+                    EmbyUtil.getInstance().deactivateUser(user, true);
+                    user.setDeactivate(true);
+                }
+                sendMessage.enableMarkdownV2(true);
+                sendMessage.setChatId(AuthorityUtil.botConfig.notifyChannel);
+                sendMessage.setText(MessageUtil.INSTANCE.getAccountMessage(user, lastDate, true));
+                try {
+                    telegramClient.execute(sendMessage);
+                } catch (TelegramApiException e) {
+                    log.error(e.toString());
+                } finally {
+                    sendMessage.setChatId(user.getTgId());
+                    try {
+                        telegramClient.execute(sendMessage);
+                    } catch (TelegramApiException e) {
+                        log.error(e.toString());
+                    }
+                }
+                return;
+            }
+            if (AuthorityUtil.botConfig.getOpenAutoRenewal() && expDate.before(user.getExpTime())) {
+                if (user.getPoints() < AuthorityUtil.botConfig.getUnblockPoints()) {
+                    if (AuthorityUtil.botConfig.getDelete() && betweenExpDay >= AuthorityUtil.botConfig.getExpDelDay()) {
+                        EmbyUtil.getInstance().deleteUser(user);
+                        user.cleanEmby();
+                    } else {
+                        EmbyUtil.getInstance().deactivateUser(user, true);
+                        user.setDeactivate(true);
+                    }
+                    sendMessage.enableMarkdownV2(true);
+                    sendMessage.setChatId(AuthorityUtil.botConfig.notifyChannel);
+                    sendMessage.setText(MessageUtil.INSTANCE.getAccountMessage(user, lastDate, false));
+                    try {
+                        telegramClient.execute(sendMessage);
+                    } catch (TelegramApiException e) {
+                        log.error(e.toString());
+                    } finally {
+                        sendMessage.setChatId(user.getTgId());
+                        try {
+                            telegramClient.execute(sendMessage);
+                        } catch (TelegramApiException e) {
+                            log.error(e.toString());
+                        }
+                    }
+                } else {
+                    user.setPoints(user.getPoints() - AuthorityUtil.botConfig.getUnblockPoints());
+                    user.addExpDate(AuthorityUtil.botConfig.getExpDay());
+                    AuthorityUtil.userService.userMapper.updateById(user);
+                    sendMessage.enableMarkdownV2(false);
+                    sendMessage.setChatId(user.getTgId());
+                    sendMessage.setText("使用 " + AuthorityUtil.botConfig.getUnblockPoints() + " 自动续期 " + AuthorityUtil.botConfig.getExpDay() + " 天");
+                    try {
+                        telegramClient.execute(sendMessage);
+                    } catch (TelegramApiException e) {
+                        log.error(e.toString());
+                    }
+                }
+                return;
+            }
+        });
     }
 
     /**

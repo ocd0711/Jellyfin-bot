@@ -42,4 +42,12 @@ class BotConfig {
     lateinit var headPhoto: String
 
     var cleanTask: Boolean = true
+
+    var checkMin: Int = 1
+
+    var checkMax: Int = 10
+
+    var openAutoRenewal: Boolean = false
+
+    var expDelDay: Int = 7
 }
