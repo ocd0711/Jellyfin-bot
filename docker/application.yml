@@ -91,3 +91,5 @@ bot:
   exp_del_day: 7
   # 是否允许白名单直接开号
   allow_white_register: true
+  # 是否删除未绑定账号
+  clean_unbind_account: true

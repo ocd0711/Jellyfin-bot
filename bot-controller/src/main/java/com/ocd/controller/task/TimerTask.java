@@ -48,15 +48,16 @@ public class TimerTask {
         List<User> allUser = AuthorityUtil.userService.userMapper.selectList(new QueryWrapper<User>().lambda().isNotNull(User::getEmbyId));
         TelegramClient telegramClient = new OkHttpTelegramClient(AuthorityUtil.botConfig.token);
         SendMessage sendMessage = new SendMessage(AuthorityUtil.botConfig.notifyChannel, "");
-        allEmbyUser.stream().filter(embyUserResult -> !allUser.stream().map(User::getEmbyId).toList().contains(embyUserResult.getId())).forEach(embyUserResult -> {
-            try {
-                EmbyUtil.getInstance().deleteEmbyById(embyUserResult.getId());
-                sendMessage.setText(String.format("#bot检查扬号: 观影账号 %s ( %s ) 已被扬, 原因: 未绑定 tg 用户", embyUserResult.getName(), embyUserResult.getId()));
-                telegramClient.execute(sendMessage);
-            } catch (TelegramApiException e) {
-                log.error(e.toString());
-            }
-        });
+        if (AuthorityUtil.botConfig.getCleanUnbindAccount())
+            allEmbyUser.stream().filter(embyUserResult -> !allUser.stream().map(User::getEmbyId).toList().contains(embyUserResult.getId())).forEach(embyUserResult -> {
+                try {
+                    EmbyUtil.getInstance().deleteEmbyById(embyUserResult.getId());
+                    sendMessage.setText(String.format("#bot检查扬号: 观影账号 %s ( %s ) 已被扬, 原因: 未绑定 tg 用户", embyUserResult.getName(), embyUserResult.getId()));
+                    telegramClient.execute(sendMessage);
+                } catch (TelegramApiException e) {
+                    log.error(e.toString());
+                }
+            });
         allEmbyUser.stream().filter(embyUserResult -> !embyUserResult.getPolicy().getIsAdministrator() && allUser.stream().map(User::getEmbyId).toList().contains(embyUserResult.getId())).forEach(embyUserResult -> {
             EmbyUtil.getInstance().initPolicy(embyUserResult.getId());
         });
