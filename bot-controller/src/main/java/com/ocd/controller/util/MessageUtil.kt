@@ -426,7 +426,7 @@ object MessageUtil {
             "禁用账户${if (AuthorityUtil.botConfig.expDelDay > 0) " (${AuthorityUtil.botConfig.expDelDay} 内不启用则删除)" else ""}"
         }
         val returnStr =
-            escapeMarkdownV2("#ACCOUNT ${if (isPlay) "${AuthorityUtil.botConfig.expDay} 天未观看 $action" else "账户过期"}")
+            escapeMarkdownV2("#ACCOUNT ${if (isPlay) "${AuthorityUtil.botConfig.expDay} 天未观看 $action" else "账户过期 $action"}")
 
         val embyName = escapeMarkdownV2(user.embyName ?: "Unknown User")
         val embyId = escapeMarkdownV2(user.embyId ?: "N/A")

@@ -85,7 +85,7 @@ bot:
   check_min: 1
   # 签到积分最大值
   check_max: 10
-  # 是否开启续期保号
+  # 是否开启续期保号 - 同时开启 clean_task 的情况, 过期时间优先于观看
   open_auto_renewal: false
   # 过期后停用多久删除
   exp_del_day: 7
