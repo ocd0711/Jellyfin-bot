@@ -350,9 +350,9 @@ public class CommandsHandler extends CommandLongPollingTelegramBot {
                                                 editMessageCaption.setCaption("bot 滚蛋");
                                             else {
                                                 if (cacheUser == null)
-                                                    editMessageCaption.setCaption("不是探花用户!");
+                                                    editMessageCaption.setCaption("不是" + AuthorityUtil.botConfig.groupNick + "用户!");
                                                 else if (!cacheUser.getSuperAdmin()) {
-                                                    editMessageCaption.setCaption("政工办超管才允许使用, 别试了");
+                                                    editMessageCaption.setCaption("超管才允许使用, 别试了");
                                                 } else {
                                                     AuthorityUtil.openRegister = !AuthorityUtil.openRegister;
                                                     editMessageCaption.setCaption(MessageUtil.INSTANCE.getStartMessage(update.getCallbackQuery().getFrom().getFirstName()));
@@ -399,7 +399,7 @@ public class CommandsHandler extends CommandLongPollingTelegramBot {
                                             else if (!cacheUser.haveEmby() || cacheUser.getDeactivate()) {
                                                 editCaptionHide.append("无账号无法操作");
                                             } else {
-                                                editCaptionHide.append(EmbyUtil.getInstance().filterNsfw(cacheUser) ? "切换成功 /start 查看" : "切换失败, 联系政工办修复 bug");
+                                                editCaptionHide.append(EmbyUtil.getInstance().filterNsfw(cacheUser) ? "切换成功 /start 查看" : "切换失败, 联系开发者修复 bug");
                                             }
                                             editMessageCaption.setCaption(editCaptionHide.toString());
                                             break;
@@ -889,7 +889,8 @@ public class CommandsHandler extends CommandLongPollingTelegramBot {
                         if (sqlUser.getAdmin()) {
                             try {
                                 com.ocd.bean.mysql.User cacheUser = AuthorityUtil.userService.userMapper.selectOne(new QueryWrapper<com.ocd.bean.mysql.User>().eq("tg_id", replyUser.getId()));
-                                switch (message.getText()) {
+                                String[] datas = message.getText().split(" ");
+                                switch (datas[0]) {
                                     case "id":
                                         outString = id(cacheUser, replyUser, deleteMessage, outString, sendMessageRequest, message);
                                         break;
@@ -903,6 +904,22 @@ public class CommandsHandler extends CommandLongPollingTelegramBot {
                                         UnpinChatMessage unpinChatMessage = new UnpinChatMessage(message.getChatId().toString(), message.getReplyToMessage().getMessageId(), "");
                                         telegramClient.execute(unpinChatMessage);
                                         telegramClient.execute(deleteMessage);
+                                        break;
+                                    case "renew":
+                                        try {
+                                            int days = Integer.parseInt(datas[1]);
+                                            if (cacheUser.haveEmby() || cacheUser.getDeactivate())
+                                                outString = "用户暂无观影账号/账号已停用无法操作";
+                                            else {
+                                                Date cacheDate = cacheUser.getExpTime();
+                                                cacheUser.setExpTime(DateUtil.offsetDay(cacheDate, days));
+                                                AuthorityUtil.userService.userMapper.updateById(cacheUser);
+                                                outString = String.format("用户 %s 账号有效期调整由 %s 调整至 %s",
+                                                        cacheUser.getTgId(), FormatUtil.INSTANCE.dateToString(cacheDate), cacheUser.getExpTime());
+                                            }
+                                        } catch (NumberFormatException e) {
+                                            outString = "renew 参数错误";
+                                        }
                                         break;
                                 }
                             } catch (TelegramApiException e) {

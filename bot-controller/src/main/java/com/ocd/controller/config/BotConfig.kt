@@ -50,4 +50,6 @@ class BotConfig {
     var openAutoRenewal: Boolean = false
 
     var expDelDay: Int = 7
+
+    var allowWhiteRegister: Boolean = true
 }

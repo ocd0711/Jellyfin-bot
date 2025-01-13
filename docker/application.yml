@@ -89,3 +89,5 @@ bot:
   open_auto_renewal: false
   # 过期后停用多久删除
   exp_del_day: 7
+  # 是否允许白名单直接开号
+  allow_white_register: true

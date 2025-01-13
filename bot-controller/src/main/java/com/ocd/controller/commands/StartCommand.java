@@ -128,7 +128,7 @@ public class StartCommand extends BotCommand {
                         sendPhotoRequest.setCaption(outStr);
                     }
                 } else {
-                    if (invitecode.getDays() > 0) {
+                    if (invitecode.getDays() > 0 || (!AuthorityUtil.botConfig.getAllowWhiteRegister() && invitecode.getDays() == -1)) {
                         sendPhotoRequest.setCaption("此为续期码, 无法注册");
                     } else if (sqlUser.getExchange() != null) {
                         sendPhotoRequest.setCaption("当前有未使用的兑换码, 先开号再使用新兑换码");

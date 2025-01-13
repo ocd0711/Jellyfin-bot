@@ -34,9 +34,9 @@ public class UserNotifyCommand extends BotCommand {
             if (user.getIsBot()) outString = "bot 滚蛋";
             else {
                 com.ocd.bean.mysql.User sqlUser = AuthorityUtil.userService.userMapper.selectOne(new QueryWrapper<com.ocd.bean.mysql.User>().eq("tg_id", user.getId()));
-                if (sqlUser == null) outString = "不是探花用户!";
+                if (sqlUser == null) outString = "不是" + AuthorityUtil.botConfig.groupNick + "用户!";
                 else if (!sqlUser.getSuperAdmin()) {
-                    outString = "政工办管理才允许使用, 别试了";
+                    outString = "管理才允许使用, 别试了";
                 } else {
                     SendMessage outUser = new SendMessage("", "");
                     AuthorityUtil.userService.userMapper.selectList(new QueryWrapper<com.ocd.bean.mysql.User>().eq("start_bot", 1).eq("vip_deactivate", 0).isNotNull("emby_vip_id")).forEach(it -> {
