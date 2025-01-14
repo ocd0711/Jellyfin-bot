@@ -273,7 +273,7 @@ public class CommandsHandler extends CommandLongPollingTelegramBot {
                                     }
                                     break;
                                 case "gift":
-                                    if (cacheUser == null) {
+                                    if (cacheUser == null || !cacheUser.getStartBot()) {
                                         outString = new StringBuilder("用户未启用 bot 无法赠送账号");
                                     } else if (chatMember.getUser().getIsBot()) {
                                         outString = new StringBuilder("此为机器人无法赠送");
@@ -294,7 +294,7 @@ public class CommandsHandler extends CommandLongPollingTelegramBot {
                                     }
                                     break;
                                 case "mail":
-                                    if (cacheUser == null) {
+                                    if (cacheUser == null || !cacheUser.getStartBot()) {
                                         outString = new StringBuilder("用户未启用 bot 无法赠送帐号");
                                     } else if (chatMember.getUser().getIsBot()) {
                                         outString = new StringBuilder("此为机器人禁止赠送");
@@ -678,6 +678,7 @@ public class CommandsHandler extends CommandLongPollingTelegramBot {
                             case "member":
                                 if (groupUserCache == null) {
                                     groupUserCache = new com.ocd.bean.mysql.User();
+                                    groupUserCache.setStartBot(false);
                                     groupUserCache.setTgId(myChatMemberUser.getId().toString());
                                     AuthorityUtil.userService.createUser(groupUserCache);
                                     SendMessage sendMessageRequestJoin = new SendMessage(userChat.getId().toString(), "");
