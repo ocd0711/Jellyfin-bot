@@ -389,6 +389,7 @@ object MessageUtil {
             out = out + "保号规则: 白名单 ♾️\n"
         else {
             out = """$out
+${if (AuthorityUtil.botConfig.openAutoRenewal) "到期时间: ${FormatUtil.dateToString(cacheUser.expTime)}" else ""}
 保号规则:
   观看: ${if (AuthorityUtil.botConfig.cleanTask) "${AuthorityUtil.botConfig.expDay} 天内有观看记录" else "无"}
   积分: ${if (AuthorityUtil.botConfig.openAutoRenewal) "${AuthorityUtil.botConfig.unblockPoints} 积分自动续期" else "无"}
