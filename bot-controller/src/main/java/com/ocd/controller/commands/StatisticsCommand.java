@@ -34,11 +34,9 @@ import java.util.List;
 @Slf4j
 public class StatisticsCommand extends BotCommand {
 
-    private final ICommandRegistry commandRegistry;
 
-    public StatisticsCommand(ICommandRegistry commandRegistry) {
+    public StatisticsCommand() {
         super("st", "统计用户设备(仅限超管)");
-        this.commandRegistry = commandRegistry;
     }
 
     @Override

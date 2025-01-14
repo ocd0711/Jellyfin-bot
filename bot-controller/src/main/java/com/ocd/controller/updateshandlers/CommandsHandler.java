@@ -8,10 +8,7 @@ import com.isen.bean.constant.ConstantStrings;
 import com.ocd.bean.dto.result.EmbyUserResult;
 import com.ocd.bean.mysql.Invitecode;
 import com.ocd.bean.mysql.Line;
-import com.ocd.controller.commands.OpenCommand;
-import com.ocd.controller.commands.StartCommand;
-import com.ocd.controller.commands.StatisticsCommand;
-import com.ocd.controller.commands.UserNotifyCommand;
+import com.ocd.controller.commands.*;
 import com.ocd.controller.util.AuthorityUtil;
 import com.ocd.controller.util.EmbyUtil;
 import com.ocd.controller.util.MessageUtil;
@@ -75,11 +72,11 @@ public class CommandsHandler extends CommandLongPollingTelegramBot {
             UserService userService, LineService lineService) {
         super(new OkHttpTelegramClient(botToken), true, () -> botUsername);
         StartCommand startCommand = new StartCommand(this);
-        StatisticsCommand statisticsCommand = new StatisticsCommand(this);
         register(startCommand);
-        register(statisticsCommand);
+        register(new StatisticsCommand());
         register(new UserNotifyCommand());
         register(new OpenCommand());
+        register(new RenewAllCommand());
 
         registerDefaultAction((absSender, message) -> {
             SendMessage commandUnknownMessage = new SendMessage(message.getChatId().toString(), "");
@@ -451,6 +448,10 @@ public class CommandsHandler extends CommandLongPollingTelegramBot {
                                             editMessageCaption.setCaption(MessageUtil.INSTANCE.getStartMessage(update.getCallbackQuery().getFrom().getFirstName(), true));
                                             if (cacheUser.getUserType() == 0 && EmbyUtil.getInstance().getUserByEmbyId(cacheUser.getEmbyId()) != null) {
                                                 cacheUser.setUserType(1);
+                                                AuthorityUtil.userService.userMapper.updateById(cacheUser);
+                                            }
+                                            if (AuthorityUtil.botConfig.getOpenAutoRenewal() && cacheUser.getExpTime() == null) {
+                                                cacheUser.addExpDate(AuthorityUtil.botConfig.getExpDay());
                                                 AuthorityUtil.userService.userMapper.updateById(cacheUser);
                                             }
                                             break;

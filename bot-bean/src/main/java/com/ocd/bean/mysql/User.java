@@ -153,6 +153,8 @@ public class User {
         this.embyId = user.getEmbyId();
         this.userType = user.getUserType();
         this.deactivate = user.getDeactivate();
+        this.expTime = user.expTime;
+        this.points += user.points;
     }
 
     public void addExpDate(Integer days) {

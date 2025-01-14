@@ -107,7 +107,18 @@ public class TimerTask {
                     }
                     return;
                 }
-            if (AuthorityUtil.botConfig.getOpenAutoRenewal() && expDate.before(user.getExpTime())) {
+            if (AuthorityUtil.botConfig.getOpenAutoRenewal() && user.getExpTime() == null) {
+                user.addExpDate(AuthorityUtil.botConfig.getExpDay());
+                AuthorityUtil.userService.userMapper.updateById(user);
+                sendMessage.enableMarkdownV2(false);
+                sendMessage.setChatId(user.getTgId());
+                sendMessage.setText("现开启积分保号, 无过期时间用户赠送 " + AuthorityUtil.botConfig.getExpDay() + " 天");
+                try {
+                    telegramClient.execute(sendMessage);
+                } catch (TelegramApiException e) {
+                    // nothing
+                }
+            } else if (AuthorityUtil.botConfig.getOpenAutoRenewal() && expDate.before(user.getExpTime())) {
                 if (user.getPoints() < AuthorityUtil.botConfig.getUnblockPoints()) {
                     if (AuthorityUtil.botConfig.getDelete() && betweenExpDay >= AuthorityUtil.botConfig.getExpDelDay()) {
                         EmbyUtil.getInstance().deleteUser(user);
