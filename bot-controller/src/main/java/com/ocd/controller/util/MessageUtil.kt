@@ -389,6 +389,7 @@ object MessageUtil {
             out = out + "保号规则: 白名单 ♾️\n"
         else {
             out = """$out
+${if (AuthorityUtil.botConfig.allowUserUnlockAccount) "(${AuthorityUtil.botConfig.unblockPoints} 积分自助解封)" else ""}
 ${if (AuthorityUtil.botConfig.openAutoRenewal || AuthorityUtil.botConfig.enableExpLife) "到期时间: ${FormatUtil.dateToString(cacheUser.expTime)}" else ""}
 保号规则:
   到期: ${if (AuthorityUtil.botConfig.enableExpLife) "开" else "关"}
