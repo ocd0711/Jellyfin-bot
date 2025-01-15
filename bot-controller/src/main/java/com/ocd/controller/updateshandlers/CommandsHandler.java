@@ -48,8 +48,6 @@ import org.telegram.telegrambots.meta.exceptions.TelegramApiException;
 
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
-import java.time.DayOfWeek;
-import java.time.LocalDate;
 import java.util.*;
 
 /**
@@ -437,9 +435,9 @@ public class CommandsHandler extends CommandLongPollingTelegramBot {
                                             String editCaptionInfo = MessageUtil.INSTANCE.getUserInfo(embyUserDto, cacheUser);
                                             editMessageCaption.setCaption(editCaptionInfo);
                                             InlineKeyboardRow rowUnblock = new InlineKeyboardRow();
-//                                            if (cacheUser.getDeactivate()) {
-//                                                rowUnblock.add(MessageUtil.INSTANCE.getUnblockButton(cacheUser));
-//                                            }
+                                            if (AuthorityUtil.botConfig.getAllowUserUnlockAccount() && cacheUser.getDeactivate()) {
+                                                rowUnblock.add(MessageUtil.INSTANCE.getUnblockButton(cacheUser));
+                                            }
                                             rowUnblock.add(MessageUtil.INSTANCE.getCheckinButton(cacheUser));
                                             rows.add(rowUnblock);
                                             break;
@@ -460,19 +458,21 @@ public class CommandsHandler extends CommandLongPollingTelegramBot {
                                                 editMessageCaption.setCaption("无账户, 无法操作");
                                             } else {
                                                 EmbyUserResult embyUserDtoUnblock = EmbyUtil.getInstance().getUserByEmbyId(cacheUser.getEmbyId());
-                                                DayOfWeek dayOfWeek = LocalDate.now().getDayOfWeek();
-                                                if (dayOfWeek == DayOfWeek.FRIDAY) {
+//                                                DayOfWeek dayOfWeek = LocalDate.now().getDayOfWeek();
+//                                                if (dayOfWeek == DayOfWeek.FRIDAY) {
+//                                                    EmbyUtil.getInstance().deactivateUser(cacheUser, false);
+//                                                    editMessageCaption.setCaption(MessageUtil.INSTANCE.getUserInfo(embyUserDtoUnblock, cacheUser) + "\n周五大赦天下 - 解除");
+//                                                } else {
+                                                if (cacheUser.getPoints() >= AuthorityUtil.botConfig.getUnblockPoints()) {
                                                     EmbyUtil.getInstance().deactivateUser(cacheUser, false);
-                                                    editMessageCaption.setCaption(MessageUtil.INSTANCE.getUserInfo(embyUserDtoUnblock, cacheUser) + "\n周五大赦天下 - 解除");
+                                                    cacheUser.setPoints(cacheUser.getPoints() - AuthorityUtil.botConfig.getUnblockPoints());
+                                                    AuthorityUtil.userService.userMapper.updateById(cacheUser);
+                                                    editMessageCaption.setCaption(MessageUtil.INSTANCE.getUserInfo(embyUserDtoUnblock, cacheUser));
                                                 } else {
-                                                    if (cacheUser.getPoints() >= AuthorityUtil.botConfig.getUnblockPoints()) {
-                                                        EmbyUtil.getInstance().deactivateUser(cacheUser, false);
-                                                        cacheUser.setPoints(cacheUser.getPoints() - AuthorityUtil.botConfig.getUnblockPoints());
-                                                        AuthorityUtil.userService.userMapper.updateById(cacheUser);
-                                                    } else {
-                                                        editMessageCaption.setCaption("非周五无法解封/积分不足");
-                                                    }
+//                                                    editMessageCaption.setCaption("非周五无法解封/积分不足");
+                                                    editMessageCaption.setCaption("积分不足 " + AuthorityUtil.botConfig.getUnblockPoints());
                                                 }
+//                                                }
                                             }
                                             break;
                                         case "checkin":

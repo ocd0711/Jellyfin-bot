@@ -54,4 +54,8 @@ class BotConfig {
     var allowWhiteRegister: Boolean = true
 
     var cleanUnbindAccount: Boolean = true
+
+    var enableExpLife: Boolean = false
+
+    var allowUserUnlockAccount = false
 }

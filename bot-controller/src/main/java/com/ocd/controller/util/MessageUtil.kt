@@ -389,11 +389,13 @@ object MessageUtil {
             out = out + "保号规则: 白名单 ♾️\n"
         else {
             out = """$out
-${if (AuthorityUtil.botConfig.openAutoRenewal) "到期时间: ${FormatUtil.dateToString(cacheUser.expTime)}" else ""}
+${if (AuthorityUtil.botConfig.openAutoRenewal || AuthorityUtil.botConfig.enableExpLife) "到期时间: ${FormatUtil.dateToString(cacheUser.expTime)}" else ""}
 保号规则:
+  到期: ${if (AuthorityUtil.botConfig.enableExpLife) "开" else "关"}
   观看: ${if (AuthorityUtil.botConfig.cleanTask) "${AuthorityUtil.botConfig.expDay} 天内有观看记录" else "无"}
-  积分: ${if (AuthorityUtil.botConfig.openAutoRenewal) "${AuthorityUtil.botConfig.unblockPoints} 积分自动续期" else "无"}
+  积分: ${if (AuthorityUtil.botConfig.openAutoRenewal) "${AuthorityUtil.botConfig.unblockPoints} 积分自动续期" else "未开启自动续期"}
   以上条件不满足账户停用 ${AuthorityUtil.botConfig.expDelDay} 天后删号
+  (如开启到期限制, 其余保号条件无效, 仅以到期时间为准)
 """.trimIndent()
         }
         return out

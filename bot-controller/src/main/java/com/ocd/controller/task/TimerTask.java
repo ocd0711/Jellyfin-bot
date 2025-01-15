@@ -81,6 +81,46 @@ public class TimerTask {
             Long betweenPlayDay = activityLogs.isEmpty() ? null : DateUtil.betweenDay(activityLogs.get(0).getDateCreated(), new Date(), true);
             Long betweenExpDay = DateUtil.betweenDay(user.getExpTime(), new Date(), true);
             String lastDate = activityLogs.isEmpty() ? "无" : FormatUtil.INSTANCE.dateToString(activityLogs.get(0).getDateCreated());
+            if (AuthorityUtil.botConfig.getEnableExpLife()) {
+                if (user.getExpTime() == null) {
+                    user.addExpDate(AuthorityUtil.botConfig.getExpDay());
+                    AuthorityUtil.userService.userMapper.updateById(user);
+                    sendMessage.enableMarkdownV2(false);
+                    sendMessage.setChatId(user.getTgId());
+                    sendMessage.setText("现开启账户到期时间, 无过期时间用户赠送 " + AuthorityUtil.botConfig.getExpDay() + " 天");
+                    try {
+                        telegramClient.execute(sendMessage);
+                    } catch (TelegramApiException e) {
+                        // nothing
+                    }
+                } else {
+                    if (expDate.before(user.getExpTime())) {
+                        if (AuthorityUtil.botConfig.getDelete() && betweenExpDay >= AuthorityUtil.botConfig.getExpDelDay()) {
+                            EmbyUtil.getInstance().deleteUser(user);
+                            user.cleanEmby();
+                        } else {
+                            EmbyUtil.getInstance().deactivateUser(user, true);
+                            user.setDeactivate(true);
+                        }
+                        sendMessage.enableMarkdownV2(true);
+                        sendMessage.setChatId(AuthorityUtil.botConfig.notifyChannel);
+                        sendMessage.setText(MessageUtil.INSTANCE.getAccountMessage(user, lastDate, false));
+                        try {
+                            telegramClient.execute(sendMessage);
+                        } catch (TelegramApiException e) {
+                            log.error(e.toString());
+                        } finally {
+                            sendMessage.setChatId(user.getTgId());
+                            try {
+                                telegramClient.execute(sendMessage);
+                            } catch (TelegramApiException e) {
+                                log.error(e.toString());
+                            }
+                        }
+                    }
+                }
+                return;
+            }
             if (AuthorityUtil.botConfig.getOpenAutoRenewal() && expDate.before(user.getExpTime()) || !AuthorityUtil.botConfig.getOpenAutoRenewal())
                 if (AuthorityUtil.botConfig.getCleanTask() && (betweenPlayDay == null || betweenPlayDay >= AuthorityUtil.botConfig.getExpDay())) {
                     if (AuthorityUtil.botConfig.getDelete() && (betweenPlayDay == null || betweenPlayDay >= AuthorityUtil.botConfig.getExpDelDay() + AuthorityUtil.botConfig.getExpDelDay())) {

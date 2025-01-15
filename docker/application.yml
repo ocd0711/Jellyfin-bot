@@ -67,8 +67,6 @@ bot:
   channel: xxxxxx
   # @群组
   groupName: xxxxxx
-  # 解封/续期积分
-  unblockPoints: 150
   # 过期检测天数
   expDay: 30
   # 是否删除账号 - 过期账号 ${exp_del_day} 天后删除
@@ -79,17 +77,23 @@ bot:
   wikiUrl: https://ocdlive.com
   # 头图存储目录(目录下可以多张, 每次随机取一张做展示)
   head_photo: /tmp/img
-  # 是否开启 活跃检测、用户状态同步 等功能
-  clean_task: true
   # 签到积分最小值
   check_min: 1
   # 签到积分最大值
   check_max: 10
-  # 是否开启续期保号 - 同时开启 clean_task 的情况, 过期时间优先于观看
-  open_auto_renewal: false
   # 过期后停用多久删除
   exp_del_day: 7
   # 是否允许白名单直接开号
   allow_white_register: true
+  # 是否允许用户执行用积分解封账号(解封的积分对应 $unblockPoints)
+  allow_user_unlock_account: false
+  # 保号配置相关参数, 条件可以自由组合, 满足付费服务/公益多种条件 --------------------------------- ⬇️
   # 是否删除未绑定账号
   clean_unbind_account: true
+  # 是否开启过期时间保号判断 - 此选项优先于 open_auto_renewal/clean_task
+  enable_exp_life: false
+  # 是否开积分自动启续期保号 - 同时开启 clean_task 的情况, 过期时间优先于观看
+  open_auto_renewal: false
+  # 是否开启观看保号
+  clean_task: true
+  # 保号配置相关参数, 条件可以自由组合, 满足付费服务/公益多种条件 --------------------------------- ⬆️
