@@ -384,13 +384,21 @@ object MessageUtil {
                     "最后观看时间: ${activityLog}\n" +
                     "积分: ${cacheUser.points}\n"
         if (isManage)
-            out = out + "登录设备数量: ${EmbyUtil.getInstance().viewingEquipment(cacheUser.embyId).size}\n"
+            out = out + "登录设备数量: ${
+                if (cacheUser.haveEmby()) EmbyUtil.getInstance().viewingEquipment(cacheUser.embyId).size else 0
+            }\n"
         if (cacheUser.userType == 2)
             out = out + "保号规则: 白名单 ♾️\n"
         else {
             out = """$out
 ${if (AuthorityUtil.botConfig.allowUserUnlockAccount) "(${AuthorityUtil.botConfig.unblockPoints} 积分自助解封)" else ""}
-${if (AuthorityUtil.botConfig.openAutoRenewal || AuthorityUtil.botConfig.enableExpLife) "到期时间: ${FormatUtil.dateToString(cacheUser.expTime)}" else ""}
+${
+                if (AuthorityUtil.botConfig.openAutoRenewal || AuthorityUtil.botConfig.enableExpLife) "到期时间: ${
+                    FormatUtil.dateToString(
+                        cacheUser.expTime
+                    )
+                }" else ""
+            }
 保号规则:
   到期: ${if (AuthorityUtil.botConfig.enableExpLife) "开" else "关"}
   观看: ${if (AuthorityUtil.botConfig.cleanTask) "${AuthorityUtil.botConfig.expDay} 天内有观看记录" else "无"}
