@@ -710,7 +710,7 @@ class EmbyUtil {
             }
             val map: HashMap<String, Any> = HashMap()
             map["CustomQueryString"] =
-                "SELECT * FROM PlaybackActivity WHERE UserId = '$embyId' ORDER BY DateCreated DESC ${if (limitCount != null) "LIMIT $limitCount" else ""}"
+                "SELECT DateCreated, UserId, ItemId, ItemType, ItemName, PlaybackMethod, ClientName, DeviceName, PlayDuration FROM PlaybackActivity WHERE UserId = '$embyId' ORDER BY DateCreated DESC ${if (limitCount != null) "LIMIT $limitCount" else ""}"
             map["ReplaceUserId"] = false
             val entity = HttpEntity(map, headers)
             val uri = UriComponentsBuilder.fromHttpUrl("${url}user_usage_stats/submit_custom_query")
@@ -781,7 +781,7 @@ class EmbyUtil {
             val map: HashMap<String, Any> = HashMap()
             map["CustomQueryString"] =
                 """
-                    SELECT *, substr(ItemName,0, instr(ItemName, ' - ')) AS name, SUM(PlayDuration) AS total_duarion, COUNT(1) AS count FROM PlaybackActivity
+                    SELECT DateCreated, UserId, ItemId, ItemType, ItemName, PlaybackMethod, ClientName, DeviceName, PlayDuration, substr(ItemName,0, instr(ItemName, ' - ')) AS name, SUM(PlayDuration) AS total_duarion, COUNT(1) AS count FROM PlaybackActivity
                     WHERE ItemType = '${if (isMovie) "Movie" else "Episode"}'
                     AND DateCreated >= '$startStr'
                     AND DateCreated <= '$endStr'
