@@ -13,6 +13,7 @@ import org.telegram.telegrambots.extensions.bots.commandbot.commands.IBotCommand
 import org.telegram.telegrambots.extensions.bots.commandbot.commands.ICommandRegistry;
 import org.telegram.telegrambots.meta.api.methods.commands.SetMyCommands;
 import org.telegram.telegrambots.meta.api.methods.send.SendPhoto;
+import org.telegram.telegrambots.meta.api.methods.updatingmessages.DeleteMessage;
 import org.telegram.telegrambots.meta.api.objects.User;
 import org.telegram.telegrambots.meta.api.objects.chat.Chat;
 import org.telegram.telegrambots.meta.exceptions.TelegramApiException;
@@ -38,6 +39,7 @@ public class StartCommand extends BotCommand {
 
     @Override
     public void execute(TelegramClient telegramClient, User user, Chat chat, String[] strings) {
+        if (!chat.getId().equals(user.getId())) return;
         MessageUtil.INSTANCE.launchInGlobalScope((Runnable) -> {
             SendPhoto sendPhotoRequest = new SendPhoto(chat.getId().toString(), MessageUtil.INSTANCE.getHeadImageAsInputFile());
             String outString = AuthorityUtil.checkTgUserStart(user);
