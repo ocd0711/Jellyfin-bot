@@ -431,7 +431,13 @@ ${
         return nextMidnight.toEpochSecond(ZoneOffset.UTC) - now.toEpochSecond(ZoneOffset.UTC)
     }
 
-    fun getAccountMessage(user: com.ocd.bean.mysql.User, lastDate: String?, isPlay: Boolean): String {
+    fun getAccountMessage(
+        embyName: String,
+        embyId: String,
+        user: com.ocd.bean.mysql.User,
+        lastDate: String?,
+        isPlay: Boolean
+    ): String {
         val action = if (AuthorityUtil.botConfig.delete && !user.haveEmby()) {
             "删除账户"
         } else {

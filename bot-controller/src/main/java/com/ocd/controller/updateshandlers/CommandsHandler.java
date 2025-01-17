@@ -969,7 +969,7 @@ public class CommandsHandler extends CommandLongPollingTelegramBot {
                                             } else {
                                                 operatorsUser.updateEmbyByEmbyUser(embyUserResult);
                                                 AuthorityUtil.userService.userMapper.updateById(operatorsUser);
-                                                outDoing = "成功绑定" + AuthorityUtil.botConfig.groupNick + ", /start 操纵面板";
+                                                outDoing = "成功绑定" + AuthorityUtil.botConfig.groupNick + ", /start 操作面板";
                                             }
                                         }
                                         break;

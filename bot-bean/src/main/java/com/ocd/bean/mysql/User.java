@@ -123,6 +123,7 @@ public class User {
         embyName = null;
         deactivate = false;
         exchange = null;
+        expTime = null;
     }
 
     public void cleanWhite() {

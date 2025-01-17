@@ -74,6 +74,8 @@ public class TimerTask {
         TelegramClient telegramClient = new OkHttpTelegramClient(AuthorityUtil.botConfig.token);
         SendMessage sendMessage = new SendMessage("", "");
         expEmbyUser.forEach(user -> {
+            String embyNameCache = user.getEmbyName();
+            String embyIdCache = user.getEmbyId();
             EmbyUtil.getInstance().initPolicy(user.getEmbyId(), user.getDeactivate());
             List<PlaybackUserRecord> activityLogs = EmbyUtil.getInstance().getUserPlayback(user.getEmbyId());
             Long betweenPlayDay = activityLogs.isEmpty() ? null : DateUtil.betweenDay(activityLogs.get(0).getDateCreated(), new Date(), true);
@@ -102,7 +104,7 @@ public class TimerTask {
                         }
                         sendMessage.enableMarkdownV2(true);
                         sendMessage.setChatId(AuthorityUtil.botConfig.notifyChannel);
-                        sendMessage.setText(MessageUtil.INSTANCE.getAccountMessage(user, lastDate, false));
+                        sendMessage.setText(MessageUtil.INSTANCE.getAccountMessage(embyNameCache, embyIdCache, user, lastDate, false));
                         try {
                             telegramClient.execute(sendMessage);
                         } catch (TelegramApiException e) {
@@ -130,7 +132,7 @@ public class TimerTask {
                     }
                     sendMessage.enableMarkdownV2(true);
                     sendMessage.setChatId(AuthorityUtil.botConfig.notifyChannel);
-                    sendMessage.setText(MessageUtil.INSTANCE.getAccountMessage(user, lastDate, true));
+                    sendMessage.setText(MessageUtil.INSTANCE.getAccountMessage(embyNameCache, embyIdCache, user, lastDate, true));
                     try {
                         telegramClient.execute(sendMessage);
                     } catch (TelegramApiException e) {
@@ -167,7 +169,7 @@ public class TimerTask {
                     }
                     sendMessage.enableMarkdownV2(true);
                     sendMessage.setChatId(AuthorityUtil.botConfig.notifyChannel);
-                    sendMessage.setText(MessageUtil.INSTANCE.getAccountMessage(user, lastDate, false));
+                    sendMessage.setText(MessageUtil.INSTANCE.getAccountMessage(embyNameCache, embyIdCache, user, lastDate, false));
                     try {
                         telegramClient.execute(sendMessage);
                     } catch (TelegramApiException e) {
