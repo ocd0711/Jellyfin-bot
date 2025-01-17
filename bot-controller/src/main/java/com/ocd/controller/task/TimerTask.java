@@ -39,7 +39,7 @@ public class TimerTask {
     private static Logger logger = LoggerFactory.getLogger(TimerTask.class);
 
     /**
-     * 0 点判断 emby 库内用户是否绑定 tg, 同步账户配置
+     * 0 点判断 emby 库内用户是否绑定 tg
      */
     @Async("taskScheduler")
     @Scheduled(cron = "0 0 0 * * ?")
@@ -58,9 +58,6 @@ public class TimerTask {
                     log.error(e.toString());
                 }
             });
-        allEmbyUser.stream().filter(embyUserResult -> !embyUserResult.getPolicy().getIsAdministrator() && allUser.stream().map(User::getEmbyId).toList().contains(embyUserResult.getId())).forEach(embyUserResult -> {
-            EmbyUtil.getInstance().initPolicy(embyUserResult.getId());
-        });
     }
 
     /**
@@ -77,6 +74,7 @@ public class TimerTask {
         TelegramClient telegramClient = new OkHttpTelegramClient(AuthorityUtil.botConfig.token);
         SendMessage sendMessage = new SendMessage("", "");
         expEmbyUser.forEach(user -> {
+            EmbyUtil.getInstance().initPolicy(user.getEmbyId(), user.getDeactivate());
             List<PlaybackUserRecord> activityLogs = EmbyUtil.getInstance().getUserPlayback(user.getEmbyId());
             Long betweenPlayDay = activityLogs.isEmpty() ? null : DateUtil.betweenDay(activityLogs.get(0).getDateCreated(), new Date(), true);
             Long betweenExpDay = DateUtil.betweenDay(user.getExpTime(), new Date(), true);

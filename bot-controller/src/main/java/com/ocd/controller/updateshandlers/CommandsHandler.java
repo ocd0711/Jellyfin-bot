@@ -392,7 +392,7 @@ public class CommandsHandler extends CommandLongPollingTelegramBot {
                                             if (cacheUser == null)
                                                 editCaptionHide.append("不是" + AuthorityUtil.botConfig.groupNick + "用户!");
                                             else if (!cacheUser.haveEmby() || cacheUser.getDeactivate()) {
-                                                editCaptionHide.append("无账号无法操作");
+                                                editCaptionHide.append("无账号/过期无法操作");
                                             } else {
                                                 editCaptionHide.append(EmbyUtil.getInstance().filterNsfw(cacheUser) ? "切换成功 /start 查看" : "切换失败, 联系开发者修复 bug");
                                             }
@@ -403,7 +403,7 @@ public class CommandsHandler extends CommandLongPollingTelegramBot {
                                             if (cacheUser == null)
                                                 editCaptionDevice.append("不是" + AuthorityUtil.botConfig.groupNick + "用户!");
                                             else if (!cacheUser.haveEmby() || cacheUser.getDeactivate()) {
-                                                editCaptionDevice.append("无账号无法操作");
+                                                editCaptionDevice.append("无账号/过期无法操作");
                                             } else {
                                                 editCaptionDevice.append("点击下面按钮将强制登出设备");
                                                 rows.addAll(MessageUtil.INSTANCE.getAllDevicesButton(cacheUser));

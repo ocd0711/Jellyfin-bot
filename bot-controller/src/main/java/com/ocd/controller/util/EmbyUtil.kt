@@ -348,13 +348,15 @@ class EmbyUtil {
         }
     }
 
-    fun initPolicy(embyId: String) {
+    @JvmOverloads
+    fun initPolicy(embyId: String, isDisabled: Boolean = false) {
         try {
             val headers = HttpHeaders().apply {
                 set("X-Emby-Token", apikey)
                 contentType = MediaType.APPLICATION_JSON
             }
             val map: HashMap<String, Any> = HashMap()
+            map["IsDisabled"] = isDisabled
             map["EnableAudioPlaybackTranscoding"] = false
             map["EnableVideoPlaybackTranscoding"] = false
             map["EnablePlaybackRemuxing"] = false
