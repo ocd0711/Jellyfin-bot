@@ -58,4 +58,6 @@ class BotConfig {
     var enableExpLife: Boolean = false
 
     var allowUserUnlockAccount = false
+
+    var enableUserNotInGroup = true
 }

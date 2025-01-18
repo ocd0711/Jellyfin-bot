@@ -125,7 +125,7 @@ public class CommandsHandler extends CommandLongPollingTelegramBot {
                                         outString = new StringBuilder("管理也别自相残杀啊, 换个人玩");
                                     } else if (cacheUser.getWarnCount() > 3) {
                                         BanChatMember banChatMemberWarn = new BanChatMember(update.getCallbackQuery().getMessage().getChatId().toString(), userId);
-                                        banChatMemberWarn.setUntilDateInstant((new Date()).toInstant());
+                                        banChatMemberWarn.setUntilDate(0);
                                         banChatMemberWarn.setRevokeMessages(true);
                                         telegramClient.execute(banChatMemberWarn);
                                         if (cacheUser != null) {
@@ -155,7 +155,7 @@ public class CommandsHandler extends CommandLongPollingTelegramBot {
                                         );
 
                                         BanChatMember banChatMember = new BanChatMember(update.getCallbackQuery().getMessage().getChatId().toString(), userId);
-                                        banChatMember.setUntilDateInstant(DateUtil.offsetMonth(new Date(), 24).toInstant());
+                                        banChatMember.setUntilDate(0);
                                         banChatMember.setRevokeMessages(true);
                                         telegramClient.execute(banChatMember);
                                         if (cacheUser != null) {
@@ -171,7 +171,6 @@ public class CommandsHandler extends CommandLongPollingTelegramBot {
                                     UnbanChatMember unbanChatMember = new UnbanChatMember(update.getCallbackQuery().getMessage().getChatId().toString(), userId);
                                     unbanChatMember.setOnlyIfBanned(true);
                                     telegramClient.execute(unbanChatMember);
-                                    RedisUtil.set(ConstantStrings.INSTANCE.getRedisTypeKey(userId.toString(), command), new Date(), 3L);
                                     Integer cacheBan = null;
                                     if (cacheUser != null) {
                                         cacheBan = cacheUser.getUserType();
@@ -639,71 +638,9 @@ public class CommandsHandler extends CommandLongPollingTelegramBot {
                     }
                 }
             }
-            if (update.getChatMember() != null) {
-//                log.info("入群/退群: {}", JSON.toJSONString(update));
-                // 入群/退群 操作 Start
-                if (StringUtils.equals(update.getChatMember().getChat().getId().toString(), AuthorityUtil.botConfig.groupId)) {
-                    if (update.getChatMember().getNewChatMember() != null) {
-                        Chat userChat = update.getChatMember().getChat();
-                        User myChatMemberUser = update.getChatMember().getNewChatMember().getUser();
-                        com.ocd.bean.mysql.User groupUserCache = AuthorityUtil.userService.userMapper.selectOne(new QueryWrapper<com.ocd.bean.mysql.User>().lambda().eq(com.ocd.bean.mysql.User::getTgId, myChatMemberUser.getId()));
-                        switch (update.getChatMember().getNewChatMember().getStatus()) {
-                            case "kicked":
-                            case "left":
-                                if (!RedisUtil.contain(ConstantStrings.INSTANCE.getRedisTypeKey(myChatMemberUser.getId().toString(), "unban"))) {
-                                    if (groupUserCache == null || groupUserCache.getUserType() != 3) {
-                                        if (groupUserCache == null) {
-                                            groupUserCache = new com.ocd.bean.mysql.User(myChatMemberUser.getId());
-                                            groupUserCache.setStartBot(false);
-                                            AuthorityUtil.userService.createUser(groupUserCache);
-                                        }
-                                        groupUserCache.ban();
-                                        AuthorityUtil.userService.userMapper.updateById(groupUserCache);
-                                        SendMessage sendMessageRequestBan = new SendMessage(userChat.getId().toString(), "");
-                                        sendMessageRequestBan.enableMarkdownV2(true);
-                                        sendMessageRequestBan.setText("离开" + AuthorityUtil.botConfig.groupNick + " " + "[" + MessageUtil.INSTANCE.escapeMarkdownV2(myChatMemberUser.getFirstName()) + "]" + "(tg://user?id=" + myChatMemberUser.getId() + ")" + " 已永封, 一路走好");
-                                        EmbyUtil.getInstance().deleteUser(groupUserCache);
-                                        BanChatMember banChatMember = new BanChatMember(userChat.getId().toString(), myChatMemberUser.getId());
-                                        banChatMember.setUntilDateInstant(DateUtil.offsetMonth(new Date(), 24).toInstant());
-//                                banChatMember.setRevokeMessages(true);
-                                        try {
-                                            telegramClient.execute(sendMessageRequestBan);
-                                            telegramClient.execute(banChatMember);
-                                        } catch (TelegramApiException e) {
-                                            log.error("退群 ban 异常:" + e);
-                                        }
-                                        return null;
-                                    }
-                                }
-                            case "member":
-                                if (groupUserCache == null) {
-                                    groupUserCache = new com.ocd.bean.mysql.User();
-                                    groupUserCache.setStartBot(false);
-                                    groupUserCache.setTgId(myChatMemberUser.getId().toString());
-                                    AuthorityUtil.userService.createUser(groupUserCache);
-                                    SendMessage sendMessageRequestJoin = new SendMessage(userChat.getId().toString(), "");
-                                    sendMessageRequestJoin.enableMarkdownV2(true);
-                                    sendMessageRequestJoin.setText("欢迎来到" + AuthorityUtil.botConfig.groupNick + " " + "[" + MessageUtil.INSTANCE.escapeMarkdownV2(myChatMemberUser.getFirstName()) + "]" + "(tg://user?id=" + myChatMemberUser.getId() + ")" + " 记得去 @" + AuthorityUtil.botConfig.name + " 启用 bot");
-                                    try {
-                                        telegramClient.execute(sendMessageRequestJoin);
-                                    } catch (TelegramApiException e) {
-                                        // 开摆
-                                    }
-                                    return null;
-                                } else {
-                                    groupUserCache.unban();
-                                    AuthorityUtil.userService.userMapper.updateById(groupUserCache);
-                                }
-                        }
-                    }
-                }
-            }
             // 检查更新是否有消息
             if (update.hasMessage()) {
                 Message message = update.getMessage();
-
-                // 入群/退群 操作 End
-
                 // check if the message has text. it could also contain for example a location ( message.hasLocation() )
                 if (message.hasText()) {
                     if (message.getText().contains("线路") || message.getText().toLowerCase().contains("wiki")) {

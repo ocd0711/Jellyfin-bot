@@ -73,7 +73,28 @@ public class TimerTask {
         List<User> expEmbyUser = AuthorityUtil.userService.userMapper.selectList(queryWrapper);
         TelegramClient telegramClient = new OkHttpTelegramClient(AuthorityUtil.botConfig.token);
         SendMessage sendMessage = new SendMessage("", "");
-        expEmbyUser.forEach(user -> {
+        expEmbyUser.stream().filter(User::haveEmby).forEach(user -> {
+            if (AuthorityUtil.botConfig.getEnableUserNotInGroup() && Boolean.FALSE.equals(AuthorityUtil.checkUserInChatMember(Long.parseLong(user.getTgId()), AuthorityUtil.botConfig.groupId, telegramClient))) {
+                EmbyUtil.getInstance().deleteUser(user);
+                user.cleanEmby();
+                AuthorityUtil.userService.userMapper.updateById(user);
+                sendMessage.enableMarkdownV2(false);
+                sendMessage.setChatId(AuthorityUtil.botConfig.notifyChannel);
+                sendMessage.setText(MessageUtil.INSTANCE.getAccountNotInGroupMessage(user));
+                try {
+                    telegramClient.execute(sendMessage);
+                } catch (TelegramApiException e) {
+                    // nothing
+                } finally {
+                    sendMessage.setChatId(user.getTgId());
+                    try {
+                        telegramClient.execute(sendMessage);
+                    } catch (TelegramApiException e) {
+                        log.error(e.toString());
+                    }
+                }
+                return;
+            }
             String embyNameCache = user.getEmbyName();
             String embyIdCache = user.getEmbyId();
             EmbyUtil.getInstance().initPolicy(user.getEmbyId(), user.getDeactivate());

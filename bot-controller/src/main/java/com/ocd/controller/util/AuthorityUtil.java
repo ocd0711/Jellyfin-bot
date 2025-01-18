@@ -83,6 +83,18 @@ public class AuthorityUtil {
         return null;
     }
 
+    public static Boolean checkUserInChatMember(long tgId, String chatId, TelegramClient telegramClient) {
+        GetChatMember getChatMember = new GetChatMember(String.valueOf(chatId), tgId);
+        try {
+            ChatMember chatMember = telegramClient.execute(getChatMember);
+            if (!ConstantStrings.INSTANCE.getGroupIn().contains(chatMember.getStatus()))
+                return false;
+        } catch (TelegramApiException e) {
+            return null;
+        }
+        return true;
+    }
+
     public static ChatMember checkChatMemberBean(long tgId, TelegramClient telegramClient) {
         GetChatMember getChatMember = new GetChatMember(AuthorityUtil.botConfig.groupId.toString(), tgId);
         try {

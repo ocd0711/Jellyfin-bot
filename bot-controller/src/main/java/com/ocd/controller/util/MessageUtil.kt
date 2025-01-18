@@ -432,8 +432,8 @@ ${
     }
 
     fun getAccountMessage(
-        embyName: String,
-        embyId: String,
+        embyNameCache: String?,
+        embyIdCache: String?,
         user: com.ocd.bean.mysql.User,
         lastDate: String?,
         isPlay: Boolean
@@ -446,14 +446,28 @@ ${
         val returnStr =
             escapeMarkdownV2("#ACCOUNT ${if (isPlay) "${AuthorityUtil.botConfig.expDay} 天未观看 $action" else "账户过期 $action"}")
 
-        val embyName = escapeMarkdownV2(user.embyName ?: "Unknown User")
-        val embyId = escapeMarkdownV2(user.embyId ?: "N/A")
+        val embyName = escapeMarkdownV2(embyNameCache ?: "Unknown User")
+        val embyId = escapeMarkdownV2(embyIdCache ?: "N/A")
         val tgId = escapeMarkdownV2(user.tgId)
 
         val endRes = """
 ${user.tgId} 最后观看时间: $lastDate 到期时间: ${FormatUtil.dateToString(user.expTime)}
 [$embyName](tg://user?id=$tgId), $embyId
 $returnStr
+    """
+        return endRes
+    }
+
+    fun getAccountNotInGroupMessage(user: com.ocd.bean.mysql.User): String {
+        val action = "删除账户, 用户不在群组内"
+        val embyName = escapeMarkdownV2(user.embyName ?: "Unknown User")
+        val embyId = escapeMarkdownV2(user.embyId ?: "N/A")
+        val tgId = escapeMarkdownV2(user.tgId)
+
+        val endRes = """
+${user.tgId} 到期时间: ${FormatUtil.dateToString(user.expTime)}
+[$embyName](tg://user?id=$tgId), $embyId
+$action
     """
         return endRes
     }

@@ -96,4 +96,6 @@ bot:
   open_auto_renewal: false
   # 是否开启观看保号
   clean_task: true
+  # 是否开启不在群内用户检测
+  enable_user_not_in_group: true
   # 保号配置相关参数, 条件可以自由组合, 满足付费服务/公益多种条件 --------------------------------- ⬆️
