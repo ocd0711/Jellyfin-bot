@@ -12,7 +12,7 @@ object ConstantStrings {
 
     val lineStr = "%s: IP: %s 端口: %s 可用状态: %s\n"
 
-    val libraryLine = "电影总数: %s\n电视剧总数: %s\n剧集总数: %s"
+    val libraryLine = "🎬 电影总数: %s\n📺 电视剧总数: %s\n🎞️ 剧集总数: %s"
 
     val groupIn = "administrator,creator,member"
 

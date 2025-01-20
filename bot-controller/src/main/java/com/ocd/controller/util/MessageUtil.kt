@@ -252,24 +252,14 @@ object MessageUtil {
 
 🚪 开放注册状态: %s
 👤 用户总数: %s
-🏖️ 活跃: %s
-👻 ${if (AuthorityUtil.botConfig.delete) "待杀(七天内)" else "停用"}: %s
 💨 允许注册数: %s
+
+${EmbyUtil.getInstance().LibraryCountStr()}
 
 🍉你好鸭 %s 请选择功能${if (isFlush) "(用户状态已刷新)" else ""}👇
 """,
             if (AuthorityUtil.openRegister) "开" else "关",
             embyCount,
-            AuthorityUtil.userService.userMapper.selectCount(
-                QueryWrapper<com.ocd.bean.mysql.User>().lambda().isNotNull(com.ocd.bean.mysql.User::getEmbyId)
-                    .`in`(com.ocd.bean.mysql.User::getUserType, listOf<Int>(1, 2))
-                    .eq(com.ocd.bean.mysql.User::getDeactivate, 0)
-            ),
-            AuthorityUtil.userService.userMapper.selectCount(
-                QueryWrapper<com.ocd.bean.mysql.User>().lambda().isNotNull(com.ocd.bean.mysql.User::getEmbyId)
-                    .`in`(com.ocd.bean.mysql.User::getUserType, listOf<Int>(1, 2))
-                    .eq(com.ocd.bean.mysql.User::getDeactivate, 1)
-            ),
             EmbyUtil.getInstance().getCanRegisterSize(),
             firstName
         )
