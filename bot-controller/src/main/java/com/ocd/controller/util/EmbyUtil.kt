@@ -731,15 +731,41 @@ class EmbyUtil {
         }
     }
 
-    @JvmOverloads
-    fun getItemBackdrop(itemId: String, width: Int = 1280, quality: Int = 70): BufferedImage? {
+    fun getItemSeriesId(show: PlaybackRecord): String? {
         return try {
             val headers = HttpHeaders().apply {
                 set("X-Emby-Token", apikey)
             }
             val entity = HttpEntity<String>(headers)
             val uri =
-                UriComponentsBuilder.fromHttpUrl("${url}emby/Items/$itemId/Images/Primary")
+                UriComponentsBuilder.fromHttpUrl("${url}emby/Users/${show.userId}/Items/${show.itemId}")
+            val response = HttpUtil.getInstance()
+                .restTemplate()
+                .exchange(
+                    uri.build().toUri(),
+                    HttpMethod.GET,
+                    entity,
+                    String::class.java
+                )
+            val jsonObject = JSON.parseObject(response.body)
+            if (jsonObject.contains("SeriesId"))
+                jsonObject.get("SeriesId").toString()
+            else
+                null
+        } catch (e: Exception) {
+            null
+        }
+    }
+
+    @JvmOverloads
+    fun getItemPrimary(show: PlaybackRecord, isMovie: Boolean, width: Int = 1280, quality: Int = 70): BufferedImage? {
+        return try {
+            val headers = HttpHeaders().apply {
+                set("X-Emby-Token", apikey)
+            }
+            val entity = HttpEntity<String>(headers)
+            val uri =
+                UriComponentsBuilder.fromHttpUrl("${url}emby/Items/${if (isMovie) show.itemId else getItemSeriesId(show) ?: show.itemId}/Images/Primary")
             uri.queryParam("maxWidth", width)
             uri.queryParam("quality", quality)
             val response = HttpUtil.getInstance()

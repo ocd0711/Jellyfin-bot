@@ -8,7 +8,6 @@ import java.awt.*;
 import java.awt.image.BufferedImage;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
-import java.io.File;
 import java.io.IOException;
 import java.util.List;
 import java.util.Random;
@@ -105,7 +104,7 @@ public class ImageGenerator {
             PlaybackRecord show = shows.get(i);
 
             // 绘制封面图片
-            BufferedImage cover = EmbyUtil.getInstance().getItemBackdrop(show.getItemId(), itemWidth);
+            BufferedImage cover = EmbyUtil.getInstance().getItemPrimary(show, isMovie, itemWidth);
             if (cover != null) {
                 g.drawImage(cover, x, y, itemWidth, itemHeight, null);
             }
