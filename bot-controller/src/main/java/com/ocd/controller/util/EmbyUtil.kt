@@ -599,6 +599,32 @@ class EmbyUtil {
         }
     }
 
+    /**
+     * 在线人数
+     */
+    @JvmOverloads
+    fun onlineCount(activeWithinSeconds: Int = 960): Int {
+        return try {
+            val headers = HttpHeaders().apply {
+                set("X-Emby-Token", apikey)
+            }
+            val entity = HttpEntity<String>(headers)
+            val uri =
+                UriComponentsBuilder.fromHttpUrl("${url}Sessions?activeWithinSeconds=$activeWithinSeconds")
+            val response = HttpUtil.getInstance()
+                .restTemplate()
+                .exchange(
+                    uri.build().toUri(),
+                    HttpMethod.GET,
+                    entity,
+                    String::class.java
+                )
+            "NowPlayingItem".toRegex().findAll(response.body).count()
+        } catch (e: Exception) {
+            0
+        }
+    }
+
 
     /**
      * 删除设备
