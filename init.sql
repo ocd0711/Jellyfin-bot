@@ -1,11 +1,3 @@
--- 需屏蔽的媒体库
-CREATE TABLE `hide_media`
-(
-    `id`                   int(11)               NOT NULL AUTO_INCREMENT COMMENT '主键id',
-    `name`                 varchar(200)          NOT NULL COMMENT '媒体库名称',
-    PRIMARY KEY (`id`)
-) ENGINE=InnoDB AUTO_INCREMENT=0 DEFAULT CHARSET=utf8mb4;
-
 -- invitecode 存储
 CREATE TABLE `invitecode`
 (

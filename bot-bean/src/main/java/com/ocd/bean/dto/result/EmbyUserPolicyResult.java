@@ -132,9 +132,10 @@ public class EmbyUserPolicyResult {
         this.isAdministrator = user.getSuperAdmin();
     }
 
-    public void sNfsw(User user, boolean isOpen, List<String> EnabledFolders) {
+    public void sHideFolder(User user, boolean isHide, List<String> EnabledFolders) {
         this.isAdministrator = user.getSuperAdmin();
-        this.enableAllFolders = isOpen;
+        this.enableAllFolders = !isHide;
+        if (!isHide) EnabledFolders.clear();
         this.enabledFolders = EnabledFolders;
     }
 }

@@ -392,7 +392,20 @@ public class CommandsHandler extends CommandLongPollingTelegramBot {
                                             else if (!cacheUser.haveEmby() || cacheUser.getDeactivate()) {
                                                 editCaptionHide.append("无账号/过期无法操作");
                                             } else {
-                                                editCaptionHide.append(EmbyUtil.getInstance().filterNsfw(cacheUser) ? "切换成功 /start 查看" : "切换失败, 联系开发者修复 bug");
+                                                editCaptionHide.append("点击下面按钮将隐藏对应分类(重新展示所有分类需点击`显示所有分类`, 否则新增分类默认不隐藏)");
+                                                if (datas.length > 2) {
+                                                    String id = datas[2];
+                                                    EmbyUtil.getInstance().filterFolder(cacheUser, id);
+                                                    rows.addAll(MessageUtil.INSTANCE.getAllFolderButton(cacheUser));
+                                                    answerCallbackQuery.setText("切换成功");
+                                                    try {
+                                                        telegramClient.execute(answerCallbackQuery);
+                                                    } catch (TelegramApiException e) {
+                                                        outString = new StringBuilder("异常情况: " + e);
+                                                    }
+                                                } else {
+                                                    rows.addAll(MessageUtil.INSTANCE.getAllFolderButton(cacheUser));
+                                                }
                                             }
                                             editMessageCaption.setCaption(editCaptionHide.toString());
                                             break;

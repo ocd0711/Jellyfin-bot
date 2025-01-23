@@ -8,7 +8,6 @@ import com.ocd.bean.dto.jellby.PlaybackData
 import com.ocd.bean.dto.jellby.PlaybackRecord
 import com.ocd.bean.dto.jellby.PlaybackUserRecord
 import com.ocd.bean.dto.result.*
-import com.ocd.bean.mysql.HideMedia
 import com.ocd.bean.mysql.Line
 import com.ocd.bean.mysql.User
 import com.ocd.util.HttpUtil
@@ -341,7 +340,6 @@ class EmbyUtil {
                     entity,
                     String::class.java
                 )
-            filterNsfw(user)
         } catch (e: Exception) {
             println(e.toString())
             println("initUser 出错")
@@ -393,21 +391,27 @@ class EmbyUtil {
         }
     }
 
-    fun filterNsfw(user: User): Boolean {
+    fun filterFolder(user: User, id: String): Boolean {
         try {
             val embyUserDto = getUserByEmbyId(user.embyId)
             val policy = embyUserDto!!.policy
             val embyMediaFoldersDtos = searchAllMediaLibraries()
-            val hideMediaList =
-                AuthorityUtil.hideMediaService.hideMediaMapper.selectList(null).stream().map(HideMedia::getName)
-                    .collect(Collectors.toList())
-            policy.sNfsw(
-                user,
-                user.hideMedia,
-                embyMediaFoldersDtos.filter { embyMediaFoldersDto -> !hideMediaList.contains(embyMediaFoldersDto.name) }
+            user.hideMedia = id != "-1"
+            val folderList = if (embyUserDto.policy.enabledFolders.isEmpty()) {
+                embyMediaFoldersDtos.filter { embyMediaFoldersDto -> ((if (AuthorityUtil.botConfig.jellyfin) embyMediaFoldersDto.id else embyMediaFoldersDto.guid)) != id }
                     .stream().map { (if (AuthorityUtil.botConfig.jellyfin) it.id else it.guid) }
                     .collect(Collectors.toList())
-            )
+            } else {
+                if (embyUserDto.policy.enabledFolders.contains(id))
+                    embyUserDto.policy.enabledFolders.remove(id)
+                else
+                    embyUserDto.policy.enabledFolders.add(id)
+                embyUserDto.policy.enabledFolders.filter { id ->
+                    embyMediaFoldersDtos.stream().map { (if (AuthorityUtil.botConfig.jellyfin) it.id else it.guid) }
+                        .toList().contains(id)
+                }
+            }
+            policy.sHideFolder(user, user.hideMedia, folderList)
 
             val headers = HttpHeaders().apply {
                 set("X-Emby-Token", apikey)
@@ -424,7 +428,6 @@ class EmbyUtil {
                     entity,
                     String::class.java
                 )
-            user.hideMedia = !user.hideMedia
             AuthorityUtil.userService.userMapper.updateById(user)
             return true
         } catch (e: Exception) {

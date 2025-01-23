@@ -154,7 +154,7 @@ object MessageUtil {
     }
 
     fun getHideButton(user: com.ocd.bean.mysql.User): InlineKeyboardButton {
-        var info = InlineKeyboardButton("🫣隐藏部分分类(当前: ${if (user.hideMedia) "开" else "关"})")
+        var info = InlineKeyboardButton("🫣分类管理")
         info.callbackData = "hide " + user.tgId
         return info
     }
@@ -240,6 +240,33 @@ object MessageUtil {
                     inlineKeyboardRow.add(deviceRow)
                 }
             }
+        return inlineKeyboardRow
+    }
+
+    fun getAllFolderButton(user: com.ocd.bean.mysql.User): List<InlineKeyboardRow> {
+        val embyUserResult = EmbyUtil.getInstance().getUserByEmbyId(user.embyId)
+        val folderAll = embyUserResult?.policy?.enableAllFolders != false
+        val folderIdList = embyUserResult?.policy?.enabledFolders ?: emptyList()
+        val embyMediaFoldersResults = EmbyUtil.getInstance().searchAllMediaLibraries()
+        val inlineKeyboardRow = ArrayList<InlineKeyboardRow>()
+        if (!folderAll) {
+            val allRow = InlineKeyboardRow();
+            val allButton =
+                InlineKeyboardButton("显示全部分类")
+            allButton.callbackData =
+                "hide ${user.tgId} -1"
+            allRow.add(allButton)
+            inlineKeyboardRow.add(allRow)
+        }
+        embyMediaFoldersResults.forEach { embyMediaFoldersResult ->
+            val folderRow = InlineKeyboardRow();
+            val deviceButton =
+                InlineKeyboardButton("${embyMediaFoldersResult.name}${if (!folderAll && !folderIdList.contains(if (AuthorityUtil.botConfig.jellyfin) embyMediaFoldersResult.id else embyMediaFoldersResult.guid)) "(已隐藏)" else ""}")
+            deviceButton.callbackData =
+                "hide ${user.tgId} ${if (AuthorityUtil.botConfig.jellyfin) embyMediaFoldersResult.id else embyMediaFoldersResult.guid}"
+            folderRow.add(deviceButton)
+            inlineKeyboardRow.add(folderRow)
+        }
         return inlineKeyboardRow
     }
 

@@ -25,12 +25,11 @@ import java.util.Set;
 public class AuthorityUtil {
 
     @Autowired
-    public AuthorityUtil(UserService userService, LineService lineService, InvitecodeService invitecodeService, InfoService infoService, HideMediaService hideMediaService, BotConfig botConfig) {
+    public AuthorityUtil(UserService userService, LineService lineService, InvitecodeService invitecodeService, InfoService infoService, BotConfig botConfig) {
         AuthorityUtil.userService = userService;
         AuthorityUtil.lineService = lineService;
         AuthorityUtil.invitecodeService = invitecodeService;
         AuthorityUtil.infoService = infoService;
-        AuthorityUtil.hideMediaService = hideMediaService;
         AuthorityUtil.botConfig = botConfig;
     }
 
@@ -41,8 +40,6 @@ public class AuthorityUtil {
     public static InvitecodeService invitecodeService;
 
     public static InfoService infoService;
-
-    public static HideMediaService hideMediaService;
 
     public static boolean openRegister = false;
 
