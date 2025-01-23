@@ -88,8 +88,6 @@ public class EmbyUserPolicyResult {
     private Integer maxActiveSessions;
     @JsonProperty("EnablePublicSharing")
     private Boolean enablePublicSharing;
-    @JsonProperty("BlockedMediaFolders")
-    private List<String> blockedMediaFolders;
     @JsonProperty("BlockedChannels")
     private List<String> blockedChannels;
     @JsonProperty("RemoteClientBitrateLimit")
@@ -119,7 +117,7 @@ public class EmbyUserPolicyResult {
     @JsonProperty("EnableSubtitleDownloading")
     private Boolean enableSubtitleDownloading;
     @JsonProperty("ExcludedSubFolders")
-    private List<?> excludedSubFolders;
+    private List<String> excludedSubFolders;
     @JsonProperty("SimultaneousStreamLimit")
     private Integer simultaneousStreamLimit;
     @JsonProperty("AllowCameraUpload")
@@ -132,10 +130,14 @@ public class EmbyUserPolicyResult {
         this.isAdministrator = user.getSuperAdmin();
     }
 
-    public void sHideFolder(User user, boolean isHide, List<String> EnabledFolders) {
+    public void sHideFolder(User user, boolean isHide, List<String> EnabledFolders, List<String> ExFolders) {
         this.isAdministrator = user.getSuperAdmin();
         this.enableAllFolders = !isHide;
-        if (!isHide) EnabledFolders.clear();
+        if (!isHide) {
+            EnabledFolders.clear();
+            ExFolders.clear();
+        }
         this.enabledFolders = EnabledFolders;
+        this.excludedSubFolders = ExFolders;
     }
 }

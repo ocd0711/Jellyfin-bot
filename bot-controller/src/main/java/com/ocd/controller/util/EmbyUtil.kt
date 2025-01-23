@@ -4,6 +4,7 @@ import cn.hutool.core.date.DateUtil
 import com.alibaba.fastjson.JSON
 import com.alibaba.fastjson.JSONArray
 import com.isen.bean.constant.ConstantStrings
+import com.ocd.bean.dto.jellby.MediaFolders
 import com.ocd.bean.dto.jellby.PlaybackData
 import com.ocd.bean.dto.jellby.PlaybackRecord
 import com.ocd.bean.dto.jellby.PlaybackUserRecord
@@ -411,7 +412,19 @@ class EmbyUtil {
                         .toList().contains(id)
                 }
             }
-            policy.sHideFolder(user, user.hideMedia, folderList)
+            var hideSubFolderIds = arrayListOf<String>()
+            if (!AuthorityUtil.botConfig.jellyfin) {
+                embyMediaFoldersDtos.filter { embyMediaFoldersDto -> !folderList.contains(if (AuthorityUtil.botConfig.jellyfin) embyMediaFoldersDto.id else embyMediaFoldersDto.guid) }
+                    .map { if (AuthorityUtil.botConfig.jellyfin) it.id else it.guid }.toList().forEach { it ->
+                        hideSubFolderIds.addAll(searchEmbyMediaSubFolders(it))
+                    }
+            }
+            policy.sHideFolder(
+                user,
+                user.hideMedia,
+                folderList,
+                hideSubFolderIds
+            )
 
             val headers = HttpHeaders().apply {
                 set("X-Emby-Token", apikey)
@@ -434,6 +447,41 @@ class EmbyUtil {
             return false
         }
     }
+
+    /**
+     * 查询所有子媒体库
+     */
+    fun searchEmbyMediaSubFolders(guid: String): List<String> {
+        return try {
+            val headers = HttpHeaders().apply {
+                set("X-Emby-Token", apikey)
+            }
+            val entity = HttpEntity<String>(headers)
+            val uri = UriComponentsBuilder.fromHttpUrl("${url}emby/Library/SelectableMediaFolders")
+            val response = HttpUtil.getInstance()
+                .restTemplate()
+                .exchange(
+                    uri.build().toUri(),
+                    HttpMethod.GET,
+                    entity,
+                    String::class.java
+                )
+            val mediaFolders = JSON.parseArray(
+                response.body ?: "",
+                MediaFolders::class.java
+            )
+            mediaFolders
+                .filter { it.Guid == guid }
+                .flatMap { folder ->
+                    folder.SubFolders.map { subFolder ->
+                        "${folder.Guid}_${subFolder.Id}"
+                    }
+                }
+        } catch (e: Exception) {
+            emptyList()
+        }
+    }
+
 
     /**
      * 查询所有媒体库
