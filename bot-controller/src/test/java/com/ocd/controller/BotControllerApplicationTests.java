@@ -19,4 +19,9 @@ class BotControllerApplicationTests {
         List<PlaybackRecord> tv = EmbyUtil.getInstance().getPlaybackInfo(false, new Date());
         ImageGenerator.generateRankingImage(false, movie, tv.subList(0, 5), 1280);
     }
+
+    @Test
+    public void randomPass() throws IOException {
+        System.out.println(EmbyUtil.getInstance().generatePassword());
+    }
 }

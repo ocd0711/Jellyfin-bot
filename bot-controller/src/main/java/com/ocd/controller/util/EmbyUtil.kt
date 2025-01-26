@@ -23,6 +23,7 @@ import java.util.*
 import java.util.stream.Collectors
 import javax.annotation.PostConstruct
 import javax.imageio.ImageIO
+import kotlin.random.Random
 
 /**
  * @author OCD
@@ -121,7 +122,7 @@ class EmbyUtil {
         }
     }
 
-    fun register(user: User, embyUser: String): Boolean {
+    fun register(user: User, embyUser: String, pass: String): Boolean {
         try {
             val headers = HttpHeaders().apply {
                 set("X-Emby-Token", apikey)
@@ -129,6 +130,7 @@ class EmbyUtil {
             }
             val map: HashMap<String, Any> = HashMap()
             map["Name"] = embyUser
+            map["Password"] = pass
             val entity = HttpEntity(map, headers)
             val uri = UriComponentsBuilder.fromHttpUrl("${url}Users/New")
             val response = HttpUtil.getInstance()
@@ -910,5 +912,14 @@ class EmbyUtil {
         } catch (e: Exception) {
             return null
         }
+    }
+
+    @JvmOverloads
+    fun generatePassword(length: Int = 12): String {
+        val characters = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789!@#$%^&*()-_+="
+        return (1..length)
+            .map { Random.nextInt(characters.length) }
+            .map(characters::get)
+            .joinToString("")
     }
 }

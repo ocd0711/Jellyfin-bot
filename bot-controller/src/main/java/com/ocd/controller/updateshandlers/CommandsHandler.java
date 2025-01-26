@@ -38,7 +38,6 @@ import org.telegram.telegrambots.meta.api.objects.ChatInviteLink;
 import org.telegram.telegrambots.meta.api.objects.InputFile;
 import org.telegram.telegrambots.meta.api.objects.Update;
 import org.telegram.telegrambots.meta.api.objects.User;
-import org.telegram.telegrambots.meta.api.objects.chat.Chat;
 import org.telegram.telegrambots.meta.api.objects.chatmember.ChatMember;
 import org.telegram.telegrambots.meta.api.objects.message.Message;
 import org.telegram.telegrambots.meta.api.objects.replykeyboard.InlineKeyboardMarkup;
@@ -540,7 +539,7 @@ public class CommandsHandler extends CommandLongPollingTelegramBot {
                                             if (cacheUser.haveEmby()) {
                                                 editMessageCaption.setCaption("已有账户, 无需重复操作");
                                             } else {
-                                                editMessageCaption.setCaption("请输入账户名称, 新建用户为空密码(例: name)");
+                                                editMessageCaption.setCaption("请输入账户名称, 新建用户会生成随机密码(例: name)");
                                                 RedisUtil.set(ConstantStrings.INSTANCE.getRedisTypeKey(userId.toString(), ""), command, null);
                                             }
                                             break;
@@ -930,19 +929,18 @@ public class CommandsHandler extends CommandLongPollingTelegramBot {
                                         else if (sqlUser.getExchange() == null && !AuthorityUtil.openRegister || ((AuthorityUtil.openRegister && EmbyUtil.getInstance().getCanRegisterSize() <= 0))) {
                                             outDoing = "无注册权限";
                                         } else {
-                                            if (!EmbyUtil.getInstance().register(sqlUser, embyName)) {
+                                            String pass = EmbyUtil.getInstance().generatePassword();
+                                            outDoing = String.format("开号成功, /start 查看信息\n随机密码: %s, 请及时修改密码", pass);
+                                            if (!EmbyUtil.getInstance().register(sqlUser, embyName, pass)) {
                                                 outDoing = "名称已占用, 请重新开始注册";
                                             } else {
                                                 if (sqlUser.getExchange() != null) {
                                                     Invitecode invitecode = AuthorityUtil.invitecodeService.invitecodeMapper.selectOne(new QueryWrapper<Invitecode>().lambda().eq(Invitecode::getInvitecode, sqlUser.getExchange()));
                                                     if (invitecode == null) {
                                                         outDoing = "账单异常, 联系开发者处理";
-                                                    } else {
-                                                        outDoing = "开号成功, /start 查看信息\n默认密码空, 请及时修改密码";
                                                     }
                                                 } else {
                                                     sqlUser.addExpDate(AuthorityUtil.botConfig.getExpDay());
-                                                    outDoing = "开号成功, /start 查看信息\n默认密码空, 请及时修改密码";
                                                 }
                                             }
                                         }
