@@ -622,7 +622,7 @@ public class CommandsHandler extends CommandLongPollingTelegramBot {
                             }
                         }
                     } else {
-                        answerCallbackQuery.setText("不是管理别瞎鸡儿点!");
+                        answerCallbackQuery.setText("旧面板, 请重新唤出新操作面板");
                         try {
                             telegramClient.execute(answerCallbackQuery);
                             return null;
