@@ -455,6 +455,7 @@ ${
         embyIdCache: String?,
         user: com.ocd.bean.mysql.User,
         lastDate: String?,
+        expUserDate: Date?,
         isPlay: Boolean
     ): String {
         val action = if (AuthorityUtil.botConfig.delete && !user.haveEmby()) {
@@ -470,7 +471,7 @@ ${
         val tgId = escapeMarkdownV2(user.tgId)
 
         val endRes = """
-${user.tgId} 最后观看时间: $lastDate 到期时间: ${FormatUtil.dateToString(user.expTime)}
+${user.tgId} 最后观看时间: $lastDate 到期时间: ${FormatUtil.dateToString(expUserDate)}
 [$embyName](tg://user?id=$tgId), $embyId
 $returnStr
     """
