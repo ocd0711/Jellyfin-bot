@@ -115,7 +115,7 @@ public class TimerTask {
                         // nothing
                     }
                 } else {
-                    if (expDate.before(user.getExpTime())) {
+                    if (expDate.after(user.getExpTime())) {
                         if (AuthorityUtil.botConfig.getDelete() && betweenExpDay >= AuthorityUtil.botConfig.getExpDelDay()) {
                             EmbyUtil.getInstance().deleteUser(user);
                             user.cleanEmby();

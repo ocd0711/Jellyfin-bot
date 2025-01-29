@@ -83,8 +83,8 @@ bot:
   check_max: 10
   # 过期后停用多久删除
   exp_del_day: 7
-  # 是否允许白名单直接开号
-  allow_white_register: true
+  # 是否允许非注册码直接开号
+  allow_direct_register: true
   # 是否允许用户执行用积分解封账号(解封的积分对应 $unblockPoints)
   allow_user_unlock_account: false
   # 保号配置相关参数, 条件可以自由组合, 满足付费服务/公益多种条件 --------------------------------- ⬇️

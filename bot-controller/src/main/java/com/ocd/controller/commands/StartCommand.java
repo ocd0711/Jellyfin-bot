@@ -13,7 +13,6 @@ import org.telegram.telegrambots.extensions.bots.commandbot.commands.IBotCommand
 import org.telegram.telegrambots.extensions.bots.commandbot.commands.ICommandRegistry;
 import org.telegram.telegrambots.meta.api.methods.commands.SetMyCommands;
 import org.telegram.telegrambots.meta.api.methods.send.SendPhoto;
-import org.telegram.telegrambots.meta.api.methods.updatingmessages.DeleteMessage;
 import org.telegram.telegrambots.meta.api.objects.User;
 import org.telegram.telegrambots.meta.api.objects.chat.Chat;
 import org.telegram.telegrambots.meta.exceptions.TelegramApiException;
@@ -130,8 +129,8 @@ public class StartCommand extends BotCommand {
                         sendPhotoRequest.setCaption(outStr);
                     }
                 } else {
-                    if (invitecode.getDays() > 0 || (!AuthorityUtil.botConfig.getAllowWhiteRegister() && invitecode.getDays() == -1)) {
-                        sendPhotoRequest.setCaption("此为续期码, 无法注册");
+                    if (!AuthorityUtil.botConfig.getAllowDirectRegister() && invitecode.getDays() != 0) {
+                        sendPhotoRequest.setCaption("此为续期/白名单码, 无法注册");
                     } else if (sqlUser.getExchange() != null) {
                         sendPhotoRequest.setCaption("当前有未使用的兑换码, 先开号再使用新兑换码");
                     } else {
