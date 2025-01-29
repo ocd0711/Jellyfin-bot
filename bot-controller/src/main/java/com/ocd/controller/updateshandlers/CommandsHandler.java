@@ -1,7 +1,7 @@
 package com.ocd.controller.updateshandlers;
 
 import cn.hutool.captcha.CaptchaUtil;
-import cn.hutool.captcha.LineCaptcha;
+import cn.hutool.captcha.GifCaptcha;
 import cn.hutool.core.date.DateUtil;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.isen.bean.constant.ConstantStrings;
@@ -30,8 +30,8 @@ import org.telegram.telegrambots.meta.api.methods.groupadministration.GetChatMem
 import org.telegram.telegrambots.meta.api.methods.groupadministration.UnbanChatMember;
 import org.telegram.telegrambots.meta.api.methods.pinnedmessages.PinChatMessage;
 import org.telegram.telegrambots.meta.api.methods.pinnedmessages.UnpinChatMessage;
+import org.telegram.telegrambots.meta.api.methods.send.SendAnimation;
 import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
-import org.telegram.telegrambots.meta.api.methods.send.SendPhoto;
 import org.telegram.telegrambots.meta.api.methods.updatingmessages.DeleteMessage;
 import org.telegram.telegrambots.meta.api.methods.updatingmessages.EditMessageCaption;
 import org.telegram.telegrambots.meta.api.objects.ChatInviteLink;
@@ -498,19 +498,19 @@ public class CommandsHandler extends CommandLongPollingTelegramBot {
                                                 } else {
                                                     String code;
                                                     ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
-                                                    LineCaptcha lineService = CaptchaUtil.createLineCaptcha(1280, 720, 4, 300);
-                                                    code = lineService.getCode();
-                                                    lineService.write(outputStream);
+                                                    GifCaptcha gifCaptcha = CaptchaUtil.createGifCaptcha(200, 100, 5);
+                                                    code = gifCaptcha.getCode();
+                                                    gifCaptcha.write(outputStream);
                                                     InputFile inputFile = new InputFile();
-                                                    inputFile.setMedia(new ByteArrayInputStream(outputStream.toByteArray()), "image.png");
-                                                    SendPhoto sendPhoto = new SendPhoto(editMessageCaption.getChatId(), inputFile);
-                                                    Message responseMessage = telegramClient.execute(sendPhoto);
+                                                    inputFile.setMedia(new ByteArrayInputStream(outputStream.toByteArray()), "captcha.gif");
+                                                    SendAnimation sendAnimation = new SendAnimation(editMessageCaption.getChatId(), inputFile);
+                                                    Message responseMessage = telegramClient.execute(sendAnimation);
                                                     nextMessageId = responseMessage.getMessageId().toString();
                                                     // 按钮处理
                                                     List<String> codes = new ArrayList<>();
                                                     codes.add(code);
                                                     while (codes.size() < 4) {
-                                                        String randomCode = MessageUtil.INSTANCE.generateRandomCode(4);
+                                                        String randomCode = codes.size() % 2 == 0 ? MessageUtil.INSTANCE.generateRandomCode(code.length()) : MessageUtil.INSTANCE.generateSimilarCode(code);
                                                         if (!codes.contains(randomCode)) {
                                                             codes.add(randomCode);
                                                         }
@@ -518,7 +518,7 @@ public class CommandsHandler extends CommandLongPollingTelegramBot {
                                                     Collections.shuffle(codes);
                                                     codes.forEach(it -> {
                                                         InlineKeyboardRow inlineKeyboardRow = new InlineKeyboardRow();
-                                                        InlineKeyboardButton cache = new InlineKeyboardButton(it);
+                                                        InlineKeyboardButton cache = new InlineKeyboardButton(it.toUpperCase(Locale.ROOT));
                                                         cache.setCallbackData("checkin " + userId + " " + it.equals(code) + " " + responseMessage.getMessageId());
                                                         inlineKeyboardRow.add(cache);
                                                         rows.add(inlineKeyboardRow);

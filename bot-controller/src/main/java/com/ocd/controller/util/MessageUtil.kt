@@ -505,11 +505,17 @@ $action
     }
 
     fun generateRandomCode(length: Int): String {
-        var code = StringBuilder()
-        for (i in 0 until length) {
-            code.append(('A' + (Math.random() * 26).toInt()).toChar())
-        }
-        return code.toString()
+        val chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789"
+        return (1..length)
+            .map { chars.random() }
+            .joinToString("")
+    }
+
+    fun generateSimilarCode(reference: String): String {
+        val uniqueChars = reference.toUpperCase().toSet().joinToString("")
+        return (1..reference.length)
+            .map { uniqueChars.random() }
+            .joinToString("")
     }
 
     @JvmOverloads
