@@ -886,7 +886,9 @@ class EmbyUtil {
             val map: HashMap<String, Any> = HashMap()
             map["CustomQueryString"] =
                 """
-                    SELECT DateCreated, UserId, ItemId, ItemType, ItemName, PlaybackMethod, ClientName, DeviceName, PlayDuration, substr(ItemName,0, instr(ItemName, ' - ')) AS name, SUM(PlayDuration) AS total_duarion, COUNT(1) AS count FROM PlaybackActivity
+                    SELECT DateCreated, UserId, ItemId, ItemType, ItemName, PlaybackMethod, ClientName, DeviceName, PlayDuration
+                    , SUBSTR(ItemName, 1, INSTR(ItemName, ' - ') + INSTR(SUBSTR(ItemName, INSTR(ItemName, ' - ') + 3), ' - ')) AS name
+                    , SUM(PlayDuration) AS total_duarion, COUNT(1) AS count FROM PlaybackActivity
                     WHERE ItemType = '${if (isMovie) "Movie" else "Episode"}'
                     AND DateCreated >= '$startStr'
                     AND DateCreated <= '$endStr'

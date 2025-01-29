@@ -42,7 +42,7 @@ data class PlaybackData @JSONCreator constructor(
                 clientName = row[6],
                 deviceName = row[7],
                 playDuration = row[8],
-                name = row.get(9),
+                name = row[9],
                 totalDuarion = row[10],
                 count = row[11]
             )
