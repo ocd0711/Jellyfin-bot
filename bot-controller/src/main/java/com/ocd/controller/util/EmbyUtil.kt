@@ -152,6 +152,9 @@ class EmbyUtil {
             user.embyId = embyUserDto.id
             AuthorityUtil.userService.userMapper.updateById(user)
             initUser(user)
+            if (!AuthorityUtil.botConfig.jellyfin) {
+                resetPass(user, pass)
+            }
         } catch (e: Exception) {
             return false
         }

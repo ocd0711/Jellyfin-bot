@@ -143,7 +143,7 @@ public class TimerTask {
                 }
                 return;
             }
-            if (AuthorityUtil.botConfig.getOpenAutoRenewal() && expDate.before(user.getExpTime()) || !AuthorityUtil.botConfig.getOpenAutoRenewal())
+            if (AuthorityUtil.botConfig.getOpenAutoRenewal() && expDate.after(user.getExpTime()) || !AuthorityUtil.botConfig.getOpenAutoRenewal())
                 if (AuthorityUtil.botConfig.getCleanTask() && (betweenPlayDay == null || betweenPlayDay >= AuthorityUtil.botConfig.getExpDay())) {
                     if (AuthorityUtil.botConfig.getDelete() && (betweenPlayDay == null || betweenPlayDay >= AuthorityUtil.botConfig.getExpDelDay() + AuthorityUtil.botConfig.getExpDelDay())) {
                         EmbyUtil.getInstance().deleteUser(user);
@@ -180,7 +180,7 @@ public class TimerTask {
                 } catch (TelegramApiException e) {
                     // nothing
                 }
-            } else if (AuthorityUtil.botConfig.getOpenAutoRenewal() && expDate.before(user.getExpTime())) {
+            } else if (AuthorityUtil.botConfig.getOpenAutoRenewal() && expDate.after(user.getExpTime())) {
                 if (user.getPoints() < AuthorityUtil.botConfig.getUnblockPoints()) {
                     if (AuthorityUtil.botConfig.getDelete() && betweenExpDay >= AuthorityUtil.botConfig.getExpDelDay()) {
                         EmbyUtil.getInstance().deleteUser(user);
