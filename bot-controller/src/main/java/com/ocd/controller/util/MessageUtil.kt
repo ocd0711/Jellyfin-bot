@@ -558,7 +558,7 @@ $action
         )
         val sendMessage = SendMessage(
             AuthorityUtil.botConfig.groupId, "用户: [${user.tgId}](tg://user?id=${user.tgId})\n" +
-                    "处理结果: 更换绑定账户 $embyName ${escapeMarkdownV2("${user.tgId} -> ${oldUser.tgId}")}\n" +
+                    "处理结果: 更换绑定账户 $embyName [${user.tgId}](tg://user?id=${user.tgId}) ${escapeMarkdownV2("->")} [${oldUser.tgId}](tg://user?id=${oldUser.tgId})\n" +
                     "管理信息: \\#changeBind"
         )
         sendMessage.enableMarkdownV2(true)

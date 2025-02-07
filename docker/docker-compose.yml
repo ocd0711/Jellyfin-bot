@@ -4,7 +4,7 @@ services:
   jellyfin-bot-prod:
     image: ocd0711/jellyfin-bot:latest
     container_name: jellyfin-bot-prod
-    hostname: tanhua-bot-prod
+    hostname: bot-prod
     privileged: true
     network_mode: host
     volumes:
