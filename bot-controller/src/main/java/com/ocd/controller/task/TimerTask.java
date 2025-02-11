@@ -79,7 +79,7 @@ public class TimerTask {
                 EmbyUtil.getInstance().deleteUser(user);
                 user.cleanEmby();
                 AuthorityUtil.userService.userMapper.updateById(user);
-                sendMessage.enableMarkdownV2(false);
+                sendMessage.enableMarkdownV2(true);
                 sendMessage.setChatId(AuthorityUtil.botConfig.notifyChannel);
                 sendMessage.setText(MessageUtil.INSTANCE.getAccountNotInGroupMessage(user));
                 try {
@@ -100,44 +100,42 @@ public class TimerTask {
             String embyIdCache = user.getEmbyId();
             EmbyUtil.getInstance().initPolicy(user.getEmbyId(), user.getDeactivate());
             List<PlaybackUserRecord> activityLogs = EmbyUtil.getInstance().getUserPlayback(user.getEmbyId());
-            Long betweenPlayDay = activityLogs.isEmpty() ? null : DateUtil.betweenDay(activityLogs.get(0).getDateCreated(), new Date(), true);
-            Long betweenExpDay = DateUtil.betweenDay(user.getExpTime(), new Date(), true);
-            String lastDate = activityLogs.isEmpty() ? "无" : FormatUtil.INSTANCE.dateToString(activityLogs.get(0).getDateCreated());
+            Long betweenPlayDay = (activityLogs == null || activityLogs.isEmpty()) ? null : DateUtil.betweenDay(activityLogs.get(0).getDateCreated(), new Date(), true);
+            String lastDate = (activityLogs == null || activityLogs.isEmpty()) ? "无" : FormatUtil.INSTANCE.dateToString(activityLogs.get(0).getDateCreated());
+            if ((AuthorityUtil.botConfig.getEnableExpLife() || AuthorityUtil.botConfig.getOpenAutoRenewal()) && user.getExpTime() == null) {
+                user.addExpDate(AuthorityUtil.botConfig.getExpDay());
+                AuthorityUtil.userService.userMapper.updateById(user);
+                sendMessage.enableMarkdownV2(false);
+                sendMessage.setChatId(user.getTgId());
+                sendMessage.setText("现开启账户到期时间, 无过期时间用户赠送 " + AuthorityUtil.botConfig.getExpDay() + " 天");
+                try {
+                    telegramClient.execute(sendMessage);
+                } catch (TelegramApiException e) {
+                    // nothing
+                }
+            }
             if (AuthorityUtil.botConfig.getEnableExpLife()) {
-                if (user.getExpTime() == null) {
-                    user.addExpDate(AuthorityUtil.botConfig.getExpDay());
-                    AuthorityUtil.userService.userMapper.updateById(user);
-                    sendMessage.enableMarkdownV2(false);
-                    sendMessage.setChatId(user.getTgId());
-                    sendMessage.setText("现开启账户到期时间, 无过期时间用户赠送 " + AuthorityUtil.botConfig.getExpDay() + " 天");
+                if (expDate.after(user.getExpTime())) {
+                    if (AuthorityUtil.botConfig.getDelete() && DateUtil.betweenDay(user.getExpTime(), new Date(), true) >= AuthorityUtil.botConfig.getExpDelDay()) {
+                        EmbyUtil.getInstance().deleteUser(user);
+                        user.cleanEmby();
+                    } else {
+                        EmbyUtil.getInstance().deactivateUser(user, true);
+                        user.setDeactivate(true);
+                    }
+                    sendMessage.enableMarkdownV2(true);
+                    sendMessage.setChatId(AuthorityUtil.botConfig.notifyChannel);
+                    sendMessage.setText(MessageUtil.INSTANCE.getAccountMessage(embyNameCache, embyIdCache, user, lastDate, expUserDate, false));
                     try {
                         telegramClient.execute(sendMessage);
                     } catch (TelegramApiException e) {
-                        // nothing
-                    }
-                } else {
-                    if (expDate.after(user.getExpTime())) {
-                        if (AuthorityUtil.botConfig.getDelete() && betweenExpDay >= AuthorityUtil.botConfig.getExpDelDay()) {
-                            EmbyUtil.getInstance().deleteUser(user);
-                            user.cleanEmby();
-                        } else {
-                            EmbyUtil.getInstance().deactivateUser(user, true);
-                            user.setDeactivate(true);
-                        }
-                        sendMessage.enableMarkdownV2(true);
-                        sendMessage.setChatId(AuthorityUtil.botConfig.notifyChannel);
-                        sendMessage.setText(MessageUtil.INSTANCE.getAccountMessage(embyNameCache, embyIdCache, user, lastDate, expUserDate, false));
+                        log.error(e.toString());
+                    } finally {
+                        sendMessage.setChatId(user.getTgId());
                         try {
                             telegramClient.execute(sendMessage);
                         } catch (TelegramApiException e) {
                             log.error(e.toString());
-                        } finally {
-                            sendMessage.setChatId(user.getTgId());
-                            try {
-                                telegramClient.execute(sendMessage);
-                            } catch (TelegramApiException e) {
-                                log.error(e.toString());
-                            }
                         }
                     }
                 }
@@ -182,7 +180,7 @@ public class TimerTask {
                 }
             } else if (AuthorityUtil.botConfig.getOpenAutoRenewal() && expDate.after(user.getExpTime())) {
                 if (user.getPoints() < AuthorityUtil.botConfig.getUnblockPoints()) {
-                    if (AuthorityUtil.botConfig.getDelete() && betweenExpDay >= AuthorityUtil.botConfig.getExpDelDay()) {
+                    if (AuthorityUtil.botConfig.getDelete() && DateUtil.betweenDay(user.getExpTime(), new Date(), true) >= AuthorityUtil.botConfig.getExpDelDay()) {
                         EmbyUtil.getInstance().deleteUser(user);
                         user.cleanEmby();
                     } else {
