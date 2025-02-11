@@ -6,7 +6,8 @@ CREATE TABLE `invitecode`
     `used`                 int(1)                DEFAULT 0 COMMENT '是否被使用',
     `tg_id`                varchar(100)          DEFAULT NULL COMMENT 'tg id',
     `days`                 int(100)              DEFAULT NULL COMMENT '续期天数, -1 为白名单, 0 为注册码(注册后的剩余天数由 expDay 决定), 大于 0 为续期天数',
-    PRIMARY KEY (`id`)
+    PRIMARY KEY (`id`),
+    UNIQUE  KEY invitecode (`invitecode`),
 ) ENGINE=InnoDB AUTO_INCREMENT=0 DEFAULT CHARSET=utf8mb4;
 
 -- 加点提示语

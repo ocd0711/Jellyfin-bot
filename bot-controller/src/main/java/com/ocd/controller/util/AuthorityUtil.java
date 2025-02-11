@@ -15,10 +15,7 @@ import org.telegram.telegrambots.meta.api.objects.chatmember.ChatMember;
 import org.telegram.telegrambots.meta.exceptions.TelegramApiException;
 import org.telegram.telegrambots.meta.generics.TelegramClient;
 
-import java.util.ArrayList;
-import java.util.HashSet;
-import java.util.Locale;
-import java.util.Set;
+import java.util.*;
 
 @Component
 @Log4j2
@@ -118,10 +115,6 @@ public class AuthorityUtil {
     }
 
     public static String invitecode() {
-        Long count = invitecodeService.invitecodeMapper.selectCount(null);
-        Set<String> codes = new HashSet<>();
-        CdkCreater cdkCreater = new CdkCreater();
-        cdkCreater.generator((int) (count / 1000), 1, codes);
-        return new ArrayList<>(codes).get(0).toUpperCase(Locale.ROOT);
+        return UUID.randomUUID().toString();
     }
 }
