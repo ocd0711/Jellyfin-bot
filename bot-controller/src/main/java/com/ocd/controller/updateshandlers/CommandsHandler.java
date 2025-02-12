@@ -962,7 +962,7 @@ public class CommandsHandler extends CommandLongPollingTelegramBot {
                                                         AuthorityUtil.invitecodeService.invitecodeMapper.insert(invitecode);
                                                         if (days == -1)
                                                             cacheString.append("生成邀请链接(♾️)  " + " https://t.me/" + AuthorityUtil.botConfig.name + "?start=" + invitecode.getInvitecode() + "\n");
-                                                        if (days == 0)
+                                                        else if (days == 0)
                                                             cacheString.append("生成邀请链接(注册码)  " + " https://t.me/" + AuthorityUtil.botConfig.name + "?start=" + invitecode.getInvitecode() + "\n");
                                                         else
                                                             cacheString.append("生成邀请链接(续期码 " + days + " 天)  " + " https://t.me/" + AuthorityUtil.botConfig.name + "?start=" + invitecode.getInvitecode() + "\n");
