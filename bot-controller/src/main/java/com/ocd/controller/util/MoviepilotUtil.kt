@@ -4,6 +4,7 @@ import com.alibaba.fastjson.JSON
 import com.isen.bean.constant.ConstantStrings
 import com.ocd.bean.dto.moviepilot.MoviepilotDownResult
 import com.ocd.bean.dto.moviepilot.MoviepilotResult
+import com.ocd.bean.dto.moviepilot.MoviepilotTransferResult
 import com.ocd.controller.commands.MoviepilotConfig
 import com.ocd.util.HttpUtil
 import org.slf4j.LoggerFactory
@@ -202,6 +203,63 @@ class MoviepilotUtil {
                     null
                 }
             }
+        } catch (e: Exception) {
+            return null
+        }
+    }
+
+    /**
+     * 查询转移结果
+     */
+    @JvmOverloads
+    fun transferStateFilm(title: String, retryCount: Int = 3, page: Int, count: Int): List<MoviepilotTransferResult>? {
+        if (authKey == null && !updateApikey())
+            return null
+        return try {
+            val headers = HttpHeaders().apply {
+                set(HttpHeaders.AUTHORIZATION, "${ConstantStrings.AUTHENTICATION_PREFIX}$authKey")
+            }
+            val entity = HttpEntity<String>(headers)
+            val uri = UriComponentsBuilder.fromHttpUrl("${moviepilotConfig.url}api/v1/history/transfer")
+            uri.queryParam("title", title)
+            uri.queryParam("page", page)
+            uri.queryParam("count", count)
+            val response = HttpUtil.getInstance()
+                .restTemplate()
+                .exchange(
+                    uri.build().toUri(),
+                    HttpMethod.GET,
+                    entity,
+                    String::class.java
+                )
+            when (response.statusCode) {
+                HttpStatus.OK, HttpStatus.NO_CONTENT -> {
+                    val jsonObject = JSON.parseObject(response.body)
+                    if (jsonObject.getBoolean("success")) {
+                        JSON.parseArray(
+                            JSON.parseObject(jsonObject.getString("data")).getString("list"),
+                            MoviepilotTransferResult::class.java
+                        )
+                    } else {
+                        emptyList()
+                    }
+                }
+
+                HttpStatus.FORBIDDEN -> {
+                    log.warn("API key might be expired (403), trying to update API key")
+                    if (retryCount > 0 && updateApikey()) {
+                        downStateFilm(retryCount - 1)
+                    } else {
+                        null
+                    }
+                }
+
+                else -> {
+                    log.error("Request failed with status code: ${response.statusCode}")
+                    null
+                }
+            }
+            return null
         } catch (e: Exception) {
             return null
         }

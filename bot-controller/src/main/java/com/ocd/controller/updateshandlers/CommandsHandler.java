@@ -674,7 +674,7 @@ public class CommandsHandler extends CommandLongPollingTelegramBot {
                                                     int point = (int) Math.round(moviepilotResult.getTorrentInfo().getSize() / (1024.0 * 1024.0 * 1024.0));
                                                     SendMessage filmMsg = new SendMessage(userId.toString(), "");
                                                     if (cacheUser.getPoints() < point) {
-                                                        filmMsg.setText(String.format("积分不足, 次求片需要消费 %d 积分\n当前用户积分 %d", point, cacheUser.getPoints()));
+                                                        filmMsg.setText(String.format("积分不足, 本次求片需要消费 %d 积分\n当前用户积分 %d", point, cacheUser.getPoints()));
                                                     } else {
                                                         String downloadId = moviepilotUtil.downFilm(moviepilotResult);
                                                         if (downloadId == null)
@@ -684,7 +684,7 @@ public class CommandsHandler extends CommandLongPollingTelegramBot {
                                                             AuthorityUtil.userService.userMapper.updateById(cacheUser);
                                                             Moviepilot moviepilot = new Moviepilot(cacheUser.getId(), moviepilotResult, moviepilotConfig.imdbUrl(moviepilotResult.getTorrentInfo().getImdbid()), downloadId);
                                                             AuthorityUtil.moviepilotService.createMoviepilot(moviepilot);
-                                                            filmMsg.setText(String.format("求片成功, 次求片需要消费 %d 积分\n扣除后用户积分 %d\n以上求片搜索立即过期, 如有新求片请重新搜索", point, cacheUser.getPoints()));
+                                                            filmMsg.setText(String.format("求片成功, 本次求片需要消费 %d 积分\n扣除后用户积分 %d\n以上求片搜索立即过期, 如有新求片请重新搜索", point, cacheUser.getPoints()));
                                                             RedisUtil.del(ConstantStrings.INSTANCE.getRedisTypeKey(operatorsUser.getTgId(), "_film"));
                                                         }
                                                     }
