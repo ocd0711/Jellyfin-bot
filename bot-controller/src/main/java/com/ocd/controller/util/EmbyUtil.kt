@@ -380,6 +380,11 @@ class EmbyUtil {
                 map["AuthenticationProviderId"] = "Jellyfin.Server.Implementations.Users.DefaultAuthenticationProvider"
                 map["PasswordResetProviderId"] = "Jellyfin.Server.Implementations.Users.DefaultPasswordResetProvider"
             }
+            getAllEmbyUser().filter { it.id.equals(embyId) }?.get(0)?.let { embyUser ->
+                map["enableAllFolders"] = embyUser.policy.enabledFolders
+                map["enabledFolders"] = embyUser.policy.enabledFolders
+                map["excludedSubFolders"] = embyUser.policy.excludedSubFolders
+            }
             val entity = HttpEntity(map, headers)
             val uri =
                 UriComponentsBuilder.fromHttpUrl("${url}Users/${embyId}/Policy")
