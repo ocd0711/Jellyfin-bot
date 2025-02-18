@@ -21,6 +21,8 @@ public class Line {
 
     private String port;
 
+    private Boolean needCheck;
+
     @Override
     public String toString() {
         return "Line{" +

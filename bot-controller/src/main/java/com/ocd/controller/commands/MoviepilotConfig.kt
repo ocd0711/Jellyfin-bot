@@ -24,7 +24,7 @@ class MoviepilotConfig {
 
     lateinit var imdb: String
 
-    fun imdbUrl(imdbId: String): String {
+    fun imdbUrl(imdbId: String?): String {
         return "$imdb$imdbId"
     }
 }

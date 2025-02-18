@@ -61,6 +61,7 @@ class EmbyUtil {
     private lateinit var embyJump: String
 
     fun checkUrl(line: Line): Boolean {
+        if (!line.needCheck) return true
         try {
             val str = if (StringUtils.equals(
                     line.port, "443"
