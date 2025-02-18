@@ -51,3 +51,18 @@ CREATE TABLE `user`
     `points`               int(11)               NOT NULL DEFAULT 0 COMMENT '用户积分',
     PRIMARY KEY (`id`)
 ) ENGINE=InnoDB AUTO_INCREMENT=0 DEFAULT CHARSET=utf8mb4;
+
+CREATE TABLE `moviepilot`
+(
+    `id`           BIGINT         NOT NULL AUTO_INCREMENT COMMENT '主键 id',
+    `parent`       BIGINT         NOT NULL COMMENT '父用户',
+    `org_string`   longtext       NOT NULL COMMENT '名称',
+    `category`     VARCHAR(255)   DEFAULT NULL COMMENT '影片类型',
+    `param`        longtext       DEFAULT NULL COMMENT 'moviepilot 提交参数',
+    `imdb`         VARCHAR(255)   DEFAULT NULL COMMENT 'imdb 预览链接',
+    `page_url`     VARCHAR(255)   DEFAULT NULL COMMENT '资源链接',
+    `status`       INT(1)         NOT NULL DEFAULT 0 COMMENT '状态: -0:等待下载 1:下载完成',
+    `down_id`      VARCHAR(255)   DEFAULT NULL COMMENT '下载 id',
+    PRIMARY KEY (`id`),
+    CONSTRAINT `moviepilot_parent_user_id` FOREIGN KEY (`parent`) REFERENCES `user` (`id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB AUTO_INCREMENT=0 DEFAULT CHARSET=utf8mb4 COMMENT = '求片记录';

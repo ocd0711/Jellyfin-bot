@@ -3,6 +3,7 @@ package com.ocd.controller.util;
 import com.alibaba.fastjson.JSON;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.isen.bean.constant.ConstantStrings;
+import com.ocd.controller.commands.MoviepilotConfig;
 import com.ocd.controller.config.BotConfig;
 import com.ocd.service.mysql.*;
 import com.ocd.util.HttpUtil;
@@ -15,22 +16,33 @@ import org.telegram.telegrambots.meta.api.objects.chatmember.ChatMember;
 import org.telegram.telegrambots.meta.exceptions.TelegramApiException;
 import org.telegram.telegrambots.meta.generics.TelegramClient;
 
-import java.util.*;
+import java.util.Date;
+import java.util.UUID;
 
 @Component
 @Log4j2
 public class AuthorityUtil {
 
     @Autowired
-    public AuthorityUtil(UserService userService, LineService lineService, InvitecodeService invitecodeService, InfoService infoService, BotConfig botConfig) {
+    public AuthorityUtil(UserService userService,
+                         LineService lineService,
+                         InvitecodeService invitecodeService,
+                         InfoService infoService,
+                         MoviepilotService moviepilotService,
+                         BotConfig botConfig,
+                         MoviepilotConfig moviepilotConfig) {
         AuthorityUtil.userService = userService;
         AuthorityUtil.lineService = lineService;
         AuthorityUtil.invitecodeService = invitecodeService;
         AuthorityUtil.infoService = infoService;
+        AuthorityUtil.moviepilotService = moviepilotService;
         AuthorityUtil.botConfig = botConfig;
+        AuthorityUtil.moviepilotConfig = moviepilotConfig;
     }
 
     public static UserService userService;
+
+    public static MoviepilotService moviepilotService;
 
     public static LineService lineService;
 
@@ -43,6 +55,22 @@ public class AuthorityUtil {
     public static Integer accountCount = null;
 
     public static BotConfig botConfig;
+
+    public static MoviepilotConfig moviepilotConfig;
+
+    public static Integer getUserPoint(Long userId) {
+        com.ocd.bean.mysql.User user = userService.userMapper.selectOne(
+                new QueryWrapper<com.ocd.bean.mysql.User>().lambda().eq(
+                        com.ocd.bean.mysql.User::getId, userId
+                ).eq(com.ocd.bean.mysql.User::getDeactivate, false).le(com.ocd.bean.mysql.User::getExpTime, new Date()));
+        if (user == null)
+            return 0;
+        return user.getPoints();
+    }
+
+    public static Boolean haveMoviePostPoint(Long userId, Integer points) {
+        return getUserPoint(userId) >= moviepilotConfig.getMultipleRate() * points;
+    }
 
     public static String checkTgUser(User user) {
         String sendMessage = EmbyUtil.getInstance().checkServerHealth();

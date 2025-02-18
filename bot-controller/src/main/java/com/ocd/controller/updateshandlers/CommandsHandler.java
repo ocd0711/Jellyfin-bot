@@ -3,21 +3,25 @@ package com.ocd.controller.updateshandlers;
 import cn.hutool.captcha.CaptchaUtil;
 import cn.hutool.captcha.GifCaptcha;
 import cn.hutool.core.date.DateUtil;
+import com.alibaba.fastjson2.JSON;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
+import com.baomidou.mybatisplus.core.conditions.update.UpdateWrapper;
 import com.isen.bean.constant.ConstantStrings;
+import com.ocd.bean.dto.moviepilot.MoviepilotDownResult;
+import com.ocd.bean.dto.moviepilot.MoviepilotResult;
+import com.ocd.bean.dto.result.CacheBotSearchFilm;
 import com.ocd.bean.dto.result.EmbyUserResult;
 import com.ocd.bean.mysql.Invitecode;
 import com.ocd.bean.mysql.Line;
+import com.ocd.bean.mysql.Moviepilot;
 import com.ocd.controller.commands.*;
-import com.ocd.controller.util.AuthorityUtil;
-import com.ocd.controller.util.EmbyUtil;
-import com.ocd.controller.util.MessageUtil;
-import com.ocd.controller.util.RedisUtil;
+import com.ocd.controller.util.*;
 import com.ocd.service.mysql.LineService;
 import com.ocd.service.mysql.UserService;
 import com.ocd.util.FormatUtil;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 import org.telegram.telegrambots.client.okhttp.OkHttpTelegramClient;
@@ -48,6 +52,7 @@ import org.telegram.telegrambots.meta.exceptions.TelegramApiException;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.util.*;
+import java.util.stream.IntStream;
 
 /**
  * This handler mainly works with commands to demonstrate the Commands feature of the API
@@ -58,11 +63,35 @@ import java.util.*;
 @Slf4j
 public class CommandsHandler extends CommandLongPollingTelegramBot {
 
-    List<String> userButtons = Arrays.asList("info", "main", "line", "openRegister", "bind", "create", "reset", "hide", "unblock", "checkin", "device", "logout", "shop", "flush");
+    @Autowired
+    private MoviepilotUtil moviepilotUtil;
 
-    /**
-     * Constructor.
-     */
+    @Autowired
+    private MoviepilotConfig moviepilotConfig;
+
+    List<String> userButtons = Arrays.asList(
+            "info",
+            "main",
+            "line",
+            "openRegister",
+            "bind",
+            "create",
+            "reset",
+            "hide",
+            "unblock",
+            "checkin",
+            "device",
+            "logout",
+            "shop",
+            "flush",
+            "mpMain",
+            "mp",
+            "mpNext",
+            "mpDown",
+            "mpCancel",
+            "mpHis"
+    );
+
     public CommandsHandler(
             @Value("${bot.token}") String botToken,
             @Value("${bot.name}") String botUsername,
@@ -450,6 +479,11 @@ public class CommandsHandler extends CommandLongPollingTelegramBot {
                                             }
                                             rowUnblock.add(MessageUtil.INSTANCE.getCheckinButton(cacheUser));
                                             rows.add(rowUnblock);
+                                            InlineKeyboardRow rowMpMain = new InlineKeyboardRow();
+                                            if (!cacheUser.getDeactivate() && moviepilotConfig.getOpenMp()) {
+                                                rowUnblock.add(MessageUtil.INSTANCE.getMpMainButton(cacheUser));
+                                            }
+                                            rows.add(rowMpMain);
                                             break;
                                         case "flush":
                                             RedisUtil.del(ConstantStrings.INSTANCE.getRedisTypeKey(userId.toString(), ""));
@@ -535,6 +569,185 @@ public class CommandsHandler extends CommandLongPollingTelegramBot {
                                                 RedisUtil.set(ConstantStrings.INSTANCE.getRedisTypeKey(userId.toString(), ""), command, null);
                                             }
                                             break;
+                                        case "mpMain":
+                                            EmbyUserResult embyUserDtoMp = EmbyUtil.getInstance().getUserByEmbyId(cacheUser.getEmbyId());
+                                            String editCaptionInfoMp = MessageUtil.INSTANCE.getMpInfo(embyUserDtoMp, cacheUser, moviepilotConfig.getMultipleRate());
+                                            editMessageCaption.setCaption(editCaptionInfoMp);
+                                            InlineKeyboardRow rowMp = new InlineKeyboardRow();
+                                            if (!cacheUser.getDeactivate())
+                                                rowMp.add(MessageUtil.INSTANCE.getMpButton(cacheUser));
+                                            rowMp.add(MessageUtil.INSTANCE.getMpHis(cacheUser));
+                                            rows.add(rowMp);
+                                            break;
+                                        case "mp":
+                                            if (!moviepilotConfig.getOpenMp()) {
+                                                answerCallbackQuery.setText("功能未开启");
+                                                try {
+                                                    telegramClient.execute(answerCallbackQuery);
+                                                    return null;
+                                                } catch (TelegramApiException e) {
+                                                    outString = new StringBuilder("异常情况: " + e);
+                                                }
+                                            } else if (!cacheUser.haveEmby()) {
+                                                answerCallbackQuery.setText("无账号, 无法使用求片功能");
+                                                try {
+                                                    telegramClient.execute(answerCallbackQuery);
+                                                    return null;
+                                                } catch (TelegramApiException e) {
+                                                    outString = new StringBuilder("异常情况: " + e);
+                                                }
+                                            } else {
+                                                editMessageCaption.setCaption("请输入求片片名");
+                                                RedisUtil.set(ConstantStrings.INSTANCE.getRedisTypeKey(userId.toString(), ""), command, null);
+                                            }
+                                            break;
+                                        case "mpNext":
+                                            if (!cacheUser.haveEmby()) {
+                                                answerCallbackQuery.setText("无账号, 无法使用求片功能");
+                                                try {
+                                                    telegramClient.execute(answerCallbackQuery);
+                                                    return null;
+                                                } catch (TelegramApiException e) {
+                                                    outString = new StringBuilder("异常情况: " + e);
+                                                }
+                                            } else {
+                                                if (!moviepilotConfig.getOpenMp()) {
+                                                    answerCallbackQuery.setText("功能未开启");
+                                                    try {
+                                                        telegramClient.execute(answerCallbackQuery);
+                                                        return null;
+                                                    } catch (TelegramApiException e) {
+                                                        outString = new StringBuilder("异常情况: " + e);
+                                                    }
+                                                } else {
+                                                    try {
+                                                        CacheBotSearchFilm cacheBotSearchFilm = JSON.parseObject(RedisUtil.get(ConstantStrings.INSTANCE.getRedisTypeKey(userId.toString(), "_film")).toString(), CacheBotSearchFilm.class);
+                                                        SendMessage filmMsg = new SendMessage(userId.toString(), "");
+                                                        com.ocd.bean.mysql.User finalCacheUser = cacheUser;
+                                                        List<InlineKeyboardRow> downRows = new ArrayList<>();
+                                                        InlineKeyboardMarkup inlineKeyboardMarkupMpDown = new InlineKeyboardMarkup(downRows);
+                                                        cacheBotSearchFilm.getPagedResults().forEach(it -> {
+                                                            filmMsg.setText(it.formatResourceInfo());
+                                                            downRows.clear();
+                                                            downRows.add(MessageUtil.INSTANCE.getMpDownRow(finalCacheUser, it.getIndex()));
+                                                            inlineKeyboardMarkupMpDown.setKeyboard(downRows);
+                                                            filmMsg.setReplyMarkup(inlineKeyboardMarkupMpDown);
+                                                            try {
+                                                                telegramClient.execute(filmMsg);
+                                                            } catch (TelegramApiException ignored) {
+                                                            }
+                                                        });
+                                                        outString = new StringBuilder(cacheBotSearchFilm.getPageInfo());
+                                                        RedisUtil.set(ConstantStrings.INSTANCE.getRedisTypeKey(operatorsUser.getTgId(), "_film"), JSON.toJSONString(cacheBotSearchFilm), null);
+                                                    } catch (Exception e) {
+                                                        RedisUtil.del(ConstantStrings.INSTANCE.getRedisTypeKey(userId.toString(), "_film"));
+                                                        outString = new StringBuilder("求片信息过期, 请重新操作");
+                                                        try {
+                                                            telegramClient.execute(deleteMessage);
+                                                        } catch (TelegramApiException ignored) {
+                                                        }
+                                                    }
+                                                }
+                                            }
+                                            break;
+                                        case "mpDown":
+                                            if (!cacheUser.haveEmby()) {
+                                                answerCallbackQuery.setText("无账号, 无法使用求片功能");
+                                                try {
+                                                    telegramClient.execute(answerCallbackQuery);
+                                                    return null;
+                                                } catch (TelegramApiException e) {
+                                                    outString = new StringBuilder("异常情况: " + e);
+                                                }
+                                            } else {
+                                                if (!moviepilotConfig.getOpenMp()) {
+                                                    answerCallbackQuery.setText("功能未开启");
+                                                    try {
+                                                        telegramClient.execute(answerCallbackQuery);
+                                                        return null;
+                                                    } catch (TelegramApiException e) {
+                                                        outString = new StringBuilder("异常情况: " + e);
+                                                    }
+                                                } else {
+                                                    CacheBotSearchFilm cacheBotSearchFilm = JSON.parseObject(RedisUtil.get(ConstantStrings.INSTANCE.getRedisTypeKey(userId.toString(), "_film")).toString(), CacheBotSearchFilm.class);
+                                                    MoviepilotResult moviepilotResult = cacheBotSearchFilm.getMoviepilotResults().get(Integer.parseInt(datas[2]));
+                                                    int point = (int) Math.round(moviepilotResult.getTorrentInfo().getSize() / (1024.0 * 1024.0 * 1024.0));
+                                                    SendMessage filmMsg = new SendMessage(userId.toString(), "");
+                                                    if (cacheUser.getPoints() < point) {
+                                                        filmMsg.setText(String.format("积分不足, 次求片需要消费 %d 积分\n当前用户积分 %d", point, cacheUser.getPoints()));
+                                                    } else {
+                                                        String downloadId = moviepilotUtil.downFilm(moviepilotResult);
+                                                        if (downloadId == null)
+                                                            filmMsg.setText("求片异常, 反馈管理");
+                                                        else {
+                                                            cacheUser.setPoints(cacheUser.getPoints() - point);
+                                                            AuthorityUtil.userService.userMapper.updateById(cacheUser);
+                                                            Moviepilot moviepilot = new Moviepilot(cacheUser.getId(), moviepilotResult, moviepilotConfig.imdbUrl(moviepilotResult.getTorrentInfo().getImdbid()), downloadId);
+                                                            AuthorityUtil.moviepilotService.createMoviepilot(moviepilot);
+                                                            filmMsg.setText(String.format("求片成功, 次求片需要消费 %d 积分\n扣除后用户积分 %d\n以上求片搜索立即过期, 如有新求片请重新搜索", point, cacheUser.getPoints()));
+                                                            RedisUtil.del(ConstantStrings.INSTANCE.getRedisTypeKey(operatorsUser.getTgId(), "_film"));
+                                                        }
+                                                    }
+                                                    try {
+                                                        telegramClient.execute(filmMsg);
+                                                        return null;
+                                                    } catch (TelegramApiException e) {
+                                                        outString = new StringBuilder("异常情况: " + e);
+                                                    }
+                                                }
+                                                return null;
+                                            }
+                                            break;
+                                        case "mpHis":
+                                            if (!moviepilotConfig.getOpenMp()) {
+                                                answerCallbackQuery.setText("功能未开启");
+                                                try {
+                                                    telegramClient.execute(answerCallbackQuery);
+                                                    return null;
+                                                } catch (TelegramApiException e) {
+                                                    outString = new StringBuilder("异常情况: " + e);
+                                                }
+                                                return null;
+                                            }
+                                            List<Moviepilot> moviepilots = AuthorityUtil.moviepilotService.getMoviepilotMapper().selectList(new QueryWrapper<Moviepilot>().lambda().eq(Moviepilot::getParent, cacheUser.getId()));
+                                            List<MoviepilotDownResult> moviepilotDownResultList = moviepilotUtil.downStateFilm();
+                                            if (moviepilotDownResultList == null)
+                                                outString = new StringBuilder("查询下载进度异常");
+                                            else {
+                                                List<String> downIds = moviepilotDownResultList.stream().map(MoviepilotDownResult::getHash).toList();
+                                                moviepilots.stream().filter(it -> !downIds.contains(it.getDownId())).forEach(it -> it.setStatus(1));
+                                                List<Moviepilot> cache = moviepilots.stream().filter(it -> it.getStatus() == 1).toList();
+                                                if (cache != null && !cache.isEmpty())
+                                                    AuthorityUtil.moviepilotService.getMoviepilotMapper().update(null,
+                                                            new UpdateWrapper<Moviepilot>().lambda()
+                                                                    .in(Moviepilot::getDownId, cache.stream().map(Moviepilot::getDownId).toList())
+                                                                    .set(Moviepilot::getStatus, 1)
+                                                    );
+                                                outString = new StringBuilder();
+                                                StringBuilder finalOutString = outString;
+                                                moviepilots.forEach(it -> {
+                                                    moviepilotDownResultList.stream()
+                                                            .filter(md -> md.getHash().equals(it.getDownId()))
+                                                            .findFirst()
+                                                            .ifPresent(md -> finalOutString.append(it.getInfoStr(md)).append("\n"));
+                                                });
+                                                SendMessage filmHisMsg = new SendMessage(userId.toString(), outString.isEmpty() ? "暂无求片下载中" : outString.toString());
+                                                try {
+                                                    telegramClient.execute(filmHisMsg);
+                                                    return null;
+                                                } catch (TelegramApiException e) {
+                                                    outString = new StringBuilder("异常情况: " + e);
+                                                }
+                                                return null;
+                                            }
+                                            break;
+                                        case "mpCancel":
+                                            RedisUtil.del(ConstantStrings.INSTANCE.getRedisTypeKey(operatorsUser.getTgId(), "_film"));
+                                            telegramClient.execute(deleteMessage);
+                                            try {
+                                                break;
+                                            } catch (Exception ignore) {
+                                            }
                                         case "create":
                                             if (cacheUser.haveEmby()) {
                                                 editMessageCaption.setCaption("已有账户, 无需重复操作");
@@ -573,7 +786,12 @@ public class CommandsHandler extends CommandLongPollingTelegramBot {
                                     }
                                 }
                                 try {
-                                    if (!command.equals("main") && !command.equals("flush") && !command.equals("openRegister")) {
+                                    if (command.equals("mpNext")) {
+                                        SendMessage filmMsg = new SendMessage(userId.toString(), outString.toString());
+                                        filmMsg.setReplyMarkup(InlineKeyboardMarkup.builder().keyboardRow(MessageUtil.INSTANCE.getMpSelect(operatorsUser)).build());
+                                        telegramClient.execute(filmMsg);
+                                        telegramClient.execute(deleteMessage);
+                                    } else if (!command.equals("main") && !command.equals("flush") && !command.equals("openRegister")) {
                                         InlineKeyboardRow rowLineHome = new InlineKeyboardRow();
                                         // 添加主页按钮
                                         InlineKeyboardButton home = new InlineKeyboardButton("🏠返回主菜单");
@@ -921,6 +1139,48 @@ public class CommandsHandler extends CommandLongPollingTelegramBot {
                                             }
                                         }
                                         break;
+                                    case "mp":
+                                        if (datas.length < 1) {
+                                            outDoing = "参数错误! ex: 片名";
+                                        } else {
+                                            String filmName = update.getMessage().getText();
+                                            List<MoviepilotResult> moviepilotResultList = moviepilotUtil.searchFilm(filmName);
+                                            if (moviepilotResultList == null)
+                                                outDoing = "求片服务异常, 群内反馈处理";
+                                            else if (moviepilotResultList.isEmpty())
+                                                outDoing = "查询不到此资源";
+                                            else {
+                                                if (operatorsUser.getPoints() <= 0) outDoing = "无积分无法求片";
+                                                else {
+                                                    moviepilotResultList.sort(Comparator.comparingInt((MoviepilotResult result) -> result.getTorrentInfo().getSeeders()).reversed());
+                                                    List<MoviepilotResult> resultListWithIndex = IntStream.range(0, moviepilotResultList.size())
+                                                            .mapToObj(i -> {
+                                                                MoviepilotResult result = moviepilotResultList.get(i);
+                                                                result.setIndex(i);
+                                                                return result;
+                                                            })
+                                                            .toList();
+                                                    CacheBotSearchFilm cacheBotSearchFilm = new CacheBotSearchFilm(0, 5, resultListWithIndex);
+                                                    SendMessage filmMsg = new SendMessage(update.getMessage().getFrom().getId().toString(), "");
+                                                    List<InlineKeyboardRow> downRows = new ArrayList<>();
+                                                    InlineKeyboardMarkup inlineKeyboardMarkupMpDown = new InlineKeyboardMarkup(downRows);
+                                                    cacheBotSearchFilm.getPagedResults().forEach(it -> {
+                                                        filmMsg.setText(it.formatResourceInfo());
+                                                        downRows.clear();
+                                                        downRows.add(MessageUtil.INSTANCE.getMpDownRow(operatorsUser, it.getIndex()));
+                                                        inlineKeyboardMarkupMpDown.setKeyboard(downRows);
+                                                        filmMsg.setReplyMarkup(inlineKeyboardMarkupMpDown);
+                                                        try {
+                                                            telegramClient.execute(filmMsg);
+                                                        } catch (TelegramApiException ignored) {
+                                                        }
+                                                    });
+                                                    outDoing = cacheBotSearchFilm.getPageInfo();
+                                                    RedisUtil.set(ConstantStrings.INSTANCE.getRedisTypeKey(operatorsUser.getTgId(), "_film"), JSON.toJSONString(cacheBotSearchFilm), null);
+                                                }
+                                            }
+                                        }
+                                        break;
                                     case "create":
                                         String embyName = datas[0];
                                         com.ocd.bean.mysql.User sqlUser = AuthorityUtil.userService.userMapper.selectOne(new QueryWrapper<com.ocd.bean.mysql.User>().lambda().eq(com.ocd.bean.mysql.User::getTgId, update.getMessage().getFrom().getId()));
@@ -981,6 +1241,8 @@ public class CommandsHandler extends CommandLongPollingTelegramBot {
                                         }
                                         break;
                                 }
+                            if (doing.equals("mp"))
+                                sendMessage.setReplyMarkup(InlineKeyboardMarkup.builder().keyboardRow(MessageUtil.INSTANCE.getMpSelect(operatorsUser)).build());
                             RedisUtil.del(ConstantStrings.INSTANCE.getRedisTypeKey(update.getMessage().getFrom().getId().toString(), ""));
                             sendMessage.setText(outDoing);
                             try {
@@ -1012,7 +1274,7 @@ public class CommandsHandler extends CommandLongPollingTelegramBot {
         if (cacheUser == null) {
             com.ocd.bean.mysql.User user = new com.ocd.bean.mysql.User(replyUser.getId());
             user.setStartBot(false);
-            int id = AuthorityUtil.userService.createUser(user);
+            long id = AuthorityUtil.userService.createUser(user);
             cacheUser = AuthorityUtil.userService.userMapper.selectById(id);
         }
         telegramClient.execute(deleteMessage);

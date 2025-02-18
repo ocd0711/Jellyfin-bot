@@ -16,6 +16,8 @@ object ConstantStrings {
 
     val groupIn = "administrator,creator,member"
 
+    const val AUTHENTICATION_PREFIX = "Bearer "
+
     val adminCommands = arrayListOf(
         "pin", "unpin", "id"
     )

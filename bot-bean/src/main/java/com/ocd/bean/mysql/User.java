@@ -23,7 +23,7 @@ public class User {
      * 用户 id
      */
     @TableId(type = IdType.AUTO)
-    private Integer id;
+    private Long id;
 
     /**
      * tg id

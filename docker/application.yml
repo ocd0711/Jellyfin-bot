@@ -99,3 +99,12 @@ bot:
   # 是否开启不在群内用户检测
   enable_user_not_in_group: true
   # 保号配置相关参数, 条件可以自由组合, 满足付费服务/公益多种条件 --------------------------------- ⬆️
+
+moviepilot:
+  openMp: false
+  # 求片积分倍率
+  multipleRate: 2
+  url: http://xxxxxx:xxxx/
+  username: xxx
+  password: xxxxxxxx
+  imdb: https://www.imdb.com/title/

@@ -8,7 +8,6 @@ import org.slf4j.LoggerFactory
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.web.client.RestTemplateBuilder
 import org.springframework.http.client.HttpComponentsClientHttpRequestFactory
-import org.springframework.http.client.SimpleClientHttpRequestFactory
 import org.springframework.http.converter.ByteArrayHttpMessageConverter
 import org.springframework.http.converter.HttpMessageConverter
 import org.springframework.http.converter.ResourceHttpMessageConverter
@@ -70,7 +69,7 @@ class HttpUtil {
 //        restTemplate.requestFactory = clientHttpRequestFactory
         val requestFactory = HttpComponentsClientHttpRequestFactory(HttpClientBuilder.create().build())
         requestFactory.setConnectTimeout(2_000)
-        requestFactory.setReadTimeout(5_000)
+        requestFactory.setReadTimeout(10_000)
         restTemplate.requestFactory = requestFactory
         restTemplate.messageConverters.add(converter)
     }

@@ -171,6 +171,55 @@ object MessageUtil {
         return info
     }
 
+    fun getMpMainButton(user: com.ocd.bean.mysql.User): InlineKeyboardButton {
+        var info = InlineKeyboardButton("🍿点播")
+        info.callbackData = "mpMain " + user.tgId
+        return info
+    }
+
+    fun getMpButton(user: com.ocd.bean.mysql.User): InlineKeyboardButton {
+        var info = InlineKeyboardButton("🍿求片")
+        info.callbackData = "mp " + user.tgId
+        return info
+    }
+
+    fun getMpHis(user: com.ocd.bean.mysql.User): InlineKeyboardButton {
+        var info = InlineKeyboardButton("🌐下载进度")
+        info.callbackData = "mpHis " + user.tgId
+        return info
+    }
+
+    fun getMpDownButton(user: com.ocd.bean.mysql.User, index: Int): InlineKeyboardButton {
+        var info = InlineKeyboardButton("⬇️选此片下载")
+        info.callbackData = "mpDown " + user.tgId + " $index"
+        return info
+    }
+
+    fun getMpDownRow(user: com.ocd.bean.mysql.User, index: Int): InlineKeyboardRow {
+        val row = InlineKeyboardRow()
+        row.add(getMpDownButton(user, index))
+        return row
+    }
+
+    fun getMpNextButton(user: com.ocd.bean.mysql.User): InlineKeyboardButton {
+        var info = InlineKeyboardButton("⏭️下一页")
+        info.callbackData = "mpNext " + user.tgId
+        return info
+    }
+
+    fun getMpCancelButton(user: com.ocd.bean.mysql.User): InlineKeyboardButton {
+        var info = InlineKeyboardButton("⏎ 取消")
+        info.callbackData = "mpCancel " + user.tgId
+        return info
+    }
+
+    fun getMpSelect(user: com.ocd.bean.mysql.User): InlineKeyboardRow {
+        val row = InlineKeyboardRow()
+        row.add(getMpNextButton(user))
+        row.add(getMpCancelButton(user))
+        return row
+    }
+
     fun getDevicesButton(user: com.ocd.bean.mysql.User): InlineKeyboardButton {
         var info = InlineKeyboardButton("📱设备管理")
         info.callbackData = "device " + user.tgId
@@ -604,5 +653,15 @@ $action
 
             currentIndex = endIndex
         }
+    }
+
+    fun getMpInfo(
+        embyUserDto: EmbyUserResult?,
+        cacheUser: com.ocd.bean.mysql.User,
+        multipleRate : Int
+    ): String {
+        var out = "当前点播费用为: 1GB 消耗 $multipleRate 积分\n" +
+                "您当前拥有 ${cacheUser.points} 积分\n".trimIndent()
+        return out
     }
 }

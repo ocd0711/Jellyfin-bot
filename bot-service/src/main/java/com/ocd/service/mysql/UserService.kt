@@ -18,7 +18,7 @@ class UserService {
     @Autowired
     lateinit var userMapper: UserMapper
 
-    fun createUser(user: User): Int {
+    fun createUser(user: User): Long {
         userMapper.insert(user)
         return user.id
     }

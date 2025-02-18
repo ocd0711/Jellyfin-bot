@@ -19,5 +19,4 @@ public class PageInfo {
      * 每页条数
      */
     private Integer pageSize = 10;
-
 }
