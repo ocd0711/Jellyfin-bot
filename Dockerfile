@@ -11,7 +11,7 @@ RUN mvn dependency:go-offline
 
 COPY . .
 
-RUN mvn package -DskipTests
+RUN mvn package -DskipTests -P cache
 
 FROM openjdk:25-slim-bookworm
 
@@ -33,6 +33,6 @@ WORKDIR /app
 
 COPY --from=build /app/bot-controller/target/*-exec.jar app.jar
 
-EXPOSE 8080
+EXPOSE 8081
 
 ENTRYPOINT ["java", "-jar", "app.jar" , "--spring.config.additional-location=/app/application-prod.yml"]
