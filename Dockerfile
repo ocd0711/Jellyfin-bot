@@ -13,13 +13,16 @@ COPY . .
 
 RUN mvn package -DskipTests
 
-FROM openjdk:17-jdk-slim
+FROM openjdk:25-slim-bookworm
+
+ENV DEBIAN_FRONTEND=noninteractive
 
 RUN apt-get update && apt-get install -y \
     libfreetype6 \
     fonts-dejavu-core \
     fonts-liberation \
     fontconfig \
+    && apt-get clean \
     && rm -rf /var/lib/apt/lists/*
 
 COPY ./fonts/*.ttf /usr/share/fonts/truetype/custom/

@@ -49,6 +49,10 @@ ocd:
 emby:
   url:  http://127.0.0.1:8080/
   apikey: xxxxxx
+  # 限速(8Mbps) - 0 为不限速
+  limitNet: 8000000
+  # 客户端数
+  deviceCount: 3
 
 emby-jump: web/index.html#!/item?id=%s&serverId=%s
 

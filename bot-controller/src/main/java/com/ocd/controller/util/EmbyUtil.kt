@@ -11,8 +11,10 @@ import com.ocd.bean.dto.jellby.PlaybackUserRecord
 import com.ocd.bean.dto.result.*
 import com.ocd.bean.mysql.Line
 import com.ocd.bean.mysql.User
+import com.ocd.controller.config.EmbyConfig
 import com.ocd.util.HttpUtil
 import org.apache.commons.lang3.StringUtils
+import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.http.*
 import org.springframework.stereotype.Component
@@ -51,14 +53,11 @@ class EmbyUtil {
         EmbyUtilHoder.mInstance = this
     }
 
-    @Value("\${emby.url}")
-    lateinit var url: String
-
-    @Value("\${emby.apikey}")
-    private lateinit var apikey: String
-
     @Value("\${emby-jump}")
     private lateinit var embyJump: String
+
+    @Autowired
+    private lateinit var embyConfig: EmbyConfig
 
     fun checkUrl(line: Line): Boolean {
         if (!line.needCheck) return true
@@ -76,7 +75,7 @@ class EmbyUtil {
 
     fun checkServerHealth(): String? {
         try {
-            HttpUtil.getInstance().restTemplate().getForObject(url, String::class.java)
+            HttpUtil.getInstance().restTemplate().getForObject(embyConfig.url, String::class.java)
         } catch (e: Exception) {
             return "emby 服务器异常, 群内看看消息?"
         }
@@ -86,7 +85,7 @@ class EmbyUtil {
     fun checkServerHealthString(): String? {
         var status: StringBuilder = StringBuilder()
         try {
-            HttpUtil.getInstance().restTemplate().getForObject(url, String::class.java)
+            HttpUtil.getInstance().restTemplate().getForObject(embyConfig.url, String::class.java)
             status.append("${AuthorityUtil.botConfig.groupNick}: 正常")
         } catch (e: Exception) {
             status.append("${AuthorityUtil.botConfig.groupNick}: 异常")
@@ -98,10 +97,10 @@ class EmbyUtil {
     fun getAllEmbyUser(isHidden: Boolean? = null, isDisabled: Boolean? = null): List<EmbyUserResult> {
         return try {
             val headers = HttpHeaders().apply {
-                set("X-Emby-Token", apikey)
+                set("X-Emby-Token", embyConfig.apikey)
             }
             val entity = HttpEntity<String>(headers)
-            val uri = UriComponentsBuilder.fromHttpUrl("${url}Users")
+            val uri = UriComponentsBuilder.fromHttpUrl("${embyConfig.url}Users")
             if (isHidden != null)
                 uri.queryParam("isHidden", isHidden)
             if (isDisabled != null)
@@ -126,14 +125,14 @@ class EmbyUtil {
     fun register(user: User, embyUser: String, pass: String): Boolean {
         try {
             val headers = HttpHeaders().apply {
-                set("X-Emby-Token", apikey)
+                set("X-Emby-Token", embyConfig.apikey)
                 contentType = MediaType.APPLICATION_JSON
             }
             val map: HashMap<String, Any> = HashMap()
             map["Name"] = embyUser
             map["Password"] = pass
             val entity = HttpEntity(map, headers)
-            val uri = UriComponentsBuilder.fromHttpUrl("${url}Users/New")
+            val uri = UriComponentsBuilder.fromHttpUrl("${embyConfig.url}Users/New")
             val response = HttpUtil.getInstance()
                 .restTemplate()
                 .exchange(
@@ -165,7 +164,7 @@ class EmbyUtil {
     fun resetPass(user: User, pass: String?) {
         try {
             val headers = HttpHeaders().apply {
-                set("X-Emby-Token", apikey)
+                set("X-Emby-Token", embyConfig.apikey)
                 contentType = MediaType.APPLICATION_JSON
             }
             val map: HashMap<String, Any> = HashMap()
@@ -179,7 +178,7 @@ class EmbyUtil {
             }
             val entity = HttpEntity(map, headers)
             val uri =
-                UriComponentsBuilder.fromHttpUrl(if (AuthorityUtil.botConfig.jellyfin) "${url}Users/Password" else "${url}Users/${user.embyId}/Password")
+                UriComponentsBuilder.fromHttpUrl(if (AuthorityUtil.botConfig.jellyfin) "${embyConfig.url}Users/Password" else "${embyConfig.url}Users/${user.embyId}/Password")
                     .queryParam("userId", user.embyId)
             val response = HttpUtil.getInstance()
                 .restTemplate()
@@ -197,11 +196,11 @@ class EmbyUtil {
     fun deleteUser(user: User) {
         try {
             val headers = HttpHeaders().apply {
-                set("X-Emby-Token", apikey)
+                set("X-Emby-Token", embyConfig.apikey)
                 contentType = MediaType.APPLICATION_JSON
             }
             val entity = HttpEntity<String>(headers)
-            val uri = UriComponentsBuilder.fromHttpUrl("${url}Users/${user.embyId}")
+            val uri = UriComponentsBuilder.fromHttpUrl("${embyConfig.url}Users/${user.embyId}")
             val response = HttpUtil.getInstance()
                 .restTemplate()
                 .exchange(
@@ -220,11 +219,11 @@ class EmbyUtil {
     fun deleteEmbyById(id: String) {
         try {
             val headers = HttpHeaders().apply {
-                set("X-Emby-Token", apikey)
+                set("X-Emby-Token", embyConfig.apikey)
                 contentType = MediaType.APPLICATION_JSON
             }
             val entity = HttpEntity<String>(headers)
-            val uri = UriComponentsBuilder.fromHttpUrl("${url}Users/$id")
+            val uri = UriComponentsBuilder.fromHttpUrl("${embyConfig.url}Users/$id")
             val response = HttpUtil.getInstance()
                 .restTemplate()
                 .exchange(
@@ -241,12 +240,20 @@ class EmbyUtil {
     fun deleteEmbyByName(embyName: String) {
         try {
             val headers = HttpHeaders().apply {
-                set("X-Emby-Token", apikey)
+                set("X-Emby-Token", embyConfig.apikey)
                 contentType = MediaType.APPLICATION_JSON
             }
             val entity = HttpEntity<String>(headers)
             val uri =
-                UriComponentsBuilder.fromHttpUrl("${url}Users/${getAllEmbyUser().filter { it.name.equals(embyName) }[0].id}")
+                UriComponentsBuilder.fromHttpUrl(
+                    "${embyConfig.url}Users/${
+                        getAllEmbyUser().filter {
+                            it.name.equals(
+                                embyName
+                            )
+                        }[0].id
+                    }"
+                )
             val response = HttpUtil.getInstance()
                 .restTemplate()
                 .exchange(
@@ -267,7 +274,7 @@ class EmbyUtil {
     fun deactivateUser(user: User, deactivate: Boolean) {
         try {
             val headers = HttpHeaders().apply {
-                set("X-Emby-Token", apikey)
+                set("X-Emby-Token", embyConfig.apikey)
                 contentType = MediaType.APPLICATION_JSON
             }
             val map: HashMap<String, Any> = HashMap()
@@ -276,8 +283,8 @@ class EmbyUtil {
             map["EnableVideoPlaybackTranscoding"] = false
             map["EnablePlaybackRemuxing"] = false
             map["EnableContentDownloading"] = false
-            map["MaxActiveSessions"] = 3
-            map["RemoteClientBitrateLimit"] = 80000000
+            map["MaxActiveSessions"] = embyConfig.deviceCount
+            map["RemoteClientBitrateLimit"] = embyConfig.limitNet
             map["SyncPlayAccess"] = "None"
             if (!AuthorityUtil.botConfig.jellyfin) {
                 map["IsHidden"] = true
@@ -285,7 +292,7 @@ class EmbyUtil {
                 map["EnableSyncTranscoding"] = false
                 map["EnableMediaConversion"] = false
                 map["EnablePublicSharing"] = false
-                map["SimultaneousStreamLimit"] = 3
+                map["SimultaneousStreamLimit"] = embyConfig.deviceCount
                 map["AllowCameraUpload"] = false
             } else {
                 map["AuthenticationProviderId"] = "Jellyfin.Server.Implementations.Users.DefaultAuthenticationProvider"
@@ -293,7 +300,7 @@ class EmbyUtil {
             }
             val entity = HttpEntity(map, headers)
             val uri =
-                UriComponentsBuilder.fromHttpUrl("${url}Users/${user.embyId}/Policy")
+                UriComponentsBuilder.fromHttpUrl("${embyConfig.url}Users/${user.embyId}/Policy")
             val response = HttpUtil.getInstance()
                 .restTemplate()
                 .exchange(
@@ -312,7 +319,7 @@ class EmbyUtil {
     fun initUser(user: User) {
         try {
             val headers = HttpHeaders().apply {
-                set("X-Emby-Token", apikey)
+                set("X-Emby-Token", embyConfig.apikey)
                 contentType = MediaType.APPLICATION_JSON
             }
             val map: HashMap<String, Any> = HashMap()
@@ -320,8 +327,8 @@ class EmbyUtil {
             map["EnableVideoPlaybackTranscoding"] = false
             map["EnablePlaybackRemuxing"] = false
             map["EnableContentDownloading"] = false
-            map["MaxActiveSessions"] = 3
-            map["RemoteClientBitrateLimit"] = 80000000
+            map["MaxActiveSessions"] = embyConfig.deviceCount
+            map["RemoteClientBitrateLimit"] = embyConfig.limitNet
             map["SyncPlayAccess"] = "None"
             map["IsAdministrator"] = user.superAdmin
             if (!AuthorityUtil.botConfig.jellyfin) {
@@ -330,7 +337,7 @@ class EmbyUtil {
                 map["EnableSyncTranscoding"] = false
                 map["EnableMediaConversion"] = false
                 map["EnablePublicSharing"] = false
-                map["SimultaneousStreamLimit"] = 3
+                map["SimultaneousStreamLimit"] = embyConfig.deviceCount
                 map["AllowCameraUpload"] = false
             } else {
                 map["AuthenticationProviderId"] = "Jellyfin.Server.Implementations.Users.DefaultAuthenticationProvider"
@@ -338,7 +345,7 @@ class EmbyUtil {
             }
             val entity = HttpEntity(map, headers)
             val uri =
-                UriComponentsBuilder.fromHttpUrl("${url}Users/${user.embyId}/Policy")
+                UriComponentsBuilder.fromHttpUrl("${embyConfig.url}Users/${user.embyId}/Policy")
             val response = HttpUtil.getInstance()
                 .restTemplate()
                 .exchange(
@@ -357,7 +364,7 @@ class EmbyUtil {
     fun initPolicy(embyId: String, isDisabled: Boolean = false) {
         try {
             val headers = HttpHeaders().apply {
-                set("X-Emby-Token", apikey)
+                set("X-Emby-Token", embyConfig.apikey)
                 contentType = MediaType.APPLICATION_JSON
             }
             val map: HashMap<String, Any> = HashMap()
@@ -366,8 +373,8 @@ class EmbyUtil {
             map["EnableVideoPlaybackTranscoding"] = false
             map["EnablePlaybackRemuxing"] = false
             map["EnableContentDownloading"] = false
-            map["MaxActiveSessions"] = 3
-            map["RemoteClientBitrateLimit"] = 80000000
+            map["MaxActiveSessions"] = embyConfig.deviceCount
+            map["RemoteClientBitrateLimit"] = embyConfig.limitNet
             map["SyncPlayAccess"] = "None"
             if (!AuthorityUtil.botConfig.jellyfin) {
                 map["IsHidden"] = true
@@ -375,7 +382,7 @@ class EmbyUtil {
                 map["EnableSyncTranscoding"] = false
                 map["EnableMediaConversion"] = false
                 map["EnablePublicSharing"] = false
-                map["SimultaneousStreamLimit"] = 3
+                map["SimultaneousStreamLimit"] = embyConfig.deviceCount
                 map["AllowCameraUpload"] = false
             } else {
                 map["AuthenticationProviderId"] = "Jellyfin.Server.Implementations.Users.DefaultAuthenticationProvider"
@@ -388,7 +395,7 @@ class EmbyUtil {
             }
             val entity = HttpEntity(map, headers)
             val uri =
-                UriComponentsBuilder.fromHttpUrl("${url}Users/${embyId}/Policy")
+                UriComponentsBuilder.fromHttpUrl("${embyConfig.url}Users/${embyId}/Policy")
             val response = HttpUtil.getInstance()
                 .restTemplate()
                 .exchange(
@@ -438,12 +445,12 @@ class EmbyUtil {
             )
 
             val headers = HttpHeaders().apply {
-                set("X-Emby-Token", apikey)
+                set("X-Emby-Token", embyConfig.apikey)
                 contentType = MediaType.APPLICATION_JSON
             }
             val entity = HttpEntity(policy, headers)
             val uri =
-                UriComponentsBuilder.fromHttpUrl("${url}Users/${user.embyId}/Policy")
+                UriComponentsBuilder.fromHttpUrl("${embyConfig.url}Users/${user.embyId}/Policy")
             val response = HttpUtil.getInstance()
                 .restTemplate()
                 .exchange(
@@ -465,10 +472,10 @@ class EmbyUtil {
     fun searchEmbyMediaSubFolders(guid: String): List<String> {
         return try {
             val headers = HttpHeaders().apply {
-                set("X-Emby-Token", apikey)
+                set("X-Emby-Token", embyConfig.apikey)
             }
             val entity = HttpEntity<String>(headers)
-            val uri = UriComponentsBuilder.fromHttpUrl("${url}emby/Library/SelectableMediaFolders")
+            val uri = UriComponentsBuilder.fromHttpUrl("${embyConfig.url}emby/Library/SelectableMediaFolders")
             val response = HttpUtil.getInstance()
                 .restTemplate()
                 .exchange(
@@ -500,10 +507,10 @@ class EmbyUtil {
     fun searchAllMediaLibraries(): List<EmbyMediaFoldersResult> {
         return try {
             val headers = HttpHeaders().apply {
-                set("X-Emby-Token", apikey)
+                set("X-Emby-Token", embyConfig.apikey)
             }
             val entity = HttpEntity<String>(headers)
-            val uri = UriComponentsBuilder.fromHttpUrl("${url}Library/MediaFolders")
+            val uri = UriComponentsBuilder.fromHttpUrl("${embyConfig.url}Library/MediaFolders")
             val response = HttpUtil.getInstance()
                 .restTemplate()
                 .exchange(
@@ -527,7 +534,7 @@ class EmbyUtil {
     fun authenticateByName(username: String, password: String?): EmbyUserResult? {
         return try {
             val headers = HttpHeaders().apply {
-                set("X-Emby-Token", apikey)
+                set("X-Emby-Token", embyConfig.apikey)
                 contentType = MediaType.APPLICATION_JSON
                 set(
                     HttpHeaders.AUTHORIZATION,
@@ -539,7 +546,7 @@ class EmbyUtil {
             map["Pw"] = password ?: ""
             val entity = HttpEntity(map, headers)
             val uri =
-                UriComponentsBuilder.fromHttpUrl("${url}Users/AuthenticateByName")
+                UriComponentsBuilder.fromHttpUrl("${embyConfig.url}Users/AuthenticateByName")
             val response = HttpUtil.getInstance()
                 .restTemplate()
                 .exchange(
@@ -560,10 +567,10 @@ class EmbyUtil {
     fun getUserByEmbyId(embyId: String?): EmbyUserResult? {
         return try {
             val headers = HttpHeaders().apply {
-                set("X-Emby-Token", apikey)
+                set("X-Emby-Token", embyConfig.apikey)
             }
             val entity = HttpEntity<String>(headers)
-            val uri = UriComponentsBuilder.fromHttpUrl("${url}Users/$embyId")
+            val uri = UriComponentsBuilder.fromHttpUrl("${embyConfig.url}Users/$embyId")
             val response = HttpUtil.getInstance()
                 .restTemplate()
                 .exchange(
@@ -587,11 +594,11 @@ class EmbyUtil {
     fun viewingEquipment(embyId: String?): List<EmbyDeviceResult> {
         return try {
             val headers = HttpHeaders().apply {
-                set("X-Emby-Token", apikey)
+                set("X-Emby-Token", embyConfig.apikey)
             }
             val entity = HttpEntity<String>(headers)
             val uri =
-                UriComponentsBuilder.fromHttpUrl(if (AuthorityUtil.botConfig.jellyfin) "${url}Devices?userId=$embyId" else "${url}Devices")
+                UriComponentsBuilder.fromHttpUrl(if (AuthorityUtil.botConfig.jellyfin) "${embyConfig.url}Devices?userId=$embyId" else "${embyConfig.url}Devices")
             val response = HttpUtil.getInstance()
                 .restTemplate()
                 .exchange(
@@ -617,11 +624,11 @@ class EmbyUtil {
     fun onlineCount(activeWithinSeconds: Int = 960): Int {
         return try {
             val headers = HttpHeaders().apply {
-                set("X-Emby-Token", apikey)
+                set("X-Emby-Token", embyConfig.apikey)
             }
             val entity = HttpEntity<String>(headers)
             val uri =
-                UriComponentsBuilder.fromHttpUrl("${url}Sessions?activeWithinSeconds=$activeWithinSeconds")
+                UriComponentsBuilder.fromHttpUrl("${embyConfig.url}Sessions?activeWithinSeconds=$activeWithinSeconds")
             val response = HttpUtil.getInstance()
                 .restTemplate()
                 .exchange(
@@ -643,10 +650,10 @@ class EmbyUtil {
     fun deleteDevice(deviceId: String?): Boolean {
         return try {
             val headers = HttpHeaders().apply {
-                set("X-Emby-Token", apikey)
+                set("X-Emby-Token", embyConfig.apikey)
             }
             val entity = HttpEntity<String>(headers)
-            val uri = UriComponentsBuilder.fromHttpUrl("${url}Devices?id=$deviceId")
+            val uri = UriComponentsBuilder.fromHttpUrl("${embyConfig.url}Devices?id=$deviceId")
             val response = HttpUtil.getInstance()
                 .restTemplate()
                 .exchange(
@@ -664,10 +671,10 @@ class EmbyUtil {
     fun LibraryCountStr(): String {
         return try {
             val headers = HttpHeaders().apply {
-                set("X-Emby-Token", apikey)
+                set("X-Emby-Token", embyConfig.apikey)
             }
             val entity = HttpEntity<String>(headers)
-            val uri = UriComponentsBuilder.fromHttpUrl("${url}Items/Counts")
+            val uri = UriComponentsBuilder.fromHttpUrl("${embyConfig.url}Items/Counts")
             val response = HttpUtil.getInstance()
                 .restTemplate()
                 .exchange(
@@ -702,11 +709,11 @@ class EmbyUtil {
     fun getShowInfo(isMovie: Boolean, date: String, days: Int = 1, timezoneOffset: Int = 8): List<PlaybackShowsResult> {
         return try {
             val headers = HttpHeaders().apply {
-                set("X-Emby-Token", apikey)
+                set("X-Emby-Token", embyConfig.apikey)
             }
             val entity = HttpEntity<String>(headers)
             val uri =
-                UriComponentsBuilder.fromHttpUrl("${url}user_usage_stats/${if (isMovie) "MoviesReport" else "GetTvShowsReport"}")
+                UriComponentsBuilder.fromHttpUrl("${embyConfig.url}user_usage_stats/${if (isMovie) "MoviesReport" else "GetTvShowsReport"}")
             uri.queryParam("date", date)
             uri.queryParam("days", days)
             uri.queryParam("timezoneOffset", timezoneOffset)
@@ -731,11 +738,11 @@ class EmbyUtil {
     fun getUserShowInfo(date: String, days: Int = 1, timezoneOffset: Int = 8): List<PlaybackShowsResult> {
         return try {
             val headers = HttpHeaders().apply {
-                set("X-Emby-Token", apikey)
+                set("X-Emby-Token", embyConfig.apikey)
             }
             val entity = HttpEntity<String>(headers)
             val uri =
-                UriComponentsBuilder.fromHttpUrl("${url}user_usage_stats/UserId/BreakdownReport")
+                UriComponentsBuilder.fromHttpUrl("${embyConfig.url}user_usage_stats/UserId/BreakdownReport")
             uri.queryParam("date", date)
             uri.queryParam("days", days)
             uri.queryParam("timezoneOffset", timezoneOffset)
@@ -760,11 +767,11 @@ class EmbyUtil {
     fun getDeviceShowInfo(date: String, days: Int = 1, timezoneOffset: Int = 8): List<PlaybackShowsResult> {
         return try {
             val headers = HttpHeaders().apply {
-                set("X-Emby-Token", apikey)
+                set("X-Emby-Token", embyConfig.apikey)
             }
             val entity = HttpEntity<String>(headers)
             val uri =
-                UriComponentsBuilder.fromHttpUrl("${url}user_usage_stats/ClientName/BreakdownReport")
+                UriComponentsBuilder.fromHttpUrl("${embyConfig.url}user_usage_stats/ClientName/BreakdownReport")
             uri.queryParam("date", date)
             uri.queryParam("days", days)
             uri.queryParam("timezoneOffset", timezoneOffset)
@@ -793,7 +800,7 @@ class EmbyUtil {
     fun getUserPlayback(embyId: String, limitCount: Int? = 1): List<PlaybackUserRecord>? {
         try {
             val headers = HttpHeaders().apply {
-                set("X-Emby-Token", apikey)
+                set("X-Emby-Token", embyConfig.apikey)
                 contentType = MediaType.APPLICATION_JSON
             }
             val map: HashMap<String, Any> = HashMap()
@@ -801,7 +808,7 @@ class EmbyUtil {
                 "SELECT DateCreated, UserId, ItemId, ItemType, ItemName, PlaybackMethod, ClientName, DeviceName, PlayDuration FROM PlaybackActivity WHERE UserId = '$embyId' ORDER BY DateCreated DESC ${if (limitCount != null) "LIMIT $limitCount" else ""}"
             map["ReplaceUserId"] = false
             val entity = HttpEntity(map, headers)
-            val uri = UriComponentsBuilder.fromHttpUrl("${url}user_usage_stats/submit_custom_query")
+            val uri = UriComponentsBuilder.fromHttpUrl("${embyConfig.url}user_usage_stats/submit_custom_query")
             val response = HttpUtil.getInstance()
                 .restTemplate()
                 .exchange(
@@ -822,11 +829,11 @@ class EmbyUtil {
     fun getItemSeriesId(show: PlaybackRecord): String? {
         return try {
             val headers = HttpHeaders().apply {
-                set("X-Emby-Token", apikey)
+                set("X-Emby-Token", embyConfig.apikey)
             }
             val entity = HttpEntity<String>(headers)
             val uri =
-                UriComponentsBuilder.fromHttpUrl("${url}emby/Users/${show.userId}/Items/${show.itemId}")
+                UriComponentsBuilder.fromHttpUrl("${embyConfig.url}emby/Users/${show.userId}/Items/${show.itemId}")
             val response = HttpUtil.getInstance()
                 .restTemplate()
                 .exchange(
@@ -849,11 +856,17 @@ class EmbyUtil {
     fun getItemPrimary(show: PlaybackRecord, isMovie: Boolean, width: Int = 1280, quality: Int = 70): BufferedImage? {
         return try {
             val headers = HttpHeaders().apply {
-                set("X-Emby-Token", apikey)
+                set("X-Emby-Token", embyConfig.apikey)
             }
             val entity = HttpEntity<String>(headers)
             val uri =
-                UriComponentsBuilder.fromHttpUrl("${url}emby/Items/${if (isMovie) show.itemId else getItemSeriesId(show) ?: show.itemId}/Images/Primary")
+                UriComponentsBuilder.fromHttpUrl(
+                    "${embyConfig.url}emby/Items/${
+                        if (isMovie) show.itemId else getItemSeriesId(
+                            show
+                        ) ?: show.itemId
+                    }/Images/Primary"
+                )
             uri.queryParam("maxWidth", width)
             uri.queryParam("quality", quality)
             val response = HttpUtil.getInstance()
@@ -889,7 +902,7 @@ class EmbyUtil {
             val startStr = DateUtil.format(startDate, "yyyy-MM-dd HH:mm:ss:SSSSSS")
             val endStr = DateUtil.format(date, "yyyy-MM-dd HH:mm:ss:SSSSSS")
             val headers = HttpHeaders().apply {
-                set("X-Emby-Token", apikey)
+                set("X-Emby-Token", embyConfig.apikey)
                 contentType = MediaType.APPLICATION_JSON
             }
             val map: HashMap<String, Any> = HashMap()
@@ -907,7 +920,7 @@ class EmbyUtil {
                 """.trimIndent()
             map["ReplaceUserId"] = false
             val entity = HttpEntity(map, headers)
-            val uri = UriComponentsBuilder.fromHttpUrl("${url}user_usage_stats/submit_custom_query")
+            val uri = UriComponentsBuilder.fromHttpUrl("${embyConfig.url}user_usage_stats/submit_custom_query")
             val response = HttpUtil.getInstance()
                 .restTemplate()
                 .exchange(
