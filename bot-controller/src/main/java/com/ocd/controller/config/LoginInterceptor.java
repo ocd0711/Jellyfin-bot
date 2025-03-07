@@ -13,7 +13,7 @@ import java.io.PrintWriter;
 @Component
 public class LoginInterceptor implements HandlerInterceptor {
 
-    static final String NO_INTERCEPTOR_PATH = ".*/().*";
+    static final String NO_INTERCEPTOR_PATH = ".*/((actuator/*)).*";
 
     @Override
     public boolean preHandle(HttpServletRequest request, HttpServletResponse response, Object handler) throws Exception {

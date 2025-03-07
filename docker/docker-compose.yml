@@ -9,14 +9,13 @@ services:
     network_mode: host
     volumes:
       - ./application.yml:/app/application-prod.yml
-      - ./hello.txt:/tmp/hello.txt:rw
     #      - /etc/timezone:/etc/timezone
     #      - /etc/localtime:/etc/localtime
       - ./head:/tmp/head
     restart: always
     user: 0:0
     healthcheck:
-      test: "curl --silent --fail localhost:8081/getstate || exit 1"
+      test: "curl --silent --fail localhost:8081/actuator/health || exit 1"
       interval: 30s
       timeout: 3s
       retries: 1
