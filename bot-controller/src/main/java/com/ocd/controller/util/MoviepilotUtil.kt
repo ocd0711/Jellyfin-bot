@@ -77,7 +77,7 @@ class MoviepilotUtil {
             val response = HttpUtil.getInstance()
                 .restTemplate()
                 .exchange(
-                    uri.build().toUri(),
+                    uri.build().encode().toUri(),
                     HttpMethod.GET,
                     entity,
                     String::class.java
@@ -129,7 +129,7 @@ class MoviepilotUtil {
             val response = HttpUtil.getInstance()
                 .restTemplate()
                 .exchange(
-                    uri.build().toUri(),
+                    uri.build().encode().toUri(),
                     HttpMethod.POST,
                     entity,
                     String::class.java

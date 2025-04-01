@@ -39,7 +39,7 @@
         <dadiyang-version>1.0.5</dadiyang-version>
         <kotlinx-coroutines-core.version>1.4.2</kotlinx-coroutines-core.version>
         <easypoi.version>4.4.0</easypoi.version>
-        <telegrambot.version>7.11.0</telegrambot.version>
+        <telegrambot.version>8.2.0</telegrambot.version>
         <api-asn1-ber.version>2.1.2</api-asn1-ber.version>
         <oshi-core.version>6.6.5</oshi-core.version>
         <eec.version>0.5.20</eec.version>

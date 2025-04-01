@@ -48,38 +48,34 @@ public class MoviepilotResult {
         private String lastTokenType;
         @JsonProperty("_continue_flag")
         private Boolean continueFlag;
-        @JsonProperty("_stop_name_flag")
-        private Boolean stopNameFlag;
-        @JsonProperty("type")
-        private String type;
-        @JsonProperty("begin_season")
-        private Integer beginSeason;
-        @JsonProperty("total_season")
-        private Integer totalSeason;
+        @JsonProperty("_unknown_name_str")
+        private String unknownNameStr;
         @JsonProperty("year")
         private String year;
-        @JsonProperty("resource_pix")
-        private String resourcePix;
+        @JsonProperty("_stop_name_flag")
+        private Boolean stopNameFlag;
         @JsonProperty("_last_token")
         private String lastToken;
+        @JsonProperty("resource_pix")
+        private String resourcePix;
         @JsonProperty("video_encode")
         private String videoEncode;
         @JsonProperty("audio_encode")
         private String audioEncode;
         @JsonProperty("resource_type")
         private String resourceType;
-        @JsonProperty("_subtitle_flag")
-        private Boolean subtitleFlag;
         @JsonProperty("cn_name")
         private Object cnName;
         @JsonProperty("resource_team")
-        private String resourceTeam;
+        private Object resourceTeam;
         @JsonProperty("customization")
         private Object customization;
         @JsonProperty("title")
         private String title;
         @JsonProperty("apply_words")
         private List<String> applyWords;
+        @JsonProperty("type")
+        private String type;
         @JsonProperty("season_episode")
         private String seasonEpisode;
         @JsonProperty("edition")
