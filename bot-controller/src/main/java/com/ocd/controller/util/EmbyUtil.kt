@@ -391,7 +391,8 @@ class EmbyUtil {
             getAllEmbyUser().filter { it.id.equals(embyId) }?.get(0)?.let { embyUser ->
                 map["enableAllFolders"] = embyUser.policy.enabledFolders
                 map["enabledFolders"] = embyUser.policy.enabledFolders
-                map["excludedSubFolders"] = embyUser.policy.excludedSubFolders
+                if (!AuthorityUtil.botConfig.jellyfin)
+                    map["excludedSubFolders"] = embyUser.policy.excludedSubFolders
             }
             val entity = HttpEntity(map, headers)
             val uri =
