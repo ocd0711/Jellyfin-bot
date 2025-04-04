@@ -389,7 +389,7 @@ class EmbyUtil {
                 map["PasswordResetProviderId"] = "Jellyfin.Server.Implementations.Users.DefaultPasswordResetProvider"
             }
             getAllEmbyUser().filter { it.id.equals(embyId) }?.get(0)?.let { embyUser ->
-                map["enableAllFolders"] = embyUser.policy.enabledFolders
+                map["enableAllFolders"] = embyUser.policy.enableAllFolders
                 map["enabledFolders"] = embyUser.policy.enabledFolders
                 if (!AuthorityUtil.botConfig.jellyfin)
                     map["excludedSubFolders"] = embyUser.policy.excludedSubFolders
