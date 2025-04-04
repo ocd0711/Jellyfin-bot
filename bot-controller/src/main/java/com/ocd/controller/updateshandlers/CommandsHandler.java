@@ -1298,7 +1298,7 @@ public class CommandsHandler extends CommandLongPollingTelegramBot {
         InlineKeyboardButton warn = new InlineKeyboardButton("⚠️ 警告");
         warn.setCallbackData("warn " + replyUser.getId());
         InlineKeyboardButton ban = new InlineKeyboardButton("");
-        GetChatMember getChatMember = new GetChatMember(message.getChatId().toString(), replyUser.getId());
+        GetChatMember getChatMember = new GetChatMember(AuthorityUtil.botConfig.groupId, replyUser.getId());
         ChatMember chatMember = telegramClient.execute(getChatMember);
         if (StringUtils.equals(chatMember.getStatus(), "kicked") || cacheUser.getUserType() == 3) {
             ban.setText("\uD83C\uDD71️ 解封");
