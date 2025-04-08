@@ -13,13 +13,15 @@ CREATE TABLE `invitecode`
     UNIQUE  KEY invitecode (`invitecode`),
 ) ENGINE=InnoDB AUTO_INCREMENT=0 DEFAULT CHARSET=utf8mb4;
 
--- 加点提示语
+-- 线路信息
 CREATE TABLE `line`
 (
     `id`                   int(11)               NOT NULL AUTO_INCREMENT COMMENT '主键id',
     `message`              varchar(1000)         DEFAULT NULL COMMENT '线路信息',
     `ip`                   varchar(30)           DEFAULT NULL COMMENT 'ip 地址',
     `port`                 varchar(30)           DEFAULT NULL COMMENT '端口',
+    `need_check`           int(1)                NOT NULL DEFAULT 1 COMMENT '是否需要检测',
+    `is_white`             int(1)                NOT NULL DEFAULT 0 COMMENT '是否为白名单专属',
     PRIMARY KEY (`id`)
 ) ENGINE=InnoDB AUTO_INCREMENT=0 DEFAULT CHARSET=utf8mb4;
 

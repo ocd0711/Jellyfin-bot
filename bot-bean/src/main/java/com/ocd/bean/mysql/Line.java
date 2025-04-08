@@ -23,6 +23,8 @@ public class Line {
 
     private Boolean needCheck;
 
+    private Boolean isWhite;
+
     @Override
     public String toString() {
         return "Line{" +
@@ -30,7 +32,8 @@ public class Line {
                 ", message='" + message + '\'' +
                 ", ip='" + ip + '\'' +
                 ", port='" + port + '\'' +
+                ", needCheck=" + needCheck +
+                ", isWhite=" + isWhite +
                 '}';
     }
-
 }

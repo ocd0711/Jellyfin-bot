@@ -402,7 +402,7 @@ public class CommandsHandler extends CommandLongPollingTelegramBot {
                                             } else if (cacheUser.getDeactivate()) {
                                                 editCaptionLine.append("账户停用无法查看");
                                             } else {
-                                                List<Line> lines = AuthorityUtil.lineService.lineMapper.selectList(null);
+                                                List<Line> lines = AuthorityUtil.lineService.lineMapper.selectList(cacheUser.getUserType() != 2 ? new QueryWrapper<Line>().lambda().eq(Line::getIsWhite, false) : null);
                                                 StringBuffer stringBuffer = new StringBuffer();
                                                 if (cacheUser.haveEmby()) {
                                                     lines.forEach(line -> stringBuffer.append(String.format(ConstantStrings.INSTANCE.getLineStr(), line.getMessage(), line.getIp(), line.getPort(), EmbyUtil.getInstance().checkUrl(line) ? "✅" : "❌")));
