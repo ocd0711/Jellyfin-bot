@@ -143,7 +143,7 @@ public class TimerTask {
             }
             if (AuthorityUtil.botConfig.getOpenAutoRenewal() && expDate.after(user.getExpTime()) || !AuthorityUtil.botConfig.getOpenAutoRenewal())
                 if (AuthorityUtil.botConfig.getCleanTask() && (betweenPlayDay == null || betweenPlayDay >= AuthorityUtil.botConfig.getExpDay())) {
-                    if (AuthorityUtil.botConfig.getDelete() && (betweenPlayDay == null || betweenPlayDay >= AuthorityUtil.botConfig.getExpDelDay() + AuthorityUtil.botConfig.getExpDelDay())) {
+                    if (AuthorityUtil.botConfig.getDelete() && (betweenPlayDay == null || betweenPlayDay >= AuthorityUtil.botConfig.getExpDay() + AuthorityUtil.botConfig.getExpDelDay())) {
                         EmbyUtil.getInstance().deleteUser(user);
                         user.cleanEmby();
                     } else {
