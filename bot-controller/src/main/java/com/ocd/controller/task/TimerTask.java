@@ -1,6 +1,7 @@
 package com.ocd.controller.task;
 
 import cn.hutool.core.date.DateUtil;
+import com.alibaba.fastjson2.JSON;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.ocd.bean.dto.jellby.PlaybackRecord;
@@ -143,6 +144,10 @@ public class TimerTask {
             }
             if (AuthorityUtil.botConfig.getOpenAutoRenewal() && expDate.after(user.getExpTime()) || !AuthorityUtil.botConfig.getOpenAutoRenewal())
                 if (AuthorityUtil.botConfig.getCleanTask() && (betweenPlayDay == null || betweenPlayDay >= AuthorityUtil.botConfig.getExpDay())) {
+                    if (activityLogs == null) {
+                        log.error("getUserPlayback 获取失败: {}", JSON.toJSONString(user));
+                        return;
+                    }
                     if (AuthorityUtil.botConfig.getDelete() && (betweenPlayDay == null || betweenPlayDay >= AuthorityUtil.botConfig.getExpDay() + AuthorityUtil.botConfig.getExpDelDay())) {
                         EmbyUtil.getInstance().deleteUser(user);
                         user.cleanEmby();

@@ -14,6 +14,7 @@ import com.ocd.bean.mysql.User
 import com.ocd.controller.config.EmbyConfig
 import com.ocd.util.HttpUtil
 import org.apache.commons.lang3.StringUtils
+import org.slf4j.LoggerFactory
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.http.*
@@ -36,12 +37,16 @@ import kotlin.random.Random
 @Component
 class EmbyUtil {
 
+
     private object EmbyUtilHoder {
         @JvmStatic
         var mInstance: EmbyUtil = EmbyUtil()
     }
 
     companion object {
+
+        private val logger = LoggerFactory.getLogger(EmbyUtil::class.java);
+
         @JvmStatic
         fun getInstance(): EmbyUtil {
             return EmbyUtilHoder.mInstance
@@ -823,6 +828,7 @@ class EmbyUtil {
             val playbackData = JSON.parseObject(response.body, PlaybackData::class.java)
             return playbackData.mapUserResultsToPlaybackRecords()
         } catch (e: Exception) {
+            logger.error("getUserPlayback: {}", e.message)
             return null
         }
     }
