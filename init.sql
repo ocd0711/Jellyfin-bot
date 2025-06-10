@@ -8,9 +8,9 @@ CREATE TABLE `invitecode`
     `days`                 int(100)              DEFAULT NULL COMMENT '续期天数, -1 为白名单, 0 为注册码(注册后的剩余天数由 expDay 决定), 大于 0 为续期天数',
     `update_time`          datetime              DEFAULT NULL COMMENT '更新时间',
     `create_time`          datetime              NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
-    `need_check`           int(1)                NOT NULL DEFAULT 1 CURRENT_TIMESTAMP COMMENT '是否需要检测',
+    `need_check`           int(1)                NOT NULL DEFAULT 1 COMMENT '是否需要检测',
     PRIMARY KEY (`id`),
-    UNIQUE  KEY invitecode (`invitecode`),
+    UNIQUE  KEY invitecode (`invitecode`)
 ) ENGINE=InnoDB AUTO_INCREMENT=0 DEFAULT CHARSET=utf8mb4;
 
 -- 线路信息
@@ -36,7 +36,7 @@ CREATE TABLE `info`
 -- 用户表
 CREATE TABLE `user`
 (
-    `id`                   int(11)               NOT NULL AUTO_INCREMENT COMMENT '主键id',
+    `id`                   BIGINT               NOT NULL AUTO_INCREMENT COMMENT '主键id',
     `tg_id`                varchar(100)          NOT NULL COMMENT 'telegram 用户 id',
     `emby_id`              varchar(100)          DEFAULT NULL COMMENT 'emby 用户 id',
     `emby_name`            varchar(100)          DEFAULT NULL COMMENT 'emby 用户 名称',
